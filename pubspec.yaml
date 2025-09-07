@@ -1,0 +1,16 @@
+name: payment_calendar
+description: A Flutter app for shared payment tracking.
+version: 1.0.0+1
+environment:
+  sdk: '>=2.17.0 <3.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  table_calendar: ^3.0.8
+  provider: ^6.0.5
+  intl: ^0.18.0
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+flutter:
+  uses-material-design: true
