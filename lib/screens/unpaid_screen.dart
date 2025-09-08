@@ -148,23 +148,41 @@ class _UnpaidScreenState extends State<UnpaidScreen> {
   Widget build(BuildContext context) {
     final provider = context.watch<ExpenseProvider>();
     final allUnpaid = provider.unpaidExpenses();
+    final hasUnpaid = allUnpaid.isNotEmpty;
+
     return Scaffold(
-main
+      appBar: AppBar(
+        title: const Text('未払い'),
+        actions: [
+          if (hasUnpaid)
+            IconButton(
+              icon: const Icon(Icons.done_all),
+              tooltip: 'すべて支払い済みにする',
+              onPressed: _markAllAsPaid,
             ),
-            textAlign: TextAlign.center,
-          ),
-          if (!hasUnpaid) ...[
-            const SizedBox(height: 8),
-            Text(
-              'すべての支払いが完了しています',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.green[600],
-              ),
-            ),
-          ],
         ],
       ),
+      body: hasUnpaid
+          ? _buildExpenseList()
+          : Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    '未払いの項目はありません',
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'すべての支払いが完了しています',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.green[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
     );
   }
 
