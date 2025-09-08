@@ -278,8 +278,35 @@ class DayDetailScreen extends StatelessWidget {
         .where((e) => e.isPaid)
         .fold<int>(0, (total, e) => total + e.amount);
     final unpaidAmount = totalAmount - paidAmount;
-
-    return Scaffold(main
+    return Scaffold(
+      appBar: AppBar(title: Text(_formatDate(day))),
+      body: expenses.isEmpty
+          ? _buildEmptyState()
+          : Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildSummaryCard('総支出', '¥$totalAmount',
+                          Colors.blue[600]!, Icons.account_balance_wallet),
+                      _buildSummaryCard('支払済', '¥$paidAmount',
+                          Colors.green[600]!, Icons.check_circle),
+                      _buildSummaryCard('未払い', '¥$unpaidAmount',
+                          Colors.red[600]!, Icons.warning),
+                    ],
+                  ),
+                ),
+                Expanded(child: _buildExpenseList(context, expenses)),
+              ],
+            ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ExpenseInputScreen(initialDate: day),
             ),
           );
         },
