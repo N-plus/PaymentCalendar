@@ -19,7 +19,7 @@ class DayDetailScreen extends StatelessWidget {
         itemBuilder: (context, i) {
           final e = expenses[i];
           return ListTile(
-            title: Text('${e.amount}円｜${e.category}｜${e.person}'),
+            title: Text('${e.amount}円｜${e.category}｜${e.personIcon}${e.person}'),
             trailing: Checkbox(
               value: e.isPaid,
               onChanged: (_) => provider.togglePaid(e),
