@@ -46,6 +46,11 @@ class _HomeScreenState extends State<HomeScreen> {
               calendarFormat: _calendarFormat,
               eventLoader: provider.expensesOn,
               startingDayOfWeek: StartingDayOfWeek.sunday,
+              rowHeight: 60,
+              daysOfWeekStyle: const DaysOfWeekStyle(
+                weekdayStyle: TextStyle(fontSize: 16, color: Colors.white),
+                weekendStyle: TextStyle(fontSize: 16, color: Colors.white70),
+              ),
               selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
               onDaySelected: (selectedDay, focusedDay) {
                 setState(() {
@@ -61,11 +66,16 @@ class _HomeScreenState extends State<HomeScreen> {
               onPageChanged: (focusedDay) => _focusedDay = focusedDay,
               calendarStyle: CalendarStyle(
                 outsideDaysVisible: false,
-                weekendTextStyle: const TextStyle(color: Colors.white70),
-                holidayTextStyle: const TextStyle(color: Colors.white70),
-                defaultTextStyle: const TextStyle(color: Colors.white),
-                selectedTextStyle: TextStyle(color: Colors.blue[600]),
-                todayTextStyle: TextStyle(color: Colors.blue[600]),
+                weekendTextStyle:
+                    const TextStyle(color: Colors.white70, fontSize: 18),
+                holidayTextStyle:
+                    const TextStyle(color: Colors.white70, fontSize: 18),
+                defaultTextStyle:
+                    const TextStyle(color: Colors.white, fontSize: 18),
+                selectedTextStyle:
+                    TextStyle(color: Colors.blue[600], fontSize: 18),
+                todayTextStyle:
+                    TextStyle(color: Colors.blue[600], fontSize: 18),
                 selectedDecoration: const BoxDecoration(
                   color: Colors.white,
                   shape: BoxShape.circle,
