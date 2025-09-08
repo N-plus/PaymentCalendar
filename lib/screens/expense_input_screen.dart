@@ -5,18 +5,26 @@ import '../providers/expense_provider.dart';
 import '../models/expense.dart';
 
 class ExpenseInputScreen extends StatefulWidget {
-  const ExpenseInputScreen({Key? key}) : super(key: key);
+  const ExpenseInputScreen({Key? key, this.initialDate}) : super(key: key);
+
+  final DateTime? initialDate;
 
   @override
   State<ExpenseInputScreen> createState() => _ExpenseInputScreenState();
 }
 
 class _ExpenseInputScreenState extends State<ExpenseInputScreen> {
-  DateTime _date = DateTime.now();
+  late DateTime _date;
   final _amountController = TextEditingController();
   String? _category;
   Member? _member;
   bool _isPaid = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _date = widget.initialDate ?? DateTime.now();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +92,8 @@ class _ExpenseInputScreenState extends State<ExpenseInputScreen> {
                     date: _date,
                     amount: amount,
                     category: _category!,
-                    person: '${_member!.icon}${_member!.name}',
+                    person: _member!.name,
+                    personIcon: _member!.icon,
                     isPaid: _isPaid,
                   ));
                   Navigator.pop(context);

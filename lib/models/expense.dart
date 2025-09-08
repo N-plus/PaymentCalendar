@@ -4,6 +4,7 @@ class Expense {
     required this.amount,
     required this.category,
     required this.person,
+    required this.personIcon,
     this.isPaid = false,
   });
 
@@ -11,6 +12,7 @@ class Expense {
   int amount;
   String category;
   String person;
+  String personIcon;
   bool isPaid;
 }
 

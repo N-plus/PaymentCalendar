@@ -20,6 +20,11 @@ class ExpenseProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void removeExpense(Expense expense) {
+    _expenses.remove(expense);
+    notifyListeners();
+  }
+
   void togglePaid(Expense expense) {
     expense.isPaid = !expense.isPaid;
     notifyListeners();
