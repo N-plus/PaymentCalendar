@@ -8,10 +8,19 @@ class ExpenseProvider extends ChangeNotifier {
   final List<Member> members = [
     Member(name: '母', icon: '👩'),
     Member(name: '父', icon: '👨'),
-    Member(name: 'キャラ', icon: '🐱'),
+    Member(name: '子', icon: '👶'),
+    Member(name: 'その他', icon: '👤'),
   ];
 
-  final List<String> categories = ['食費', '交通費', '娯楽費'];
+  final List<String> categories = [
+    '食費',
+    '交通費',
+    '娯楽費',
+    '医療費',
+    '日用品',
+    '光熱費',
+    'その他',
+  ];
 
   List<Expense> get expenses => List.unmodifiable(_expenses);
 
