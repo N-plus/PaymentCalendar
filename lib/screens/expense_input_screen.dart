@@ -84,7 +84,8 @@ class _ExpenseInputScreenState extends State<ExpenseInputScreen> {
                     date: _date,
                     amount: amount,
                     category: _category!,
-                    person: '${_member!.icon}${_member!.name}',
+                    person: _member!.name,
+                    personIcon: _member!.icon,
                     isPaid: _isPaid,
                   ));
                   Navigator.pop(context);

@@ -18,7 +18,7 @@ class UnpaidScreen extends StatelessWidget {
           final e = unpaid[i];
           return ListTile(
             title: Text(
-                '${DateFormat.Md().format(e.date)}｜${e.person}｜${e.category}｜${e.amount}円'),
+                '${DateFormat.Md().format(e.date)}｜${e.personIcon}${e.person}｜${e.category}｜${e.amount}円'),
             trailing: Checkbox(
               value: e.isPaid,
               onChanged: (_) => provider.togglePaid(e),
