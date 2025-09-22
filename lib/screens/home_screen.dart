@@ -1,412 +1,254 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
-class ExpenseItem {
-  final String personIcon;
-  final int amount;
-  bool isPaid;
-
-  ExpenseItem({
-    required this.personIcon,
-    required this.amount,
-    required this.isPaid,
-  });
-}
+import '../providers/expense_provider.dart';
+import '../widgets/person_avatar.dart';
+import 'expense_input_screen.dart';
+import 'settings_screen.dart';
+import 'unpaid_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  DateTime currentDate = DateTime.now();
-  int selectedNavIndex = 0;
-
-  // サンプルデータ
-  Map<int, List<ExpenseItem>> expenseData = {
-    2: [
-      ExpenseItem(personIcon: '👩', amount: 1200, isPaid: false),
-    ],
-    5: [
-      ExpenseItem(personIcon: '👨', amount: 800, isPaid: true),
-    ],
-    8: [
-      ExpenseItem(personIcon: '🐱', amount: 500, isPaid: false),
-    ],
-    12: [
-      ExpenseItem(personIcon: '👩', amount: 2500, isPaid: true),
-      ExpenseItem(personIcon: '👨', amount: 300, isPaid: false),
-    ],
-  };
-
-  void _changeMonth(int direction) {
-    setState(() {
-      currentDate = DateTime(
-        currentDate.year,
-        currentDate.month + direction,
-        1,
-      );
-    });
-  }
-
-  void _togglePaymentStatus(int day, int index) {
-    setState(() {
-      expenseData[day]![index].isPaid = !expenseData[day]![index].isPaid;
-    });
-  }
-
-  void _onNavTapped(int index) {
-    setState(() {
-      selectedNavIndex = index;
-    });
-    // TODO: 他の画面への遷移処理
-  }
+  bool _includePlanned = false;
+  final _currencyFormat = NumberFormat.currency(locale: 'ja_JP', symbol: '¥');
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF4A90E2),
-        elevation: 2,
-        toolbarHeight: 100,
-        title: Column(
-          children: [
-            const Text(
-              '家計簿',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+    return Consumer<ExpenseProvider>(
+      builder: (context, provider, child) {
+        if (provider.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final summaries = provider.summaries(includePlanned: _includePlanned);
+        final total = summaries.fold<int>(0, (prev, element) => prev + element.unpaidTotal);
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Payment Calendar'),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.settings),
+                onPressed: () => Navigator.of(context).pushNamed(SettingsScreen.routeName),
               ),
-            ),
-            const SizedBox(height: 15),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            ],
+          ),
+          body: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildMonthNavButton(Icons.arrow_back_ios, () => _changeMonth(-1)),
-                const SizedBox(width: 20),
-                SizedBox(
-                  width: 120,
-                  child: Text(
-                    '${currentDate.year}年${currentDate.month}月',
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
+                SwitchListTile.adaptive(
+                  value: _includePlanned,
+                  onChanged: (value) {
+                    setState(() => _includePlanned = value);
+                  },
+                  title: const Text('予定を含める'),
+                  contentPadding: EdgeInsets.zero,
                 ),
-                const SizedBox(width: 20),
-                _buildMonthNavButton(Icons.arrow_forward_ios, () => _changeMonth(1)),
-              ],
-            ),
-          ],
-        ),
-        centerTitle: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          padding: const EdgeInsets.all(15),
-          child: Column(
-            children: [
-              _buildDayHeaders(),
-              Expanded(child: _buildCalendarGrid()),
-            ],
-          ),
-        ),
-      ),
-      floatingActionButton: SizedBox(
-        width: 60,
-        height: 60,
-        child: FloatingActionButton(
-          onPressed: _addExpense,
-          backgroundColor: const Color(0xFF28A745),
-          child: const Icon(
-            Icons.add,
-            size: 28,
-            color: Colors.white,
-          ),
-        ),
-      ),
-      bottomNavigationBar: _buildBottomNavigation(),
-    );
-  }
-
-  Widget _buildMonthNavButton(IconData icon, VoidCallback onPressed) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
-        border: Border.all(color: Colors.white, width: 2),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: IconButton(
-        onPressed: onPressed,
-        icon: Icon(icon, color: Colors.white, size: 20),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      ),
-    );
-  }
-
-  Widget _buildDayHeaders() {
-    const dayHeaders = ['日', '月', '火', '水', '木', '金', '土'];
-    return SizedBox(
-      height: 50,
-      child: Row(
-        children: dayHeaders
-            .map((day) => Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE9ECEF),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    margin: const EdgeInsets.all(4),
+                const SizedBox(height: 12),
+                Text(
+                  '未払い合計: ${_currencyFormat.format(total)}',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 12),
+                if (summaries.isEmpty)
+                  Expanded(
                     child: Center(
                       child: Text(
-                        day,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: Color(0xFF495057),
-                        ),
+                        provider.persons.isEmpty
+                            ? 'まずは人を追加してください。設定 > 人の管理で登録できます。'
+                            : '未払いはありません。',
+                        textAlign: TextAlign.center,
                       ),
                     ),
+                  )
+                else
+                  SizedBox(
+                    height: 180,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: summaries.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 12),
+                      itemBuilder: (context, index) {
+                        final summary = summaries[index];
+                        return _PersonCard(
+                          summary: summary,
+                          currencyFormat: _currencyFormat,
+                          includePlanned: _includePlanned,
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => UnpaidListScreen(
+                                  initialPersonId: summary.person.id,
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
                   ),
-                ))
-            .toList(),
-      ),
-    );
-  }
-
-  Widget _buildCalendarGrid() {
-    return GridView.builder(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 7,
-        childAspectRatio: 0.8,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 8,
-      ),
-      itemCount: _getDaysInMonth(),
-      itemBuilder: (context, index) {
-        return _buildCalendarDay(index);
+                const SizedBox(height: 16),
+                const Expanded(
+                  child: _UpcomingList(),
+                ),
+              ],
+            ),
+          ),
+          floatingActionButton: FloatingActionButton.extended(
+            onPressed: () => showExpenseEditor(context),
+            icon: const Icon(Icons.add),
+            label: const Text('記録追加'),
+          ),
+        );
       },
     );
   }
+}
 
-  int _getDaysInMonth() {
-    DateTime firstDay = DateTime(currentDate.year, currentDate.month, 1);
-    DateTime lastDay = DateTime(currentDate.year, currentDate.month + 1, 0);
-    int daysInMonth = lastDay.day;
-    int firstWeekday = firstDay.weekday % 7;
+class _PersonCard extends StatelessWidget {
+  const _PersonCard({
+    required this.summary,
+    required this.currencyFormat,
+    required this.includePlanned,
+    required this.onTap,
+  });
 
-    return daysInMonth + firstWeekday;
-  }
+  final PersonSummary summary;
+  final NumberFormat currencyFormat;
+  final bool includePlanned;
+  final VoidCallback onTap;
 
-  Widget _buildCalendarDay(int index) {
-    DateTime firstDay = DateTime(currentDate.year, currentDate.month, 1);
-    int firstWeekday = firstDay.weekday % 7;
-
-    if (index < firstWeekday) {
-      DateTime lastDayPrevMonth = DateTime(currentDate.year, currentDate.month, 0);
-      int day = lastDayPrevMonth.day - (firstWeekday - index - 1);
-
-      return _buildDayContainer(
-        day: day,
-        isCurrentMonth: false,
-        isToday: false,
-        expenses: [],
-      );
-    }
-
-    int day = index - firstWeekday + 1;
-    DateTime lastDay = DateTime(currentDate.year, currentDate.month + 1, 0);
-
-    if (day > lastDay.day) {
-      int nextMonthDay = day - lastDay.day;
-      return _buildDayContainer(
-        day: nextMonthDay,
-        isCurrentMonth: false,
-        isToday: false,
-        expenses: [],
-      );
-    }
-
-    DateTime today = DateTime.now();
-    bool isToday = currentDate.year == today.year &&
-        currentDate.month == today.month &&
-        day == today.day;
-
-    List<ExpenseItem> dayExpenses = expenseData[day] ?? [];
-
-    return _buildDayContainer(
-      day: day,
-      isCurrentMonth: true,
-      isToday: isToday,
-      expenses: dayExpenses,
-    );
-  }
-
-  Widget _buildDayContainer({
-    required int day,
-    required bool isCurrentMonth,
-    required bool isToday,
-    required List<ExpenseItem> expenses,
-  }) {
+  @override
+  Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: isCurrentMonth ? () => _onDayTapped(day) : null,
+      onTap: onTap,
       child: Container(
+        width: 200,
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isCurrentMonth
-              ? (isToday ? const Color(0xFFFFF5F5) : Colors.white)
-              : const Color(0xFFF8F9FA),
-          border: Border.all(
-            color: isToday
-                ? const Color(0xFFDC3545)
-                : const Color(0xFFE9ECEF),
-            width: 2,
-          ),
-          borderRadius: BorderRadius.circular(8),
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-        padding: const EdgeInsets.all(8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              day.toString(),
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: isCurrentMonth ? Colors.black : const Color(0xFFADB5BD),
-              ),
-            ),
-            const SizedBox(height: 5),
-            ...expenses.map((expense) => _buildExpenseItem(
-                  expense,
-                  day,
-                  expenses.indexOf(expense),
-                )),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildExpenseItem(ExpenseItem expense, int day, int index) {
-    return GestureDetector(
-      onTap: () => _togglePaymentStatus(day, index),
-      child: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFFF8F9FA),
-          borderRadius: BorderRadius.circular(6),
-          border: Border(
-            left: BorderSide(
-              color: expense.isPaid
-                  ? const Color(0xFF28A745)
-                  : const Color(0xFFDC3545),
-              width: 4,
-            ),
-          ),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-        margin: const EdgeInsets.only(bottom: 4),
-        child: Row(
-          children: [
-            Text(
-              expense.personIcon,
-              style: const TextStyle(fontSize: 16),
-            ),
-            const SizedBox(width: 4),
-            Expanded(
-              child: Text(
-                '${expense.amount}円',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                  color: Color(0xFF495057),
+            Row(
+              children: [
+                PersonAvatar(person: summary.person, size: 48),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    summary.person.name,
+                    style: Theme.of(context).textTheme.titleMedium,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-                overflow: TextOverflow.ellipsis,
-              ),
+              ],
             ),
+            const Spacer(),
             Text(
-              expense.isPaid ? '☑️' : '□',
-              style: const TextStyle(fontSize: 14),
+              currencyFormat.format(summary.unpaidTotal),
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
+            if (summary.plannedCount > 0)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.secondaryContainer,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text('予定 ${summary.plannedCount}件'),
+                  ),
+                ),
+              ),
+            if (!includePlanned && summary.plannedCount > 0)
+              const Padding(
+                padding: EdgeInsets.only(top: 4),
+                child: Text(
+                  '予定は集計外です',
+                  style: TextStyle(fontSize: 12),
+                ),
+              ),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildBottomNavigation() {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Color(0xFFE9ECEF), width: 2)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 8,
-            offset: Offset(0, -2),
-          ),
-        ],
-      ),
-      child: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: selectedNavIndex,
-        onTap: _onNavTapped,
-        backgroundColor: Colors.white,
-        selectedItemColor: const Color(0xFF4A90E2),
-        unselectedItemColor: const Color(0xFF6C757D),
-        selectedFontSize: 14,
-        unselectedFontSize: 14,
-        iconSize: 24,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Text('🏠', style: TextStyle(fontSize: 24)),
-            label: 'ホーム',
-          ),
-          BottomNavigationBarItem(
-            icon: Text('❗', style: TextStyle(fontSize: 24)),
-            label: '未払い',
-          ),
-          BottomNavigationBarItem(
-            icon: Text('📊', style: TextStyle(fontSize: 24)),
-            label: 'サマリー',
-          ),
-          BottomNavigationBarItem(
-            icon: Text('⚙️', style: TextStyle(fontSize: 24)),
-            label: '設定',
-          ),
-        ],
-      ),
-    );
-  }
+class _UpcomingList extends StatelessWidget {
+  const _UpcomingList();
 
-  void _addExpense() {
-    // TODO: 支出入力画面への遷移
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('支出入力画面に移動します')),
-    );
-  }
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.watch<ExpenseProvider>();
+    final plannedExpenses = provider.expenses
+        .where((expense) => !expense.isPaid && expense.isPlanned)
+        .toList()
+      ..sort((a, b) => a.date.compareTo(b.date));
 
-  void _onDayTapped(int day) {
-    // TODO: 日付詳細画面への遷移
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${day}日の詳細画面に移動します')),
+    if (plannedExpenses.isEmpty) {
+      return const Center(
+        child: Text('予定されている支払いはありません。'),
+      );
+    }
+
+    final formatter = DateFormat('M/d (E)', 'ja_JP');
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '今後の予定',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: 8),
+        Expanded(
+          child: ListView.separated(
+            itemCount: plannedExpenses.length,
+            separatorBuilder: (_, __) => const Divider(height: 1),
+            itemBuilder: (context, index) {
+              final expense = plannedExpenses[index];
+              final person = provider.getPerson(expense.personId);
+              return ListTile(
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => UnpaidListScreen(
+                      initialPersonId: person.id,
+                      initialStatus: ExpenseStatusFilter.planned,
+                    ),
+                  ),
+                ),
+                leading: PersonAvatar(person: person, size: 40),
+                title: Text(expense.memo?.isNotEmpty == true ? expense.memo! : '未分類の支払い'),
+                subtitle: Text('${person.name} ・ ${formatter.format(expense.date)}'),
+                trailing: Text(NumberFormat.currency(locale: 'ja_JP', symbol: '¥').format(expense.amount)),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

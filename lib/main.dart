@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import 'providers/expense_provider.dart';
 import 'screens/home_screen.dart';
-import 'screens/unpaid_screen.dart';
-import 'screens/summary_screen.dart';
 import 'screens/settings_screen.dart';
+import 'screens/unpaid_screen.dart';
 
 void main() {
-  runApp(ChangeNotifierProvider(
-    create: (_) => ExpenseProvider(),
-    child: const PaymentCalendarApp(),
-  ));
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ExpenseProvider(),
+      child: const PaymentCalendarApp(),
+    ),
+  );
 }
 
 class PaymentCalendarApp extends StatelessWidget {
-  const PaymentCalendarApp({Key? key}) : super(key: key);
+  const PaymentCalendarApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,47 +25,51 @@ class PaymentCalendarApp extends StatelessWidget {
       title: 'Payment Calendar',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        colorSchemeSeed: Colors.indigo,
+        useMaterial3: true,
         fontFamily: 'NotoSansJP',
-        textTheme: const TextTheme(
-          bodyLarge: TextStyle(fontSize: 18),
-          bodyMedium: TextStyle(fontSize: 16),
-        ),
       ),
+      routes: {
+        SettingsScreen.routeName: (_) => const SettingsScreen(),
+      },
       home: const RootPage(),
     );
   }
 }
 
 class RootPage extends StatefulWidget {
-  const RootPage({Key? key}) : super(key: key);
+  const RootPage({super.key});
 
   @override
   State<RootPage> createState() => _RootPageState();
 }
 
 class _RootPageState extends State<RootPage> {
-  int _index = 0;
-  final _screens = const [
+  int _currentIndex = 0;
+
+  final _pages = const [
     HomeScreen(),
-    UnpaidScreen(),
-    SummaryScreen(),
-    SettingsScreen(),
+    UnpaidListScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_index],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _index,
-        onTap: (i) => setState(() => _index = i),
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'ホーム'),
-          BottomNavigationBarItem(icon: Icon(Icons.error_outline), label: '未払い'),
-          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'サマリー'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: '設定'),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _pages,
+      ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _currentIndex,
+        destinations: const [
+          NavigationDestination(icon: Icon(Icons.home), label: 'ホーム'),
+          NavigationDestination(icon: Icon(Icons.list_alt), label: '未払い一覧'),
         ],
+        onDestinationSelected: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
       ),
     );
   }
