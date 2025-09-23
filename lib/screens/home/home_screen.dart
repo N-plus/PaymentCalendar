@@ -19,7 +19,7 @@ import '../../providers/home_summary_provider.dart';
 import '../../providers/settings_provider.dart';
 import '../../screens/person/person_detail_screen.dart';
 import '../../screens/unpaid/unpaid_screen.dart';
-import '../../utils/format.dart';
+import '../../utils/date_util.dart';
 import '../expense/expense_form_sheet.dart';
 import '../settings/settings_screen.dart';
 
