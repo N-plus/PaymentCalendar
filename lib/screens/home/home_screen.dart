@@ -24,10 +24,15 @@ class HomeScreen extends ConsumerWidget {
     final summaries = ref.watch(homeSummariesProvider);
     final quickPayIncludesPlanned = ref.watch(settingsProvider
         .select((settings) => settings.quickPayIncludesPlanned));
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
+      backgroundColor: colorScheme.surfaceVariant.withOpacity(0.3),
       appBar: AppBar(
         title: const Text('ホーム'),
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
+        elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
@@ -38,14 +43,25 @@ class HomeScreen extends ConsumerWidget {
             },
           ),
         ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(48),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      ),
+      body: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            color: colorScheme.surface,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('予定を含める'),
+                Icon(Icons.event, color: colorScheme.primary),
+                const SizedBox(width: 8),
+                Text(
+                  '予定を含める',
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(fontWeight: FontWeight.w600),
+                ),
+                const Spacer(),
                 Switch(
                   value: includePlanned,
                   onChanged: (value) => ref
@@ -55,19 +71,25 @@ class HomeScreen extends ConsumerWidget {
               ],
             ),
           ),
-        ),
-      ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: summaries.length,
-        itemBuilder: (context, index) {
-          final summary = summaries[index];
-          return _PersonSummaryTile(
-            summary: summary,
-            includePlanned: includePlanned,
-            quickPayIncludesPlanned: quickPayIncludesPlanned,
-          );
-        },
+          Divider(height: 1, thickness: 1, color: Theme.of(context).dividerColor),
+          Expanded(
+            child: summaries.isEmpty
+                ? const _EmptySummaryView()
+                : ListView.separated(
+                    padding: const EdgeInsets.all(16),
+                    itemBuilder: (context, index) {
+                      final summary = summaries[index];
+                      return _PersonSummaryTile(
+                        summary: summary,
+                        includePlanned: includePlanned,
+                        quickPayIncludesPlanned: quickPayIncludesPlanned,
+                      );
+                    },
+                    separatorBuilder: (context, index) => const SizedBox(height: 12),
+                    itemCount: summaries.length,
+                  ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
@@ -78,6 +100,35 @@ class HomeScreen extends ConsumerWidget {
           );
         },
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+class _EmptySummaryView extends StatelessWidget {
+  const _EmptySummaryView();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.people_alt_outlined,
+            size: 64,
+            color: colorScheme.onSurface.withOpacity(0.3),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            '人が登録されていません',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -98,9 +149,18 @@ class _PersonSummaryTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final totalAmount = summary.totalAmount(includePlanned: includePlanned);
     final totalCount = summary.totalCount(includePlanned: includePlanned);
+    final includePlannedForPayment =
+        includePlanned && quickPayIncludesPlanned;
+    final hasUnpaid = summary.unpaidCount > 0;
+    final hasPlanned = summary.plannedCount > 0;
+    final hasPayTargets = summary.unpaidCount > 0 ||
+        (includePlannedForPayment && summary.plannedCount > 0);
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 16),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -117,35 +177,19 @@ class _PersonSummaryTile extends ConsumerWidget {
                     children: [
                       Text(
                         summary.person.name,
-                        style: Theme.of(context)
-                            .textTheme
+                        style: textTheme
                             .titleMedium
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         formatCurrency(totalAmount),
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineSmall
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 4,
-                        children: [
-                          _CountBadge(
-                            label: '未払い',
-                            count: summary.unpaidCount,
-                          ),
-                          if (summary.plannedCount > 0)
-                            _CountBadge(
-                              label: '予定',
-                              count: summary.plannedCount,
-                              color: Colors.deepPurple,
-                            ),
-                        ],
+                        style: textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: hasUnpaid
+                              ? colorScheme.error
+                              : textTheme.headlineSmall?.color,
+                        ),
                       ),
                     ],
                   ),
@@ -153,23 +197,6 @@ class _PersonSummaryTile extends ConsumerWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => PersonDetailScreen(
-                              person: summary.person,
-                            ),
-                          ),
-                        );
-                      },
-                      child: const Text('個人詳細'),
-                    ),
-                    const SizedBox(height: 8),
-                    OutlinedButton(
-                      onPressed: () => _onPayAllPressed(context, ref),
-                      child: const Text('全件支払い'),
-                    ),
                     IconButton(
                       tooltip: '未払い一覧を開く',
                       onPressed: () {
@@ -183,6 +210,18 @@ class _PersonSummaryTile extends ConsumerWidget {
                       },
                       icon: const Icon(Icons.chevron_right),
                     ),
+                    if (summary.unpaidCount > 0)
+                      _CountBadge(
+                        text: '未払い${summary.unpaidCount}件',
+                        color: colorScheme.error,
+                      ),
+                    if (hasPlanned) ...[
+                      const SizedBox(height: 4),
+                      _CountBadge(
+                        text: '予定${summary.plannedCount}件',
+                        color: colorScheme.secondary,
+                      ),
+                    ],
                   ],
                 ),
               ],
@@ -192,6 +231,45 @@ class _PersonSummaryTile extends ConsumerWidget {
               includePlanned
                   ? '予定を含めた合計 $totalCount 件'
                   : '未払い合計 $totalCount 件',
+              style: textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => PersonDetailScreen(
+                            person: summary.person,
+                          ),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.person, size: 18),
+                    label: const Text('個人詳細'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: hasPayTargets
+                        ? () => _onPayAllPressed(context, ref)
+                        : null,
+                    icon: const Icon(Icons.payment, size: 18),
+                    label: const Text('全件支払い'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -282,23 +360,49 @@ class _Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final emoji = summary.person.emoji;
+    const double size = 56;
+    final colorScheme = Theme.of(context).colorScheme;
     final photoPath = summary.person.photoPath;
     if (photoPath != null && File(photoPath).existsSync()) {
-      return CircleAvatar(
-        radius: 28,
-        backgroundImage: FileImage(File(photoPath)),
+      return Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 6,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Image.file(
+          File(photoPath),
+          fit: BoxFit.cover,
+        ),
       );
     }
+    final emoji = summary.person.emoji;
     final text = emoji ??
         (summary.person.name.characters.isNotEmpty
             ? summary.person.name.characters.first
             : '?');
-    return CircleAvatar(
-      radius: 28,
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: colorScheme.primaryContainer,
+        shape: BoxShape.circle,
+      ),
+      alignment: Alignment.center,
       child: Text(
         text,
-        style: const TextStyle(fontSize: 24),
+        style: const TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
@@ -306,30 +410,31 @@ class _Avatar extends StatelessWidget {
 
 class _CountBadge extends StatelessWidget {
   const _CountBadge({
-    required this.label,
-    required this.count,
+    required this.text,
     this.color,
   });
 
-  final String label;
-  final int count;
+  final String text;
   final Color? color;
 
   @override
   Widget build(BuildContext context) {
     final badgeColor = color ?? Theme.of(context).colorScheme.primary;
-    final foreground =
-        ThemeData.estimateBrightnessForColor(badgeColor) == Brightness.dark
-            ? Colors.white
-            : Colors.black87;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: badgeColor.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: badgeColor.withOpacity(0.4)),
+        color: badgeColor.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: badgeColor.withOpacity(0.3)),
       ),
-      child: Text('$label: $count', style: TextStyle(color: foreground)),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: badgeColor,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 }
