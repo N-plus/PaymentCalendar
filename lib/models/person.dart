@@ -1,6 +1,4 @@
-import 'package:equatable/equatable.dart';
-
-class Person extends Equatable {
+class Person {
   const Person({
     required this.id,
     required this.name,
@@ -27,5 +25,17 @@ class Person extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, name, photoPath, emoji];
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is Person &&
+        other.id == id &&
+        other.name == name &&
+        other.photoPath == photoPath &&
+        other.emoji == emoji;
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, photoPath, emoji);
 }

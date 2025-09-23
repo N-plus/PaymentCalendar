@@ -1,6 +1,4 @@
-import 'package:equatable/equatable.dart';
-
-class SettingsState extends Equatable {
+class SettingsState {
   const SettingsState({
     this.reminderEnabled = false,
     this.plannedReminderEnabled = false,
@@ -26,9 +24,20 @@ class SettingsState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is SettingsState &&
+        other.reminderEnabled == reminderEnabled &&
+        other.plannedReminderEnabled == plannedReminderEnabled &&
+        other.quickPayIncludesPlanned == quickPayIncludesPlanned;
+  }
+
+  @override
+  int get hashCode => Object.hash(
         reminderEnabled,
         plannedReminderEnabled,
         quickPayIncludesPlanned,
-      ];
+      );
 }

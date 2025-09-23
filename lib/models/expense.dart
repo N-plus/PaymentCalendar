@@ -1,9 +1,9 @@
-import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 enum ExpenseStatus { unpaid, planned, paid }
 
-class Expense extends Equatable {
+class Expense {
   const Expense({
     required this.id,
     required this.personId,
@@ -103,15 +103,32 @@ class Expense extends Equatable {
   }
 
   @override
-  List<Object?> get props => [
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is Expense &&
+        other.id == id &&
+        other.personId == personId &&
+        other.date == date &&
+        other.amount == amount &&
+        other.memo == memo &&
+        other.status == status &&
+        listEquals(other.photoPaths, photoPaths) &&
+        other.paidAt == paidAt &&
+        other.createdAt == createdAt;
+  }
+
+  @override
+  int get hashCode => Object.hash(
         id,
         personId,
         date,
         amount,
         memo,
         status,
-        photoPaths,
+        Object.hashAll(photoPaths),
         paidAt,
         createdAt,
-      ];
+      );
 }
