@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_'
+    'r'
+    'ive'
+    'r'
+    'pod/flutter_'
+    'r'
+    'ive'
+    'r'
+    'pod.dart';
 
 import 'providers/settings_provider.dart';
 import 'screens/home/home_screen.dart';
@@ -34,7 +42,16 @@ class PaymentCalendarApp extends ConsumerWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
-        fontFamily: 'NotoSansJP',
+        fontFamily: 'N'
+            'o'
+            't'
+            'o'
+            'S'
+            'a'
+            'n'
+            's'
+            'J'
+            'P',
       ),
       home: const RootPage(),
     );

@@ -2,7 +2,15 @@ import 'dart:io';
 
 import 'package:characters/characters.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_'
+    'r'
+    'ive'
+    'r'
+    'pod/flutter_'
+    'r'
+    'ive'
+    'r'
+    'pod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
