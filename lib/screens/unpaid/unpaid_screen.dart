@@ -321,22 +321,34 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
                       title: const Text('通常'),
                       value: CategoryFilter.normal,
                       groupValue: tempCategory,
-                      onChanged: (value) =>
-                          setDialogState(() => tempCategory = value!),
+                      onChanged: (value) {
+                        if (value == null) {
+                          return;
+                        }
+                        setDialogState(() => tempCategory = value);
+                      },
                     ),
                     RadioListTile<CategoryFilter>(
                       title: const Text('予定'),
                       value: CategoryFilter.planned,
                       groupValue: tempCategory,
-                      onChanged: (value) =>
-                          setDialogState(() => tempCategory = value!),
+                      onChanged: (value) {
+                        if (value == null) {
+                          return;
+                        }
+                        setDialogState(() => tempCategory = value);
+                      },
                     ),
                     RadioListTile<CategoryFilter>(
                       title: const Text('両方'),
                       value: CategoryFilter.both,
                       groupValue: tempCategory,
-                      onChanged: (value) =>
-                          setDialogState(() => tempCategory = value!),
+                      onChanged: (value) {
+                        if (value == null) {
+                          return;
+                        }
+                        setDialogState(() => tempCategory = value);
+                      },
                     ),
                     const Divider(),
                     const Text(
@@ -347,28 +359,43 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
                       title: const Text('全期間'),
                       value: DateFilter.all,
                       groupValue: tempDateFilter,
-                      onChanged: (value) => setDialogState(() {
-                        tempDateFilter = value!;
-                        tempRange = null;
-                      }),
+                      onChanged: (value) {
+                        if (value == null) {
+                          return;
+                        }
+                        setDialogState(() {
+                          tempDateFilter = value;
+                          tempRange = null;
+                        });
+                      },
                     ),
                     RadioListTile<DateFilter>(
                       title: const Text('今月'),
                       value: DateFilter.thisMonth,
                       groupValue: tempDateFilter,
-                      onChanged: (value) => setDialogState(() {
-                        tempDateFilter = value!;
-                        tempRange = null;
-                      }),
+                      onChanged: (value) {
+                        if (value == null) {
+                          return;
+                        }
+                        setDialogState(() {
+                          tempDateFilter = value;
+                          tempRange = null;
+                        });
+                      },
                     ),
                     RadioListTile<DateFilter>(
                       title: const Text('先月'),
                       value: DateFilter.lastMonth,
                       groupValue: tempDateFilter,
-                      onChanged: (value) => setDialogState(() {
-                        tempDateFilter = value!;
-                        tempRange = null;
-                      }),
+                      onChanged: (value) {
+                        if (value == null) {
+                          return;
+                        }
+                        setDialogState(() {
+                          tempDateFilter = value;
+                          tempRange = null;
+                        });
+                      },
                     ),
                     RadioListTile<DateFilter>(
                       title: const Text('カスタム'),
@@ -405,29 +432,45 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
                       title: const Text('日付（降順）'),
                       value: SortBy.dateDesc,
                       groupValue: tempSort,
-                      onChanged: (value) =>
-                          setDialogState(() => tempSort = value!),
+                      onChanged: (value) {
+                        if (value == null) {
+                          return;
+                        }
+                        setDialogState(() => tempSort = value);
+                      },
                     ),
                     RadioListTile<SortBy>(
                       title: const Text('日付（昇順）'),
                       value: SortBy.dateAsc,
                       groupValue: tempSort,
-                      onChanged: (value) =>
-                          setDialogState(() => tempSort = value!),
+                      onChanged: (value) {
+                        if (value == null) {
+                          return;
+                        }
+                        setDialogState(() => tempSort = value);
+                      },
                     ),
                     RadioListTile<SortBy>(
                       title: const Text('金額（降順）'),
                       value: SortBy.amountDesc,
                       groupValue: tempSort,
-                      onChanged: (value) =>
-                          setDialogState(() => tempSort = value!),
+                      onChanged: (value) {
+                        if (value == null) {
+                          return;
+                        }
+                        setDialogState(() => tempSort = value);
+                      },
                     ),
                     RadioListTile<SortBy>(
                       title: const Text('金額（昇順）'),
                       value: SortBy.amountAsc,
                       groupValue: tempSort,
-                      onChanged: (value) =>
-                          setDialogState(() => tempSort = value!),
+                      onChanged: (value) {
+                        if (value == null) {
+                          return;
+                        }
+                        setDialogState(() => tempSort = value);
+                      },
                     ),
                   ],
                 ),
