@@ -17,17 +17,19 @@ class PeopleNotifier extends StateNotifier<List<Person>> {
 
   final _uuid = const Uuid();
 
-  void addPerson(String name, {String? emoji, String? photoPath}) {
-    if (name.trim().isEmpty) {
-      return;
+  Person? addPerson(String name, {String? emoji, String? photoPath}) {
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) {
+      return null;
     }
     final newPerson = Person(
       id: _uuid.v4(),
-      name: name.trim(),
+      name: trimmed,
       emoji: emoji,
       photoPath: photoPath,
     );
     state = [...state, newPerson];
+    return newPerson;
   }
 
   void updatePerson(Person updated) {
