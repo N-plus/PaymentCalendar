@@ -1,0 +1,43 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
+
+import '../models/person.dart';
+
+final peopleProvider = StateNotifierProvider<PeopleNotifier, List<Person>>((ref) {
+  return PeopleNotifier();
+});
+
+class PeopleNotifier extends StateNotifier<List<Person>> {
+  PeopleNotifier()
+      : super(const [
+          Person(id: 'mother', name: '母', emoji: '👩'),
+          Person(id: 'father', name: '父', emoji: '👨'),
+          Person(id: 'pet', name: 'キャラ', emoji: '🐱'),
+        ]);
+
+  final _uuid = const Uuid();
+
+  void addPerson(String name, {String? emoji, String? photoPath}) {
+    if (name.trim().isEmpty) {
+      return;
+    }
+    final newPerson = Person(
+      id: _uuid.v4(),
+      name: name.trim(),
+      emoji: emoji,
+      photoPath: photoPath,
+    );
+    state = [...state, newPerson];
+  }
+
+  void updatePerson(Person updated) {
+    state = [
+      for (final person in state)
+        if (person.id == updated.id) updated else person,
+    ];
+  }
+
+  void removePerson(Person target) {
+    state = state.where((person) => person.id != target.id).toList();
+  }
+}
