@@ -53,11 +53,16 @@ class _PersonDetailScreenState
       2: paidExpenses.fold<int>(0, (sum, e) => sum + e.amount),
     };
     final currentTotal = totals[_tabController.index] ?? 0;
-    final totalLabel = switch (_tabController.index) {
-      0 => '未払い合計',
-      1 => '予定合計',
-      _ => '支払い済み合計',
-    };
+    final totalLabel = () {
+      switch (_tabController.index) {
+        case 0:
+          return '未払い合計';
+        case 1:
+          return '予定合計';
+        default:
+          return '支払い済み合計';
+      }
+    }();
 
     return Scaffold(
       appBar: AppBar(
