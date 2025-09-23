@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:characters/characters.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_'
     'r'
@@ -13,6 +12,7 @@ import 'package:flutter_'
     'pod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:payment_calendar/utils/color_utils.dart';
 
 import '../../models/person.dart';
 import '../../providers/expenses_provider.dart';
@@ -228,9 +228,9 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
             color: isSelected ? theme.colorScheme.primary : theme.dividerColor,
             width: 2,
           ),
-          color: isSelected
-              ? theme.colorScheme.primaryContainer.withOpacity(0.4)
-              : theme.colorScheme.surface,
+            color: isSelected
+                ? theme.colorScheme.primaryContainer.withOpacityValue(0.4)
+                : theme.colorScheme.surface,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -259,9 +259,9 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: theme.colorScheme.primary, width: 2),
-          color: _showNewPersonForm
-              ? theme.colorScheme.primaryContainer.withOpacity(0.4)
-              : theme.colorScheme.surface,
+            color: _showNewPersonForm
+                ? theme.colorScheme.primaryContainer.withOpacityValue(0.4)
+                : theme.colorScheme.surface,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -293,8 +293,9 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceVariant.withOpacity(0.4),
+        decoration: BoxDecoration(
+          color:
+              theme.colorScheme.surfaceContainerHighest.withOpacityValue(0.4),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: theme.dividerColor),
       ),
@@ -568,8 +569,8 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
             child: Container(
               width: 24,
               height: 24,
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.6),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacityValue(0.6),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.close, size: 16, color: Colors.white),
@@ -609,9 +610,9 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
         height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacityValue(0.1),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),

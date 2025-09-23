@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:characters/characters.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_'
     'r'
@@ -11,6 +10,7 @@ import 'package:flutter_'
     'ive'
     'r'
     'pod.dart';
+import 'package:payment_calendar/utils/color_utils.dart';
 
 import '../../models/expense.dart';
 import '../../models/person.dart';
@@ -26,34 +26,24 @@ class ExpenseDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final expenses = ref.watch(expensesProvider);
-    Expense? expenseNullable;
-    for (final item in expenses) {
-      if (item.id == expenseId) {
-        expenseNullable = item;
-        break;
+      final expenses = ref.watch(expensesProvider);
+      final matchingExpenses =
+          expenses.where((item) => item.id == expenseId);
+      if (matchingExpenses.isEmpty) {
+        return const Scaffold(
+          body: Center(child: Text('明細が見つかりませんでした')),
+        );
       }
-    }
-    if (expenseNullable == null) {
-      return const Scaffold(
-        body: Center(child: Text('明細が見つかりませんでした')),
-      );
-    }
-    final expense = expenseNullable!;
-    final people = ref.watch(peopleProvider);
-    Person? personNullable;
-    for (final p in people) {
-      if (p.id == expense.personId) {
-        personNullable = p;
-        break;
+      final expense = matchingExpenses.first;
+      final people = ref.watch(peopleProvider);
+      final matchingPeople =
+          people.where((person) => person.id == expense.personId);
+      if (matchingPeople.isEmpty) {
+        return const Scaffold(
+          body: Center(child: Text('人の情報が見つかりませんでした')),
+        );
       }
-    }
-    if (personNullable == null) {
-      return const Scaffold(
-        body: Center(child: Text('人の情報が見つかりませんでした')),
-      );
-    }
-    final person = personNullable!;
+      final person = matchingPeople.first;
     return Scaffold(
       appBar: AppBar(
         title: const Text('明細'),
@@ -199,13 +189,16 @@ class ExpenseDetailScreen extends ConsumerWidget {
           ),
         ],
       ),
-    );
-    if (confirmed == true) {
-      ref.read(expensesProvider.notifier).deleteExpense(expenseId);
-      if (Navigator.of(context).canPop()) {
-        Navigator.of(context).pop();
+      );
+      if (confirmed == true) {
+        if (!context.mounted) {
+          return;
+        }
+        ref.read(expensesProvider.notifier).deleteExpense(expenseId);
+        if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        }
       }
-    }
   }
 
   Future<void> _changeDueDate(BuildContext context, WidgetRef ref) async {
@@ -296,13 +289,13 @@ class _StatusChip extends StatelessWidget {
         label = '支払い済み';
         break;
     }
-    return Chip(
-      label: Text(label),
-      backgroundColor: color.withOpacity(0.15),
-      side: BorderSide(color: color.withOpacity(0.4)),
-      labelStyle: TextStyle(color: color.darken()),
-    );
-  }
+      return Chip(
+        label: Text(label),
+        backgroundColor: color.withOpacityValue(0.15),
+        side: BorderSide(color: color.withOpacityValue(0.4)),
+        labelStyle: TextStyle(color: color.darken()),
+      );
+    }
 }
 
 class _PhotoViewer extends StatelessWidget {

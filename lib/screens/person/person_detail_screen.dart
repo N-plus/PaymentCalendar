@@ -8,6 +8,7 @@ import 'package:flutter_'
     'ive'
     'r'
     'pod.dart';
+import 'package:payment_calendar/widgets/radio_option_tile.dart';
 
 import '../../models/expense.dart';
 import '../../models/person.dart';
@@ -273,51 +274,45 @@ class _PersonDetailScreenState
                   '期間',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                ..._DateFilter.values.map(
-                  (filter) => RadioListTile<_DateFilter>(
-                    value: filter,
-                    groupValue: _dateFilter,
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(_dateFilterLabel(filter)),
-                    onChanged: (value) {
-                      if (value == null) {
-                        return;
-                      }
-                      if (value == _DateFilter.custom) {
-                        Navigator.of(context).pop();
-                        _showCustomDatePicker();
-                      } else {
-                        setState(() {
-                          _dateFilter = value;
-                          _customRange = null;
-                        });
-                        Navigator.of(context).pop();
-                      }
-                    },
+                  ..._DateFilter.values.map(
+                    (filter) => RadioOptionTile<_DateFilter>(
+                      value: filter,
+                      groupValue: _dateFilter,
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(_dateFilterLabel(filter)),
+                      onSelected: (value) {
+                        if (value == _DateFilter.custom) {
+                          Navigator.of(context).pop();
+                          _showCustomDatePicker();
+                        } else {
+                          setState(() {
+                            _dateFilter = value;
+                            _customRange = null;
+                          });
+                          Navigator.of(context).pop();
+                        }
+                      },
+                    ),
                   ),
-                ),
                 const Divider(),
                 const Text(
                   '並び替え',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                ..._SortOption.values.map(
-                  (option) => RadioListTile<_SortOption>(
-                    value: option,
-                    groupValue: _sort,
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(_sortLabel(option)),
-                    onChanged: (value) {
-                      if (value == null) {
-                        return;
-                      }
-                      setState(() {
-                        _sort = value;
-                      });
-                      Navigator.of(context).pop();
-                    },
+                  ..._SortOption.values.map(
+                    (option) => RadioOptionTile<_SortOption>(
+                      value: option,
+                      groupValue: _sort,
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(_sortLabel(option)),
+                      onSelected: (value) {
+                        setState(() {
+                          _sort = value;
+                        });
+                        Navigator.of(context).pop();
+                      },
+                    ),
                   ),
-                ),
               ],
             ),
           ),

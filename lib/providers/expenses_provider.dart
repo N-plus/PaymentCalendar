@@ -21,7 +21,7 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
   ExpensesNotifier() : super(_seedExpenses());
 
   static List<Expense> _seedExpenses() {
-    final uuid = const Uuid();
+    const uuid = Uuid();
     final now = DateUtils.dateOnly(DateTime.now());
     return [
       Expense.newRecord(
