@@ -19,31 +19,33 @@ class ExpenseDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final expenses = ref.watch(expensesProvider);
-    Expense? expense;
+    Expense? expenseNullable;
     for (final item in expenses) {
       if (item.id == expenseId) {
-        expense = item;
+        expenseNullable = item;
         break;
       }
     }
-    if (expense == null) {
+    if (expenseNullable == null) {
       return const Scaffold(
         body: Center(child: Text('明細が見つかりませんでした')),
       );
     }
+    final expense = expenseNullable!;
     final people = ref.watch(peopleProvider);
-    Person? person;
+    Person? personNullable;
     for (final p in people) {
       if (p.id == expense.personId) {
-        person = p;
+        personNullable = p;
         break;
       }
     }
-    if (person == null) {
+    if (personNullable == null) {
       return const Scaffold(
         body: Center(child: Text('人の情報が見つかりませんでした')),
       );
     }
+    final person = personNullable!;
     return Scaffold(
       appBar: AppBar(
         title: const Text('明細'),
