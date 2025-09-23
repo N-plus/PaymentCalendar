@@ -1,67 +1,75 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'providers/expense_provider.dart';
-import 'screens/home_screen.dart';
-import 'screens/unpaid_screen.dart';
-import 'screens/summary_screen.dart';
-import 'screens/settings_screen.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-void main() {
-  runApp(ChangeNotifierProvider(
-    create: (_) => ExpenseProvider(),
-    child: const PaymentCalendarApp(),
-  ));
+import 'providers/settings_provider.dart';
+import 'screens/home/home_screen.dart';
+import 'screens/settings/settings_screen.dart';
+import 'screens/unpaid/unpaid_screen.dart';
+import 'services/reminder_service.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final reminderService = ReminderService(FlutterLocalNotificationsPlugin());
+  await reminderService.initialize();
+  runApp(
+    ProviderScope(
+      overrides: [
+        reminderServiceProvider.overrideWithValue(reminderService),
+      ],
+      child: const PaymentCalendarApp(),
+    ),
+  );
 }
 
-class PaymentCalendarApp extends StatelessWidget {
-  const PaymentCalendarApp({Key? key}) : super(key: key);
+class PaymentCalendarApp extends ConsumerWidget {
+  const PaymentCalendarApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(reminderCoordinatorProvider);
     return MaterialApp(
       title: 'Payment Calendar',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        useMaterial3: true,
         fontFamily: 'NotoSansJP',
-        textTheme: const TextTheme(
-          bodyLarge: TextStyle(fontSize: 18),
-          bodyMedium: TextStyle(fontSize: 16),
-        ),
       ),
       home: const RootPage(),
     );
   }
 }
 
-class RootPage extends StatefulWidget {
-  const RootPage({Key? key}) : super(key: key);
+class RootPage extends ConsumerStatefulWidget {
+  const RootPage({super.key});
 
   @override
-  State<RootPage> createState() => _RootPageState();
+  ConsumerState<RootPage> createState() => _RootPageState();
 }
 
-class _RootPageState extends State<RootPage> {
+class _RootPageState extends ConsumerState<RootPage> {
   int _index = 0;
-  final _screens = const [
-    HomeScreen(),
-    UnpaidScreen(),
-    SummaryScreen(),
-    SettingsScreen(),
-  ];
 
   @override
   Widget build(BuildContext context) {
+    final screens = [
+      const HomeScreen(),
+      const UnpaidScreen(),
+      const SettingsScreen(),
+    ];
     return Scaffold(
-      body: _screens[_index],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _index,
-        onTap: (i) => setState(() => _index = i),
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'ホーム'),
-          BottomNavigationBarItem(icon: Icon(Icons.error_outline), label: '未払い'),
-          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'サマリー'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: '設定'),
+      body: IndexedStack(
+        index: _index,
+        children: screens,
+      ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _index,
+        onDestinationSelected: (value) => setState(() => _index = value),
+        destinations: const [
+          NavigationDestination(icon: Icon(Icons.home), label: 'ホーム'),
+          NavigationDestination(icon: Icon(Icons.receipt_long), label: '未払い'),
+          NavigationDestination(icon: Icon(Icons.settings), label: '設定'),
         ],
       ),
     );
