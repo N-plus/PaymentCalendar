@@ -7,7 +7,7 @@ import '../../providers/expenses_provider.dart';
 import '../../utils/format.dart';
 import '../expense/expense_detail_screen.dart';
 
-enum _PeriodFilter { thisMonth, lastMonth, custom }
+enum _DateFilter { all, thisMonth, lastMonth, custom }
 
 enum _SortOption { dateDesc, dateAsc, amountDesc, amountAsc }
 
@@ -25,7 +25,7 @@ class _PersonDetailScreenState
     extends ConsumerState<PersonDetailScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
-  _PeriodFilter _period = _PeriodFilter.thisMonth;
+  _DateFilter _dateFilter = _DateFilter.thisMonth;
   DateTimeRange? _customRange;
   _SortOption _sort = _SortOption.dateDesc;
 
@@ -44,131 +44,168 @@ class _PersonDetailScreenState
 
   @override
   Widget build(BuildContext context) {
-    final unpaidExpenses = _filteredExpenses(ExpenseStatus.unpaid);
-    final plannedExpenses = _filteredExpenses(ExpenseStatus.planned);
-    final paidExpenses = _filteredExpenses(ExpenseStatus.paid);
-    final totals = {
-      0: unpaidExpenses.fold<int>(0, (sum, e) => sum + e.amount),
-      1: plannedExpenses.fold<int>(0, (sum, e) => sum + e.amount),
-      2: paidExpenses.fold<int>(0, (sum, e) => sum + e.amount),
-    };
-    final currentTotal = totals[_tabController.index] ?? 0;
-    final totalLabel = () {
-      switch (_tabController.index) {
-        case 0:
-          return '未払い合計';
-        case 1:
-          return '予定合計';
-        default:
-          return '支払い済み合計';
-      }
-    }();
+    final expenses = ref.watch(expensesProvider);
+    final personExpenses = expenses
+        .where((expense) => expense.personId == widget.person.id)
+        .toList();
+    final currentStatus = _statusForIndex(_tabController.index);
+    final filteredExpenses =
+        _filteredExpenses(personExpenses, currentStatus);
+    final currentTotal = filteredExpenses.fold<int>(
+      0,
+      (sum, expense) => sum + expense.amount,
+    );
+    final unpaidTotal = personExpenses
+        .where((expense) => expense.status == ExpenseStatus.unpaid)
+        .fold<int>(0, (sum, expense) => sum + expense.amount);
+    final totalLabel = _statusLabel(currentStatus);
+    final highlightColor = currentStatus == ExpenseStatus.paid
+        ? Colors.grey[700]
+        : (currentTotal > 0 ? Colors.red[600] : Colors.grey[600]);
 
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        elevation: 0,
         title: Row(
           children: [
-            CircleAvatar(
-              radius: 20,
-              child: Text(widget.person.emoji ?? widget.person.name[0]),
-            ),
+            _buildAvatar(widget.person, size: 32),
             const SizedBox(width: 12),
-            Text(widget.person.name),
+            Text(
+              widget.person.name,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
           ],
         ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(36),
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Text(
-              '$totalLabel: ${formatCurrency(currentTotal)}',
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(fontWeight: FontWeight.bold),
-            ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.filter_list),
+            tooltip: 'フィルタ・並び替え',
+            onPressed: _showFilterDialog,
           ),
-        ),
+        ],
       ),
       body: Column(
         children: [
-          TabBar(
-            controller: _tabController,
-            tabs: const [
-              Tab(text: '未払い'),
-              Tab(text: '予定'),
-              Tab(text: '支払い済み'),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
+          Container(
+            width: double.infinity,
+            color: Colors.white,
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TextButton.icon(
-                  onPressed: _selectPeriod,
-                  icon: const Icon(Icons.filter_list),
-                  label: Text(_periodLabel()),
+                Text(
+                  totalLabel,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
                 ),
-                const SizedBox(width: 12),
-                TextButton.icon(
-                  onPressed: _selectSort,
-                  icon: const Icon(Icons.sort),
-                  label: Text(_sortLabel()),
+                const SizedBox(height: 4),
+                Text(
+                  formatCurrency(currentTotal),
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: highlightColor,
+                  ),
                 ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _ExpenseList(
-                  expenses: unpaidExpenses,
-                  onCheck: (expense) => _markAsPaid(expense),
-                  onTap: _openDetail,
-                ),
-                _ExpenseList(
-                  expenses: plannedExpenses,
-                  showPlannedBadge: true,
-                  onCheck: (expense) => _markAsPaid(expense),
-                  onTap: _openDetail,
-                ),
-                _ExpenseList(
-                  expenses: paidExpenses,
-                  checked: true,
-                  onUncheck: (expense) => _markAsUnpaid(expense),
-                  onTap: _openDetail,
-                ),
+                if (_dateFilter == _DateFilter.custom && _customRange != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      '${formatDate(_customRange!.start)}〜${formatDate(_customRange!.end)}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
           Container(
-            padding: const EdgeInsets.all(16),
-            alignment: Alignment.centerLeft,
-            child: Text(
-              '$totalLabel: ${formatCurrency(currentTotal)}',
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(fontWeight: FontWeight.bold),
+            color: Colors.white,
+            child: TabBar(
+              controller: _tabController,
+              labelColor: Theme.of(context).colorScheme.primary,
+              unselectedLabelColor: Colors.grey[600],
+              indicatorColor: Theme.of(context).colorScheme.primary,
+              tabs: const [
+                Tab(text: '未払い'),
+                Tab(text: '予定'),
+                Tab(text: '支払い済み'),
+              ],
             ),
           ),
+          Expanded(
+            child: filteredExpenses.isEmpty
+                ? _buildEmptyState(currentStatus)
+                : ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: filteredExpenses.length,
+                    itemBuilder: (context, index) {
+                      final expense = filteredExpenses[index];
+                      return _buildExpenseCard(expense);
+                    },
+                  ),
+          ),
         ],
+      ),
+      bottomNavigationBar: Container(
+        color: Colors.white,
+        padding: const EdgeInsets.all(16),
+        child: SafeArea(
+          top: false,
+          child: Text(
+            '${widget.person.name}の未払い合計: ${formatCurrency(unpaidTotal)}',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[700],
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
       ),
     );
   }
 
-  List<Expense> _filteredExpenses(ExpenseStatus status) {
-    final expenses = ref.watch(expensesProvider);
+  ExpenseStatus _statusForIndex(int index) {
+    switch (index) {
+      case 0:
+        return ExpenseStatus.unpaid;
+      case 1:
+        return ExpenseStatus.planned;
+      default:
+        return ExpenseStatus.paid;
+    }
+  }
+
+  String _statusLabel(ExpenseStatus status) {
+    switch (status) {
+      case ExpenseStatus.unpaid:
+        return '未払い合計';
+      case ExpenseStatus.planned:
+        return '予定合計';
+      case ExpenseStatus.paid:
+        return '支払い済み合計';
+    }
+  }
+
+  List<Expense> _filteredExpenses(
+    List<Expense> expenses,
+    ExpenseStatus status,
+  ) {
     final filtered = expenses.where((expense) {
-      if (expense.personId != widget.person.id) {
-        return false;
-      }
       if (expense.status != status) {
         return false;
       }
-      return _isWithinPeriod(expense.date);
+      return _matchesDateFilter(expense.date);
     }).toList();
+
     filtered.sort((a, b) {
       switch (_sort) {
         case _SortOption.dateDesc:
@@ -184,25 +221,25 @@ class _PersonDetailScreenState
     return filtered;
   }
 
-  bool _isWithinPeriod(DateTime date) {
+  bool _matchesDateFilter(DateTime date) {
     final target = DateUtils.dateOnly(date);
-    switch (_period) {
-      case _PeriodFilter.thisMonth:
+    switch (_dateFilter) {
+      case _DateFilter.all:
+        return true;
+      case _DateFilter.thisMonth:
         final now = DateTime.now();
         final start = DateTime(now.year, now.month, 1);
-        final end = DateTime(now.year, now.month + 1, 1).subtract(
-          const Duration(days: 1),
-        );
+        final end =
+            DateTime(now.year, now.month + 1, 1).subtract(const Duration(days: 1));
         return !target.isBefore(start) && !target.isAfter(end);
-      case _PeriodFilter.lastMonth:
+      case _DateFilter.lastMonth:
         final now = DateTime.now();
         final month = DateTime(now.year, now.month - 1, 1);
         final start = DateTime(month.year, month.month, 1);
-        final end = DateTime(month.year, month.month + 1, 1).subtract(
-          const Duration(days: 1),
-        );
+        final end =
+            DateTime(month.year, month.month + 1, 1).subtract(const Duration(days: 1));
         return !target.isBefore(start) && !target.isAfter(end);
-      case _PeriodFilter.custom:
+      case _DateFilter.custom:
         final range = _customRange;
         if (range == null) {
           return true;
@@ -213,84 +250,109 @@ class _PersonDetailScreenState
     }
   }
 
-  Future<void> _selectPeriod() async {
-    final result = await showMenu<_PeriodFilter>(
+  void _showFilterDialog() {
+    showDialog<void>(
       context: context,
-      position: const RelativeRect.fromLTRB(16, 120, 16, 0),
-      items: const [
-        PopupMenuItem(
-          value: _PeriodFilter.thisMonth,
-          child: Text('今月'),
-        ),
-        PopupMenuItem(
-          value: _PeriodFilter.lastMonth,
-          child: Text('先月'),
-        ),
-        PopupMenuItem(
-          value: _PeriodFilter.custom,
-          child: Text('カスタム'),
-        ),
-      ],
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('フィルタ・並び替え'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  '期間',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                ..._DateFilter.values.map(
+                  (filter) => RadioListTile<_DateFilter>(
+                    value: filter,
+                    groupValue: _dateFilter,
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(_dateFilterLabel(filter)),
+                    onChanged: (value) {
+                      if (value == null) {
+                        return;
+                      }
+                      if (value == _DateFilter.custom) {
+                        Navigator.of(context).pop();
+                        _showCustomDatePicker();
+                      } else {
+                        setState(() {
+                          _dateFilter = value;
+                          _customRange = null;
+                        });
+                        Navigator.of(context).pop();
+                      }
+                    },
+                  ),
+                ),
+                const Divider(),
+                const Text(
+                  '並び替え',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                ..._SortOption.values.map(
+                  (option) => RadioListTile<_SortOption>(
+                    value: option,
+                    groupValue: _sort,
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(_sortLabel(option)),
+                    onChanged: (value) {
+                      if (value == null) {
+                        return;
+                      }
+                      setState(() {
+                        _sort = value;
+                      });
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
-    if (result == null) {
-      return;
-    }
-    if (result == _PeriodFilter.custom) {
-      final range = await showDateRangePicker(
-        context: context,
-        initialDateRange: _customRange,
-        firstDate: DateTime.now().subtract(const Duration(days: 365)),
-        lastDate: DateTime.now().add(const Duration(days: 365)),
-      );
-      if (range != null) {
-        setState(() {
-          _customRange = range;
-          _period = _PeriodFilter.custom;
-        });
-      }
-    } else {
-      setState(() {
-        _period = result;
-      });
-    }
   }
 
-  Future<void> _selectSort() async {
-    final result = await showMenu<_SortOption>(
+  Future<void> _showCustomDatePicker() async {
+    final range = await showDateRangePicker(
       context: context,
-      position: const RelativeRect.fromLTRB(16, 160, 16, 0),
-      items: const [
-        PopupMenuItem(value: _SortOption.dateDesc, child: Text('日付（新しい順）')),
-        PopupMenuItem(value: _SortOption.dateAsc, child: Text('日付（古い順）')),
-        PopupMenuItem(value: _SortOption.amountDesc, child: Text('金額（高い順）')),
-        PopupMenuItem(value: _SortOption.amountAsc, child: Text('金額（低い順）')),
-      ],
+      initialDateRange: _customRange,
+      firstDate: DateTime.now().subtract(const Duration(days: 365 * 5)),
+      lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
     );
-    if (result == null) {
+    if (range == null) {
       return;
     }
     setState(() {
-      _sort = result;
+      _customRange = range;
+      _dateFilter = _DateFilter.custom;
     });
   }
 
-  String _periodLabel() {
-    switch (_period) {
-      case _PeriodFilter.thisMonth:
+  String _dateFilterLabel(_DateFilter filter) {
+    switch (filter) {
+      case _DateFilter.all:
+        return '全期間';
+      case _DateFilter.thisMonth:
         return '今月';
-      case _PeriodFilter.lastMonth:
+      case _DateFilter.lastMonth:
         return '先月';
-      case _PeriodFilter.custom:
+      case _DateFilter.custom:
         final range = _customRange;
         if (range == null) {
           return 'カスタム';
         }
-        return '${formatDate(range.start)}〜${formatDate(range.end)}';
+        return 'カスタム（${formatDate(range.start)}〜${formatDate(range.end)}）';
     }
   }
 
-  String _sortLabel() {
-    switch (_sort) {
+  String _sortLabel(_SortOption sort) {
+    switch (sort) {
       case _SortOption.dateDesc:
         return '日付（新しい順）';
       case _SortOption.dateAsc:
@@ -302,12 +364,209 @@ class _PersonDetailScreenState
     }
   }
 
+  Widget _buildAvatar(Person person, {double size = 32}) {
+    final radius = size / 2;
+    final placeholder = person.emoji?.isNotEmpty == true
+        ? person.emoji!
+        : (person.name.isNotEmpty ? person.name.substring(0, 1) : '?');
+    if (person.photoPath != null && person.photoPath!.isNotEmpty) {
+      return CircleAvatar(
+        radius: radius,
+        backgroundColor: Colors.grey[200],
+        child: ClipOval(
+          child: Image.asset(
+            person.photoPath!,
+            width: size,
+            height: size,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => Center(
+              child: Text(
+                placeholder,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    return CircleAvatar(
+      radius: radius,
+      backgroundColor: Colors.grey[200],
+      child: Text(
+        placeholder,
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+  Widget _buildExpenseCard(Expense expense) {
+    final isPaid = expense.status == ExpenseStatus.paid;
+    final isPlanned = expense.status == ExpenseStatus.planned;
+    final memo = expense.memo.isEmpty ? '記録' : expense.memo;
+    final amountColor = isPaid ? Colors.grey[600] : Colors.black87;
+    final photos = expense.photoPaths.length;
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 1,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        leading: isPaid
+            ? IconButton(
+                icon: const Icon(Icons.check_circle, color: Colors.green),
+                tooltip: '未払いに戻す',
+                onPressed: () => _markAsUnpaid(expense),
+              )
+            : Checkbox(
+                value: false,
+                onChanged: (value) {
+                  if (value == true) {
+                    _markAsPaid(expense);
+                  }
+                },
+                activeColor: Theme.of(context).colorScheme.primary,
+              ),
+        title: Row(
+          children: [
+            Text(
+              _formatShortDate(expense.date),
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                memo,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            if (isPlanned)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.orange[100],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '予定',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.orange[800],
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+          ],
+        ),
+        subtitle: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            if (photos > 0)
+              Row(
+                children: [
+                  Icon(Icons.camera_alt, size: 14, color: Colors.grey[500]),
+                  const SizedBox(width: 4),
+                  Text(
+                    '$photos枚',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[500],
+                    ),
+                  ),
+                ],
+              )
+            else
+              const SizedBox.shrink(),
+            Text(
+              formatCurrency(expense.amount),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: amountColor,
+              ),
+            ),
+          ],
+        ),
+        onTap: () => _openDetail(expense),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(ExpenseStatus status) {
+    final message = () {
+      switch (status) {
+        case ExpenseStatus.unpaid:
+          return '未払いの明細がありません';
+        case ExpenseStatus.planned:
+          return '予定の明細がありません';
+        case ExpenseStatus.paid:
+          return '支払い済みの明細がありません';
+      }
+    }();
+
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.receipt_long, size: 64, color: Colors.grey[400]),
+          const SizedBox(height: 16),
+          Text(
+            message,
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatShortDate(DateTime date) {
+    final target = DateUtils.dateOnly(date);
+    return '${target.month}/${target.day}';
+  }
+
   void _markAsPaid(Expense expense) {
+    if (expense.status == ExpenseStatus.paid) {
+      return;
+    }
     ref.read(expensesProvider.notifier).markAsPaid(expense.id);
+    final memo = expense.memo.isEmpty ? '記録' : expense.memo;
+    _showSnackBarWithUndo(
+      '$memoを支払い済みにしました',
+      () => ref.read(expensesProvider.notifier).markAsUnpaid(expense.id),
+    );
   }
 
   void _markAsUnpaid(Expense expense) {
+    if (expense.status != ExpenseStatus.paid) {
+      return;
+    }
     ref.read(expensesProvider.notifier).markAsUnpaid(expense.id);
+  }
+
+  void _showSnackBarWithUndo(String message, VoidCallback onUndo) {
+    final messenger = ScaffoldMessenger.of(context);
+    messenger
+      ..clearSnackBars()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          action: SnackBarAction(
+            label: '元に戻す',
+            onPressed: onUndo,
+          ),
+          duration: const Duration(seconds: 3),
+        ),
+      );
   }
 
   void _openDetail(Expense expense) {
@@ -315,56 +574,6 @@ class _PersonDetailScreenState
       MaterialPageRoute(
         builder: (_) => ExpenseDetailScreen(expenseId: expense.id),
       ),
-    );
-  }
-}
-
-class _ExpenseList extends StatelessWidget {
-  const _ExpenseList({
-    required this.expenses,
-    this.checked = false,
-    this.showPlannedBadge = false,
-    this.onCheck,
-    this.onUncheck,
-    required this.onTap,
-  });
-
-  final List<Expense> expenses;
-  final bool checked;
-  final bool showPlannedBadge;
-  final ValueChanged<Expense>? onCheck;
-  final ValueChanged<Expense>? onUncheck;
-  final ValueChanged<Expense> onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    if (expenses.isEmpty) {
-      return const Center(child: Text('該当する明細はありません'));
-    }
-    return ListView.builder(
-      itemCount: expenses.length,
-      itemBuilder: (context, index) {
-        final expense = expenses[index];
-        final isChecked = checked || expense.status == ExpenseStatus.paid;
-        return ListTile(
-          leading: Checkbox(
-            value: isChecked,
-            onChanged: (value) {
-              if (value == true && onCheck != null) {
-                onCheck!(expense);
-              } else if (value == false && onUncheck != null) {
-                onUncheck!(expense);
-              }
-            },
-          ),
-          title: Text('${formatDate(expense.date)}  ${expense.memo}'),
-          subtitle: showPlannedBadge
-              ? const Text('[予定]', style: TextStyle(color: Colors.deepPurple))
-              : null,
-          trailing: Text(formatCurrency(expense.amount)),
-          onTap: () => onTap(expense),
-        );
-      },
     );
   }
 }
