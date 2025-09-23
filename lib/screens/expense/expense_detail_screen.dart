@@ -8,7 +8,7 @@ import '../../models/person.dart';
 import '../../providers/expenses_provider.dart';
 import '../../providers/people_provider.dart';
 import '../../utils/color_utils.dart';
-import '../../utils/format.dart';
+import '../../utils/date_util.dart';
 import 'expense_form_sheet.dart';
 
 class ExpenseDetailScreen extends ConsumerWidget {
