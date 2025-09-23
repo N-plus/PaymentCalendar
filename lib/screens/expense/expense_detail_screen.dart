@@ -209,7 +209,8 @@ class ExpenseDetailScreen extends ConsumerWidget {
     );
     if (picked != null) {
       ref.read(expensesProvider.notifier).changeDate(expenseId, picked);
-}
+    }
+  }
 
   Widget _buildImage(String path) {
     final file = File(path);
@@ -225,7 +226,6 @@ class ExpenseDetailScreen extends ConsumerWidget {
       fit: BoxFit.cover,
     );
   }
-}
 
   void _openPhoto(BuildContext context, String path) {
     Navigator.of(context).push(
