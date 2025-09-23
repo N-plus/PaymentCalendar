@@ -1,8 +1,6 @@
-import 'package:equatable/equatable.dart';
-
 import 'person.dart';
 
-class PersonSummary extends Equatable {
+class PersonSummary {
   const PersonSummary({
     required this.person,
     required this.unpaidAmount,
@@ -24,11 +22,24 @@ class PersonSummary extends Equatable {
       includePlanned ? unpaidCount + plannedCount : unpaidCount;
 
   @override
-  List<Object?> get props => [
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is PersonSummary &&
+        other.person == person &&
+        other.unpaidAmount == unpaidAmount &&
+        other.unpaidCount == unpaidCount &&
+        other.plannedAmount == plannedAmount &&
+        other.plannedCount == plannedCount;
+  }
+
+  @override
+  int get hashCode => Object.hash(
         person,
         unpaidAmount,
         unpaidCount,
         plannedAmount,
         plannedCount,
-      ];
+      );
 }
