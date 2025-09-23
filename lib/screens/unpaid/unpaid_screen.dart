@@ -20,379 +20,735 @@ class UnpaidScreen extends ConsumerStatefulWidget {
   ConsumerState<UnpaidScreen> createState() => _UnpaidScreenState();
 }
 
-enum _PeriodFilter { thisMonth, lastMonth, custom }
+enum DateFilter { all, thisMonth, lastMonth, custom }
 
-enum _SortOption { dateDesc, dateAsc, amountDesc, amountAsc }
+enum SortBy { dateDesc, dateAsc, amountDesc, amountAsc }
 
-enum _TypeFilter { normal, planned, both }
+enum CategoryFilter { normal, planned, both }
 
 class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
-  _PeriodFilter _period = _PeriodFilter.thisMonth;
-  DateTimeRange? _customRange;
-  _SortOption _sort = _SortOption.dateDesc;
-  _TypeFilter _type = _TypeFilter.normal;
-  String? _personId;
-  bool _isSearching = false;
-  String _query = '';
+  static const _defaultDateFilter = DateFilter.thisMonth;
+  static const _defaultCategoryFilter = CategoryFilter.normal;
+  static const _defaultSortBy = SortBy.dateDesc;
+
+  String? selectedPersonId;
+  DateFilter dateFilter = _defaultDateFilter;
+  CategoryFilter categoryFilter = _defaultCategoryFilter;
+  SortBy sortBy = _defaultSortBy;
+  DateTimeRange? customDateRange;
+  late final TextEditingController _searchController;
+  String searchQuery = '';
 
   @override
   void initState() {
     super.initState();
-    _personId = widget.initialPersonId;
+    selectedPersonId = widget.initialPersonId;
+    _searchController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final people = ref.watch(peopleProvider);
+    final peopleMap = {for (final person in people) person.id: person};
     final expenses = ref.watch(expensesProvider);
-    final filtered = expenses.where(_applyFilters).toList()
+
+    final candidates =
+        expenses.where((e) => e.status != ExpenseStatus.paid).toList();
+    final filteredExpenses = candidates
+        .where((expense) => _matchesFilters(expense, peopleMap))
+        .toList()
       ..sort(_sortComparator);
-    final total = filtered.fold<int>(0, (sum, e) => sum + e.amount);
+
+    final total =
+        filteredExpenses.fold<int>(0, (sum, expense) => sum + expense.amount);
 
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
         title: const Text('未払い一覧'),
-        actions: [
-          IconButton(
-            icon: Icon(_isSearching ? Icons.close : Icons.search),
-            onPressed: () {
-              setState(() {
-                if (_isSearching) {
-                  _query = '';
-                }
-                _isSearching = !_isSearching;
-              });
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.filter_alt),
-            onPressed: () => _openFilters(people),
-          ),
-          IconButton(
-            icon: const Icon(Icons.sort),
-            onPressed: _openSortMenu,
-          ),
-        ],
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        elevation: 0,
       ),
       body: Column(
         children: [
-          if (_isSearching)
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: TextField(
-                decoration: const InputDecoration(
-                  prefixIcon: Icon(Icons.search),
-                  hintText: 'メモで検索',
-                  border: OutlineInputBorder(),
+          Container(
+            color: Colors.white,
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'メモや人名で検索...',
+                    prefixIcon: const Icon(Icons.search),
+                    suffixIcon: searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              setState(() {
+                                searchQuery = '';
+                                _searchController.clear();
+                              });
+                            },
+                          )
+                        : null,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onChanged: (value) => setState(() => searchQuery = value),
                 ),
-                onChanged: (value) => setState(() => _query = value),
-              ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () => _showFilterDialog(people),
+                      icon: const Icon(Icons.filter_list, size: 18),
+                      label: const Text('フィルタ'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue[50],
+                        foregroundColor: Colors.blue[700],
+                        elevation: 0,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      '${filteredExpenses.length}件',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+                if (_hasActiveFilters())
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: _buildActiveFilters(peopleMap),
+                  ),
+              ],
             ),
+          ),
+          Divider(height: 1, color: Colors.grey[300]),
           Expanded(
-            child: filtered.isEmpty
-                ? const Center(child: Text('該当する明細はありません'))
+            child: filteredExpenses.isEmpty
+                ? _buildEmptyState()
                 : ListView.builder(
-                    itemCount: filtered.length,
+                    padding: const EdgeInsets.all(16),
+                    itemCount: filteredExpenses.length,
                     itemBuilder: (context, index) {
-                      final expense = filtered[index];
-                      final person = people.firstWhere(
-                        (element) => element.id == expense.personId,
-                        orElse: () =>
-                            const Person(id: 'unknown', name: '不明', emoji: '❓'),
-                      );
-                      return _UnpaidListTile(
-                        expense: expense,
-                        person: person,
-                        onCheck: () =>
-                            ref.read(expensesProvider.notifier).markAsPaid(
-                                  expense.id,
-                                ),
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                ExpenseDetailScreen(expenseId: expense.id),
-                          ),
-                        ),
-                      );
+                      final expense = filteredExpenses[index];
+                      final person = peopleMap[expense.personId];
+                      return _buildExpenseListItem(expense, person);
                     },
                   ),
           ),
-          Container(
-            padding: const EdgeInsets.all(16),
-            width: double.infinity,
-            child: Text(
-              '未払い合計: ${formatCurrency(total)}',
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(fontWeight: FontWeight.bold),
-            ),
-          ),
         ],
+      ),
+      bottomNavigationBar: Container(
+        color: Colors.white,
+        padding: const EdgeInsets.all(16),
+        child: SafeArea(
+          child: Text(
+            '未払い合計（全体）: ${formatCurrency(total)}',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.red[600],
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
       ),
     );
   }
 
-  bool _applyFilters(Expense expense) {
-    if (expense.status == ExpenseStatus.paid) {
+  bool _matchesFilters(Expense expense, Map<String, Person> peopleMap) {
+    if (selectedPersonId != null && expense.personId != selectedPersonId) {
       return false;
     }
-    if (_personId != null && expense.personId != _personId) {
-      return false;
-    }
-    switch (_type) {
-      case _TypeFilter.normal:
-        if (expense.status != ExpenseStatus.unpaid) {
-          return false;
-        }
-        break;
-      case _TypeFilter.planned:
-        if (expense.status != ExpenseStatus.planned) {
-          return false;
-        }
-        break;
-      case _TypeFilter.both:
-        break;
-    }
-    if (!_isWithinPeriod(expense.date)) {
-      return false;
-    }
-    final query = _query.trim().toLowerCase();
-    if (query.isNotEmpty &&
-        !expense.memo.toLowerCase().contains(query)) {
-      return false;
-    }
-    return true;
-  }
 
-  bool _isWithinPeriod(DateTime date) {
-    final target = DateUtils.dateOnly(date);
-    switch (_period) {
-      case _PeriodFilter.thisMonth:
+    if (categoryFilter == CategoryFilter.normal &&
+        expense.status != ExpenseStatus.unpaid) {
+      return false;
+    }
+    if (categoryFilter == CategoryFilter.planned &&
+        expense.status != ExpenseStatus.planned) {
+      return false;
+    }
+
+    final query = searchQuery.trim().toLowerCase();
+    if (query.isNotEmpty) {
+      final memo = expense.memo.toLowerCase();
+      final personName =
+          peopleMap[expense.personId]?.name.toLowerCase() ?? '';
+      if (!memo.contains(query) && !personName.contains(query)) {
+        return false;
+      }
+    }
+
+    final dateOnly = DateUtils.dateOnly(expense.date);
+    switch (dateFilter) {
+      case DateFilter.thisMonth:
         final now = DateTime.now();
         final start = DateTime(now.year, now.month, 1);
-        final end = DateTime(now.year, now.month + 1, 1)
-            .subtract(const Duration(days: 1));
-        return !target.isBefore(start) && !target.isAfter(end);
-      case _PeriodFilter.lastMonth:
+        final end =
+            DateTime(now.year, now.month + 1, 1).subtract(const Duration(days: 1));
+        if (dateOnly.isBefore(start) || dateOnly.isAfter(end)) {
+          return false;
+        }
+        break;
+      case DateFilter.lastMonth:
         final now = DateTime.now();
         final prev = DateTime(now.year, now.month - 1, 1);
         final start = DateTime(prev.year, prev.month, 1);
-        final end =
-            DateTime(prev.year, prev.month + 1, 1).subtract(const Duration(days: 1));
-        return !target.isBefore(start) && !target.isAfter(end);
-      case _PeriodFilter.custom:
-        final range = _customRange;
-        if (range == null) {
-          return true;
+        final end = DateTime(prev.year, prev.month + 1, 1)
+            .subtract(const Duration(days: 1));
+        if (dateOnly.isBefore(start) || dateOnly.isAfter(end)) {
+          return false;
         }
-        final start = DateUtils.dateOnly(range.start);
-        final end = DateUtils.dateOnly(range.end);
-        return !target.isBefore(start) && !target.isAfter(end);
+        break;
+      case DateFilter.custom:
+        final range = customDateRange;
+        if (range != null) {
+          final start = DateUtils.dateOnly(range.start);
+          final end = DateUtils.dateOnly(range.end);
+          if (dateOnly.isBefore(start) || dateOnly.isAfter(end)) {
+            return false;
+          }
+        }
+        break;
+      case DateFilter.all:
+        break;
     }
+
+    return true;
   }
 
   int _sortComparator(Expense a, Expense b) {
-    switch (_sort) {
-      case _SortOption.dateDesc:
-        return b.date.compareTo(a.date);
-      case _SortOption.dateAsc:
+    switch (sortBy) {
+      case SortBy.dateAsc:
         return a.date.compareTo(b.date);
-      case _SortOption.amountDesc:
-        return b.amount.compareTo(a.amount);
-      case _SortOption.amountAsc:
+      case SortBy.dateDesc:
+        return b.date.compareTo(a.date);
+      case SortBy.amountAsc:
         return a.amount.compareTo(b.amount);
+      case SortBy.amountDesc:
+        return b.amount.compareTo(a.amount);
     }
   }
 
-  Future<void> _openFilters(List<Person> people) async {
-    await showModalBottomSheet<void>(
+  void _showFilterDialog(List<Person> people) {
+    final initialPersonId = selectedPersonId;
+    final initialDateFilter = dateFilter;
+    final initialCategory = categoryFilter;
+    final initialSort = sortBy;
+    final initialRange = customDateRange;
+
+    showDialog<void>(
       context: context,
       builder: (context) {
+        var tempPersonId = initialPersonId;
+        var tempDateFilter = initialDateFilter;
+        var tempCategory = initialCategory;
+        var tempSort = initialSort;
+        var tempRange = initialRange;
         return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  DropdownButtonFormField<String?>(
-                    value: _personId,
-                    decoration: const InputDecoration(
-                      labelText: '人',
+          builder: (context, setDialogState) {
+            Future<void> pickRange() async {
+              final range = await showDateRangePicker(
+                context: context,
+                firstDate: DateTime(2020),
+                lastDate: DateTime.now().add(const Duration(days: 365)),
+                initialDateRange: tempRange,
+              );
+              if (range != null) {
+                setDialogState(() {
+                  tempDateFilter = DateFilter.custom;
+                  tempRange = range;
+                });
+              }
+            }
+
+            return AlertDialog(
+              title: const Text('フィルタ・並び替え'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '人',
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    items: [
-                      const DropdownMenuItem<String?>(
-                        value: null,
-                        child: Text('すべて'),
-                      ),
-                      ...people.map(
-                        (person) => DropdownMenuItem<String?>(
-                          value: person.id,
-                          child: Text(person.name),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      children: [
+                        FilterChip(
+                          label: const Text('全員'),
+                          selected: tempPersonId == null,
+                          onSelected: (selected) {
+                            setDialogState(() => tempPersonId = null);
+                          },
                         ),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      setModalState(() => _personId = value);
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<_PeriodFilter>(
-                    value: _period,
-                    decoration: const InputDecoration(labelText: '期間'),
-                    items: const [
-                      DropdownMenuItem(
-                        value: _PeriodFilter.thisMonth,
-                        child: Text('今月'),
-                      ),
-                      DropdownMenuItem(
-                        value: _PeriodFilter.lastMonth,
-                        child: Text('先月'),
-                      ),
-                      DropdownMenuItem(
-                        value: _PeriodFilter.custom,
-                        child: Text('カスタム'),
-                      ),
-                    ],
-                    onChanged: (value) async {
-                      if (value == null) {
-                        return;
-                      }
-                      if (value == _PeriodFilter.custom) {
-                        final range = await showDateRangePicker(
-                          context: context,
-                          initialDateRange: _customRange,
-                          firstDate:
-                              DateTime.now().subtract(const Duration(days: 365)),
-                          lastDate:
-                              DateTime.now().add(const Duration(days: 365)),
-                        );
-                        if (range != null) {
-                          setModalState(() {
-                            _period = value;
-                            _customRange = range;
+                        ...people.map(
+                          (person) => FilterChip(
+                            label: Text(person.name),
+                            selected: tempPersonId == person.id,
+                            onSelected: (selected) {
+                              setDialogState(() {
+                                tempPersonId = selected ? person.id : null;
+                              });
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Divider(height: 24),
+                    const Text(
+                      '区分',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    RadioListTile<CategoryFilter>(
+                      title: const Text('通常'),
+                      value: CategoryFilter.normal,
+                      groupValue: tempCategory,
+                      onChanged: (value) =>
+                          setDialogState(() => tempCategory = value!),
+                    ),
+                    RadioListTile<CategoryFilter>(
+                      title: const Text('予定'),
+                      value: CategoryFilter.planned,
+                      groupValue: tempCategory,
+                      onChanged: (value) =>
+                          setDialogState(() => tempCategory = value!),
+                    ),
+                    RadioListTile<CategoryFilter>(
+                      title: const Text('両方'),
+                      value: CategoryFilter.both,
+                      groupValue: tempCategory,
+                      onChanged: (value) =>
+                          setDialogState(() => tempCategory = value!),
+                    ),
+                    const Divider(),
+                    const Text(
+                      '期間',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    RadioListTile<DateFilter>(
+                      title: const Text('全期間'),
+                      value: DateFilter.all,
+                      groupValue: tempDateFilter,
+                      onChanged: (value) => setDialogState(() {
+                        tempDateFilter = value!;
+                        tempRange = null;
+                      }),
+                    ),
+                    RadioListTile<DateFilter>(
+                      title: const Text('今月'),
+                      value: DateFilter.thisMonth,
+                      groupValue: tempDateFilter,
+                      onChanged: (value) => setDialogState(() {
+                        tempDateFilter = value!;
+                        tempRange = null;
+                      }),
+                    ),
+                    RadioListTile<DateFilter>(
+                      title: const Text('先月'),
+                      value: DateFilter.lastMonth,
+                      groupValue: tempDateFilter,
+                      onChanged: (value) => setDialogState(() {
+                        tempDateFilter = value!;
+                        tempRange = null;
+                      }),
+                    ),
+                    RadioListTile<DateFilter>(
+                      title: const Text('カスタム'),
+                      value: DateFilter.custom,
+                      groupValue: tempDateFilter,
+                      onChanged: (value) {
+                        if (value == null) {
+                          return;
+                        }
+                        if (value == DateFilter.custom) {
+                          pickRange();
+                        } else {
+                          setDialogState(() {
+                            tempDateFilter = value;
+                            tempRange = null;
                           });
                         }
-                      } else {
-                        setModalState(() => _period = value);
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<_TypeFilter>(
-                    value: _type,
-                    decoration: const InputDecoration(labelText: '区分'),
-                    items: const [
-                      DropdownMenuItem(
-                        value: _TypeFilter.normal,
-                        child: Text('通常'),
-                      ),
-                      DropdownMenuItem(
-                        value: _TypeFilter.planned,
-                        child: Text('予定'),
-                      ),
-                      DropdownMenuItem(
-                        value: _TypeFilter.both,
-                        child: Text('両方'),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      if (value != null) {
-                        setModalState(() => _type = value);
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {});
-                        Navigator.of(context).pop();
                       },
-                      child: const Text('適用'),
                     ),
-                  ),
-                ],
+                    if (tempDateFilter == DateFilter.custom && tempRange != null)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 16, bottom: 8),
+                        child: Text(
+                          '${formatDate(tempRange.start)} 〜 ${formatDate(tempRange.end)}',
+                          style: TextStyle(color: Colors.grey[600]),
+                        ),
+                      ),
+                    const Divider(),
+                    const Text(
+                      '並び替え',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    RadioListTile<SortBy>(
+                      title: const Text('日付（降順）'),
+                      value: SortBy.dateDesc,
+                      groupValue: tempSort,
+                      onChanged: (value) =>
+                          setDialogState(() => tempSort = value!),
+                    ),
+                    RadioListTile<SortBy>(
+                      title: const Text('日付（昇順）'),
+                      value: SortBy.dateAsc,
+                      groupValue: tempSort,
+                      onChanged: (value) =>
+                          setDialogState(() => tempSort = value!),
+                    ),
+                    RadioListTile<SortBy>(
+                      title: const Text('金額（降順）'),
+                      value: SortBy.amountDesc,
+                      groupValue: tempSort,
+                      onChanged: (value) =>
+                          setDialogState(() => tempSort = value!),
+                    ),
+                    RadioListTile<SortBy>(
+                      title: const Text('金額（昇順）'),
+                      value: SortBy.amountAsc,
+                      groupValue: tempSort,
+                      onChanged: (value) =>
+                          setDialogState(() => tempSort = value!),
+                    ),
+                  ],
+                ),
               ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('キャンセル'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      selectedPersonId = tempPersonId;
+                      dateFilter = tempDateFilter;
+                      categoryFilter = tempCategory;
+                      sortBy = tempSort;
+                      customDateRange = tempDateFilter == DateFilter.custom
+                          ? tempRange
+                          : null;
+                    });
+                    Navigator.pop(context);
+                  },
+                  child: const Text('適用'),
+                ),
+              ],
             );
           },
         );
       },
     );
-    setState(() {});
   }
 
-  Future<void> _openSortMenu() async {
-    final result = await showMenu<_SortOption>(
-      context: context,
-      position: const RelativeRect.fromLTRB(16, 80, 16, 0),
-      items: const [
-        PopupMenuItem(value: _SortOption.dateDesc, child: Text('日付（新しい順）')),
-        PopupMenuItem(value: _SortOption.dateAsc, child: Text('日付（古い順）')),
-        PopupMenuItem(value: _SortOption.amountDesc, child: Text('金額（高い順）')),
-        PopupMenuItem(value: _SortOption.amountAsc, child: Text('金額（低い順）')),
-      ],
-    );
-    if (result == null) {
-      return;
+  Widget _buildActiveFilters(Map<String, Person> peopleMap) {
+    final chips = <Widget>[];
+
+    if (selectedPersonId != null) {
+      final person = peopleMap[selectedPersonId];
+      if (person != null) {
+        chips.add(
+          Chip(
+            label: Text(person.name),
+            onDeleted: () => setState(() => selectedPersonId = null),
+            deleteIcon: const Icon(Icons.close, size: 16),
+          ),
+        );
+      }
     }
-    setState(() {
-      _sort = result;
-    });
+
+    if (categoryFilter != _defaultCategoryFilter) {
+      chips.add(
+        Chip(
+          label: Text(_getCategoryFilterName(categoryFilter)),
+          onDeleted: () =>
+              setState(() => categoryFilter = _defaultCategoryFilter),
+          deleteIcon: const Icon(Icons.close, size: 16),
+        ),
+      );
+    }
+
+    if (dateFilter != _defaultDateFilter) {
+      chips.add(
+        Chip(
+          label: Text(_getDateFilterLabel()),
+          onDeleted: () => setState(() {
+            dateFilter = _defaultDateFilter;
+            customDateRange = null;
+          }),
+          deleteIcon: const Icon(Icons.close, size: 16),
+        ),
+      );
+    }
+
+    if (searchQuery.isNotEmpty) {
+      chips.add(
+        Chip(
+          label: Text('検索: $searchQuery'),
+          onDeleted: () {
+            setState(() {
+              searchQuery = '';
+              _searchController.clear();
+            });
+          },
+          deleteIcon: const Icon(Icons.close, size: 16),
+        ),
+      );
+    }
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 4,
+      children: chips,
+    );
   }
-}
 
-class _UnpaidListTile extends StatelessWidget {
-  const _UnpaidListTile({
-    required this.expense,
-    required this.person,
-    required this.onCheck,
-    required this.onTap,
-  });
+  Widget _buildEmptyState() {
+    final message = _hasActiveFilters()
+        ? 'フィルタ条件に一致する記録がありません'
+        : '未払いの記録がありません';
 
-  final Expense expense;
-  final Person person;
-  final VoidCallback onCheck;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final photoPath = person.photoPath;
-    final avatar = photoPath != null && File(photoPath).existsSync()
-        ? CircleAvatar(backgroundImage: FileImage(File(photoPath)))
-        : CircleAvatar(
-            child: Text(
-              person.emoji ??
-                  (person.name.characters.isNotEmpty
-                      ? person.name.characters.first
-                      : '?'),
-            ),
-          );
-    return ListTile(
-      leading: Checkbox(
-        value: false,
-        onChanged: (_) => onCheck(),
-      ),
-      title: Text('${formatDate(expense.date)}  ${expense.memo}'),
-      subtitle: Row(
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          avatar,
-          const SizedBox(width: 8),
-          Text(person.name),
-          if (expense.status == ExpenseStatus.planned)
-            const Padding(
-              padding: EdgeInsets.only(left: 8.0),
-              child: Chip(
-                label: Text('予定'),
-                backgroundColor: Color(0xFFEDE7F6),
-              ),
+          Icon(
+            Icons.receipt_long,
+            size: 64,
+            color: Colors.grey[400],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            message,
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 16,
             ),
+          ),
+          if (_hasActiveFilters()) ...[
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _clearFilters,
+              child: const Text('フィルタをクリア'),
+            ),
+          ],
         ],
       ),
-      trailing: Text(formatCurrency(expense.amount)),
-      onTap: onTap,
     );
+  }
+
+  void _clearFilters() {
+    setState(() {
+      selectedPersonId = null;
+      dateFilter = _defaultDateFilter;
+      categoryFilter = _defaultCategoryFilter;
+      sortBy = _defaultSortBy;
+      customDateRange = null;
+      searchQuery = '';
+      _searchController.clear();
+    });
+  }
+
+  Widget _buildExpenseListItem(Expense expense, Person? person) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 1,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        leading: Checkbox(
+          value: false,
+          onChanged: (_) => _markExpenseAsPaid(expense),
+          activeColor: Theme.of(context).colorScheme.primary,
+        ),
+        title: Row(
+          children: [
+            Text(
+              _formatListDate(expense.date),
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                expense.memo.isEmpty ? '記録' : expense.memo,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              formatCurrency(expense.amount),
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(width: 12),
+            _buildSmallAvatar(person),
+            if (expense.status == ExpenseStatus.planned) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.orange[100],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '予定',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.orange[800],
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+        subtitle: expense.photoPaths.isNotEmpty
+            ? Row(
+                children: [
+                  Icon(Icons.camera_alt, size: 14, color: Colors.grey[500]),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${expense.photoPaths.length}枚',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[500],
+                    ),
+                  ),
+                ],
+              )
+            : null,
+        onTap: () => _navigateToExpenseDetail(expense),
+      ),
+    );
+  }
+
+  void _navigateToExpenseDetail(Expense expense) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ExpenseDetailScreen(expenseId: expense.id),
+      ),
+    );
+  }
+
+  void _markExpenseAsPaid(Expense expense) {
+    final notifier = ref.read(expensesProvider.notifier);
+    notifier.markAsPaid(expense.id);
+
+    final memo = expense.memo.isEmpty ? '記録' : expense.memo;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$memoを支払い済みにしました'),
+        action: SnackBarAction(
+          label: 'UNDO',
+          onPressed: () => notifier.markAsUnpaid(expense.id),
+        ),
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  Widget _buildSmallAvatar(Person? person) {
+    const double radius = 16;
+    if (person == null) {
+      return const CircleAvatar(
+        radius: radius,
+        child: Text('?', style: TextStyle(fontWeight: FontWeight.bold)),
+      );
+    }
+
+    final photoPath = person.photoPath;
+    if (photoPath != null && File(photoPath).existsSync()) {
+      return CircleAvatar(
+        radius: radius,
+        backgroundImage: FileImage(File(photoPath)),
+      );
+    }
+
+    final display = person.emoji ??
+        (person.name.characters.isNotEmpty
+            ? person.name.characters.first
+            : '?');
+    return CircleAvatar(
+      radius: radius,
+      child: Text(
+        display,
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+  bool _hasActiveFilters() {
+    return selectedPersonId != null ||
+        searchQuery.isNotEmpty ||
+        categoryFilter != _defaultCategoryFilter ||
+        dateFilter != _defaultDateFilter ||
+        (dateFilter == DateFilter.custom && customDateRange != null);
+  }
+
+  String _formatListDate(DateTime date) {
+    final target = DateUtils.dateOnly(date);
+    return '${target.month}/${target.day}';
+  }
+
+  String _getCategoryFilterName(CategoryFilter filter) {
+    switch (filter) {
+      case CategoryFilter.normal:
+        return '通常';
+      case CategoryFilter.planned:
+        return '予定';
+      case CategoryFilter.both:
+        return '両方';
+    }
+  }
+
+  String _getDateFilterLabel() {
+    if (dateFilter == DateFilter.custom && customDateRange != null) {
+      return '${formatDate(customDateRange!.start)} 〜 ${formatDate(customDateRange!.end)}';
+    }
+    return _getDateFilterName(dateFilter);
+  }
+
+  String _getDateFilterName(DateFilter filter) {
+    switch (filter) {
+      case DateFilter.all:
+        return '全期間';
+      case DateFilter.thisMonth:
+        return '今月';
+      case DateFilter.lastMonth:
+        return '先月';
+      case DateFilter.custom:
+        return 'カスタム';
+    }
   }
 }
