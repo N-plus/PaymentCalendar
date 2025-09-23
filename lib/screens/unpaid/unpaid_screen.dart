@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:characters/characters.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_'
     'r'
@@ -11,6 +10,7 @@ import 'package:flutter_'
     'ive'
     'r'
     'pod.dart';
+import 'package:payment_calendar/widgets/radio_option_tile.dart';
 
 import '../../models/expense.dart';
 import '../../models/person.dart';
@@ -285,7 +285,8 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
               }
             }
 
-            return AlertDialog(
+              final selectedRange = tempRange;
+              return AlertDialog(
               title: const Text('フィルタ・並び替え'),
               content: SingleChildScrollView(
                 child: Column(
@@ -325,161 +326,128 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
                       '区分',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    RadioListTile<CategoryFilter>(
-                      title: const Text('通常'),
-                      value: CategoryFilter.normal,
-                      groupValue: tempCategory,
-                      onChanged: (value) {
-                        if (value == null) {
-                          return;
-                        }
-                        setDialogState(() => tempCategory = value);
-                      },
-                    ),
-                    RadioListTile<CategoryFilter>(
-                      title: const Text('予定'),
-                      value: CategoryFilter.planned,
-                      groupValue: tempCategory,
-                      onChanged: (value) {
-                        if (value == null) {
-                          return;
-                        }
-                        setDialogState(() => tempCategory = value);
-                      },
-                    ),
-                    RadioListTile<CategoryFilter>(
-                      title: const Text('両方'),
-                      value: CategoryFilter.both,
-                      groupValue: tempCategory,
-                      onChanged: (value) {
-                        if (value == null) {
-                          return;
-                        }
-                        setDialogState(() => tempCategory = value);
-                      },
-                    ),
+                      RadioOptionTile<CategoryFilter>(
+                        title: const Text('通常'),
+                        value: CategoryFilter.normal,
+                        groupValue: tempCategory,
+                        onSelected: (value) {
+                          setDialogState(() => tempCategory = value);
+                        },
+                      ),
+                      RadioOptionTile<CategoryFilter>(
+                        title: const Text('予定'),
+                        value: CategoryFilter.planned,
+                        groupValue: tempCategory,
+                        onSelected: (value) {
+                          setDialogState(() => tempCategory = value);
+                        },
+                      ),
+                      RadioOptionTile<CategoryFilter>(
+                        title: const Text('両方'),
+                        value: CategoryFilter.both,
+                        groupValue: tempCategory,
+                        onSelected: (value) {
+                          setDialogState(() => tempCategory = value);
+                        },
+                      ),
                     const Divider(),
                     const Text(
                       '期間',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    RadioListTile<DateFilter>(
-                      title: const Text('全期間'),
-                      value: DateFilter.all,
-                      groupValue: tempDateFilter,
-                      onChanged: (value) {
-                        if (value == null) {
-                          return;
-                        }
-                        setDialogState(() {
-                          tempDateFilter = value;
-                          tempRange = null;
-                        });
-                      },
-                    ),
-                    RadioListTile<DateFilter>(
-                      title: const Text('今月'),
-                      value: DateFilter.thisMonth,
-                      groupValue: tempDateFilter,
-                      onChanged: (value) {
-                        if (value == null) {
-                          return;
-                        }
-                        setDialogState(() {
-                          tempDateFilter = value;
-                          tempRange = null;
-                        });
-                      },
-                    ),
-                    RadioListTile<DateFilter>(
-                      title: const Text('先月'),
-                      value: DateFilter.lastMonth,
-                      groupValue: tempDateFilter,
-                      onChanged: (value) {
-                        if (value == null) {
-                          return;
-                        }
-                        setDialogState(() {
-                          tempDateFilter = value;
-                          tempRange = null;
-                        });
-                      },
-                    ),
-                    RadioListTile<DateFilter>(
-                      title: const Text('カスタム'),
-                      value: DateFilter.custom,
-                      groupValue: tempDateFilter,
-                      onChanged: (value) {
-                        if (value == null) {
-                          return;
-                        }
-                        if (value == DateFilter.custom) {
-                          pickRange();
-                        } else {
+                      RadioOptionTile<DateFilter>(
+                        title: const Text('全期間'),
+                        value: DateFilter.all,
+                        groupValue: tempDateFilter,
+                        onSelected: (value) {
                           setDialogState(() {
                             tempDateFilter = value;
                             tempRange = null;
                           });
-                        }
-                      },
-                    ),
-                    if (tempDateFilter == DateFilter.custom && tempRange != null)
-                      Padding(
-                        padding: const EdgeInsets.only(left: 16, bottom: 8),
-                        child: Text(
-                          '${formatDate(tempRange.start)} 〜 ${formatDate(tempRange.end)}',
-                          style: TextStyle(color: Colors.grey[600]),
-                        ),
+                        },
                       ),
+                      RadioOptionTile<DateFilter>(
+                        title: const Text('今月'),
+                        value: DateFilter.thisMonth,
+                        groupValue: tempDateFilter,
+                        onSelected: (value) {
+                          setDialogState(() {
+                            tempDateFilter = value;
+                            tempRange = null;
+                          });
+                        },
+                      ),
+                      RadioOptionTile<DateFilter>(
+                        title: const Text('先月'),
+                        value: DateFilter.lastMonth,
+                        groupValue: tempDateFilter,
+                        onSelected: (value) {
+                          setDialogState(() {
+                            tempDateFilter = value;
+                            tempRange = null;
+                          });
+                        },
+                      ),
+                      RadioOptionTile<DateFilter>(
+                        title: const Text('カスタム'),
+                        value: DateFilter.custom,
+                        groupValue: tempDateFilter,
+                        onSelected: (value) {
+                          if (value == DateFilter.custom) {
+                            pickRange();
+                          } else {
+                            setDialogState(() {
+                              tempDateFilter = value;
+                              tempRange = null;
+                            });
+                          }
+                        },
+                      ),
+                      if (tempDateFilter == DateFilter.custom && selectedRange != null)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 16, bottom: 8),
+                          child: Text(
+                            '${formatDate(selectedRange.start)} 〜 ${formatDate(selectedRange.end)}',
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
+                        ),
                     const Divider(),
                     const Text(
                       '並び替え',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    RadioListTile<SortBy>(
-                      title: const Text('日付（降順）'),
-                      value: SortBy.dateDesc,
-                      groupValue: tempSort,
-                      onChanged: (value) {
-                        if (value == null) {
-                          return;
-                        }
-                        setDialogState(() => tempSort = value);
-                      },
-                    ),
-                    RadioListTile<SortBy>(
-                      title: const Text('日付（昇順）'),
-                      value: SortBy.dateAsc,
-                      groupValue: tempSort,
-                      onChanged: (value) {
-                        if (value == null) {
-                          return;
-                        }
-                        setDialogState(() => tempSort = value);
-                      },
-                    ),
-                    RadioListTile<SortBy>(
-                      title: const Text('金額（降順）'),
-                      value: SortBy.amountDesc,
-                      groupValue: tempSort,
-                      onChanged: (value) {
-                        if (value == null) {
-                          return;
-                        }
-                        setDialogState(() => tempSort = value);
-                      },
-                    ),
-                    RadioListTile<SortBy>(
-                      title: const Text('金額（昇順）'),
-                      value: SortBy.amountAsc,
-                      groupValue: tempSort,
-                      onChanged: (value) {
-                        if (value == null) {
-                          return;
-                        }
-                        setDialogState(() => tempSort = value);
-                      },
-                    ),
+                      RadioOptionTile<SortBy>(
+                        title: const Text('日付（降順）'),
+                        value: SortBy.dateDesc,
+                        groupValue: tempSort,
+                        onSelected: (value) {
+                          setDialogState(() => tempSort = value);
+                        },
+                      ),
+                      RadioOptionTile<SortBy>(
+                        title: const Text('日付（昇順）'),
+                        value: SortBy.dateAsc,
+                        groupValue: tempSort,
+                        onSelected: (value) {
+                          setDialogState(() => tempSort = value);
+                        },
+                      ),
+                      RadioOptionTile<SortBy>(
+                        title: const Text('金額（降順）'),
+                        value: SortBy.amountDesc,
+                        groupValue: tempSort,
+                        onSelected: (value) {
+                          setDialogState(() => tempSort = value);
+                        },
+                      ),
+                      RadioOptionTile<SortBy>(
+                        title: const Text('金額（昇順）'),
+                        value: SortBy.amountAsc,
+                        groupValue: tempSort,
+                        onSelected: (value) {
+                          setDialogState(() => tempSort = value);
+                        },
+                      ),
                   ],
                 ),
               ),

@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:characters/characters.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_'
     'r'
@@ -11,6 +10,7 @@ import 'package:flutter_'
     'ive'
     'r'
     'pod.dart';
+import 'package:payment_calendar/utils/color_utils.dart';
 
 import '../../models/expense.dart';
 import '../../models/person_summary.dart';
@@ -34,8 +34,9 @@ class HomeScreen extends ConsumerWidget {
         .select((settings) => settings.quickPayIncludesPlanned));
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Scaffold(
-      backgroundColor: colorScheme.surfaceVariant.withOpacity(0.3),
+      return Scaffold(
+        backgroundColor:
+            colorScheme.surfaceContainerHighest.withOpacityValue(0.3),
       appBar: AppBar(
         title: const Text('ホーム'),
         backgroundColor: colorScheme.surface,
@@ -127,7 +128,7 @@ class _EmptySummaryView extends StatelessWidget {
           Icon(
             Icons.people_alt_outlined,
             size: 64,
-            color: colorScheme.onSurface.withOpacity(0.3),
+              color: colorScheme.onSurface.withOpacityValue(0.3),
           ),
           const SizedBox(height: 16),
           Text(
@@ -338,6 +339,10 @@ class _PersonSummaryTile extends ConsumerWidget {
       return;
     }
 
+    if (!context.mounted) {
+      return;
+    }
+
     final originals = ref
         .read(expensesProvider.notifier)
         .markPaidForPerson(
@@ -377,9 +382,9 @@ class _Avatar extends StatelessWidget {
         height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacityValue(0.1),
               blurRadius: 6,
               offset: const Offset(0, 3),
             ),
@@ -430,10 +435,10 @@ class _CountBadge extends StatelessWidget {
     final badgeColor = color ?? Theme.of(context).colorScheme.primary;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: badgeColor.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: badgeColor.withOpacity(0.3)),
+        decoration: BoxDecoration(
+          color: badgeColor.withOpacityValue(0.12),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: badgeColor.withOpacityValue(0.3)),
       ),
       child: Text(
         text,
