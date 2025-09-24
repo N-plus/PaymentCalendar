@@ -34,9 +34,8 @@ class HomeScreen extends ConsumerWidget {
         .select((settings) => settings.quickPayIncludesPlanned));
     final colorScheme = Theme.of(context).colorScheme;
 
-      return Scaffold(
-        backgroundColor:
-            colorScheme.surfaceContainerHighest.withOpacityValue(0.3),
+    return Scaffold(
+      backgroundColor: colorScheme.surface.withOpacityValue(0.3),
       appBar: AppBar(
         title: const Text('ホーム'),
         backgroundColor: colorScheme.surface,

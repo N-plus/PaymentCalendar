@@ -293,9 +293,8 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color:
-              theme.colorScheme.surfaceContainerHighest.withOpacityValue(0.4),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withOpacityValue(0.4),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: theme.dividerColor),
       ),
