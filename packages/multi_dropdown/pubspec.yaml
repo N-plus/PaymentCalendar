@@ -1,0 +1,14 @@
+name: multi_dropdown
+version: 0.0.1
+publish_to: 'none'
+description: Local lightweight multi-select dropdown widget.
+
+environment:
+  sdk: '>=2.17.0 <3.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
