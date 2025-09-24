@@ -11,7 +11,7 @@ class Expense {
     required this.amount,
     required this.memo,
     required this.status,
-    this.photoPaths = const [],
+    this.photoPaths = const <String>[],
     this.paidAt,
     required this.createdAt,
   });
@@ -22,7 +22,7 @@ class Expense {
     required DateTime date,
     required int amount,
     String memo = '',
-    List<String> photoPaths = const [],
+    List<String> photoPaths = const <String>[],
   }) {
     final now = DateUtils.dateOnly(DateTime.now());
     final status = _statusFor(date, false, now: now);
@@ -33,7 +33,7 @@ class Expense {
       amount: amount,
       memo: memo,
       status: status,
-      photoPaths: List.unmodifiable(photoPaths),
+      photoPaths: List<String>.unmodifiable(photoPaths),
       createdAt: DateTime.now(),
     );
   }
@@ -71,7 +71,7 @@ class Expense {
       memo: memo ?? this.memo,
       status: status ?? this.status,
       photoPaths: photoPaths != null
-          ? List.unmodifiable(List<String>.from(photoPaths))
+          ? List<String>.unmodifiable(photoPaths)
           : this.photoPaths,
       paidAt: paidAt ?? this.paidAt,
       createdAt: createdAt ?? this.createdAt,
