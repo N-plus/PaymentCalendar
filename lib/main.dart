@@ -1,14 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_'
-    'r'
-    'ive'
-    'r'
-    'pod/flutter_'
-    'r'
-    'ive'
-    'r'
-    'pod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'providers/settings_provider.dart';
 import 'screens/home/home_screen.dart';
