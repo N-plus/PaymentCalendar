@@ -42,4 +42,8 @@ class PeopleNotifier extends StateNotifier<List<Person>> {
   void removePerson(Person target) {
     state = state.where((person) => person.id != target.id).toList();
   }
+
+  void restorePerson(Person person) {
+    state = [...state, person];
+  }
 }
