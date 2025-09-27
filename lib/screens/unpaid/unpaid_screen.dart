@@ -153,7 +153,7 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
         ],
       ),
       bottomNavigationBar: Container(
-        color: Colors.white,
+        color: const Color(0xFFFFFAF0),
         padding: const EdgeInsets.all(16),
         child: SafeArea(
           child: Text(
