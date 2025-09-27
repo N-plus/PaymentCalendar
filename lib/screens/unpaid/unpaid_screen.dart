@@ -69,7 +69,7 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
         filteredExpenses.fold<int>(0, (sum, expense) => sum + expense.amount);
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: const Color(0xFFFFFAF0),
       appBar: AppBar(
         title: const Text('未払い一覧'),
         backgroundColor: Colors.white,
