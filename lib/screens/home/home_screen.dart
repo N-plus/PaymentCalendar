@@ -160,6 +160,7 @@ class _PersonSummaryTile extends ConsumerWidget {
 
     return Card(
       elevation: 2,
+      color: const Color(0xFFFFFFFF),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),
