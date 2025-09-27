@@ -159,7 +159,8 @@ class _PersonSummaryTile extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Card(
-      elevation: 2,
+      elevation: 4,
+      shadowColor: const Color.fromRGBO(0, 0, 0, 0.05),
       color: const Color(0xFFFFFFFF),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
