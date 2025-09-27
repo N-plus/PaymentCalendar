@@ -260,13 +260,13 @@ class _PersonSummaryTile extends ConsumerWidget {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: ElevatedButton.icon(
+                  child: OutlinedButton.icon(
                     onPressed: hasPayTargets
                         ? () => _onPayAllPressed(context, ref)
                         : null,
                     icon: const Icon(Icons.payment, size: 18),
                     label: const Text('全件支払い'),
-                    style: ElevatedButton.styleFrom(
+                    style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
                   ),
