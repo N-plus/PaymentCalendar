@@ -163,6 +163,7 @@ class _SettingsSection extends StatelessWidget {
         ),
         Card(
           margin: const EdgeInsets.symmetric(horizontal: 16),
+          color: Colors.white,
           child: Column(children: children),
         ),
       ],
