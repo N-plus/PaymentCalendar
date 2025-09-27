@@ -32,8 +32,8 @@ class PaymentCalendarApp extends ConsumerWidget {
       title: 'Payment Calendar',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF001F3F)),
-        scaffoldBackgroundColor: const Color(0xFF001F3F),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF3366CC)),
+        scaffoldBackgroundColor: const Color(0xFF3366CC),
         useMaterial3: true,
         fontFamily: 'N'
             'o'
