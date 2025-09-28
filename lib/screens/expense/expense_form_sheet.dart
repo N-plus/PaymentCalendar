@@ -221,9 +221,7 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
             color: isSelected ? theme.colorScheme.primary : theme.dividerColor,
             width: 2,
           ),
-            color: isSelected
-                ? theme.colorScheme.primaryContainer.withOpacityValue(0.4)
-                : theme.colorScheme.surface,
+          color: isSelected ? Colors.white : theme.colorScheme.surface,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
