@@ -77,32 +77,35 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
       _personId = people.first.id;
     }
 
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
-      child: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(context),
-                const SizedBox(height: 24),
-                _buildDateSection(context),
-                const SizedBox(height: 24),
-                _buildPersonSection(context, people),
-                const SizedBox(height: 24),
-                _buildAmountSection(context),
-                const SizedBox(height: 24),
-                _buildMemoSection(context),
-                const SizedBox(height: 24),
-                _buildPhotoSection(context),
-                const SizedBox(height: 32),
-                _buildActions(context),
-              ],
+    return Container(
+      color: const Color(0xFFFFFAF0),
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(context),
+                  const SizedBox(height: 24),
+                  _buildDateSection(context),
+                  const SizedBox(height: 24),
+                  _buildPersonSection(context, people),
+                  const SizedBox(height: 24),
+                  _buildAmountSection(context),
+                  const SizedBox(height: 24),
+                  _buildMemoSection(context),
+                  const SizedBox(height: 24),
+                  _buildPhotoSection(context),
+                  const SizedBox(height: 32),
+                  _buildActions(context),
+                ],
+              ),
             ),
           ),
         ),
