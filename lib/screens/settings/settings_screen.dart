@@ -159,7 +159,7 @@ class _SettingsSection extends StatelessWidget {
                 title,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: Theme.of(context).colorScheme.primary,
+                      color: const Color(0xFF9E9E9E),
                     ),
               ),
             ],
