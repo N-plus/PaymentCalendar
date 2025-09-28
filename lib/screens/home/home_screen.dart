@@ -52,8 +52,6 @@ class HomeScreen extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
-                Icon(Icons.event, color: colorScheme.primary),
-                const SizedBox(width: 8),
                 Text(
                   '予定を含める',
                   style: Theme.of(context)
