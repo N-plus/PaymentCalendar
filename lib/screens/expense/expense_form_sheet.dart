@@ -351,6 +351,9 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
             children: [
               TextButton(
                 onPressed: _addingPerson ? null : _cancelNewPerson,
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.black,
+                ),
                 child: const Text('キャンセル'),
               ),
               const SizedBox(width: 8),
@@ -358,6 +361,7 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
                 onPressed: _addingPerson ? null : _addNewPerson,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
+                  foregroundColor: Colors.black,
                 ),
                 child: _addingPerson
                     ? const SizedBox(
@@ -510,6 +514,7 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
                     onPressed: canAddMore ? _captureImage : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
                     ),
                     icon: const Icon(Icons.camera_alt, size: 18),
                     label: const Text('カメラ'),
@@ -519,6 +524,7 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
                     onPressed: canAddMore ? _pickImages : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
                     ),
                     icon: const Icon(Icons.photo_library, size: 18),
                     label: const Text('ギャラリー'),
@@ -590,6 +596,7 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
             onPressed: _saving ? null : () => Navigator.of(context).pop(),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
+              foregroundColor: Colors.black,
             ),
             child: const Text('キャンセル'),
           ),
@@ -600,6 +607,7 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
             onPressed: _saving ? null : _save,
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
+              foregroundColor: Colors.black,
             ),
             child: Text(widget.expenseId == null ? '保存' : '更新'),
           ),
