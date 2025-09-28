@@ -100,7 +100,10 @@ class HomeScreen extends ConsumerWidget {
             builder: (_) => const ExpenseFormSheet(),
           );
         },
-        child: const Icon(Icons.add),
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
       ),
     );
   }
