@@ -247,6 +247,7 @@ class _PersonSummaryTile extends ConsumerWidget {
                     label: const Text('個人詳細'),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
+                      foregroundColor: const Color(0xFF3366CC),
                     ),
                   ),
                 ),
@@ -260,6 +261,7 @@ class _PersonSummaryTile extends ConsumerWidget {
                     label: const Text('全件支払い'),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
+                      foregroundColor: const Color(0xFF3366CC),
                     ),
                   ),
                 ),
