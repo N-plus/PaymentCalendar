@@ -32,10 +32,10 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
       ),
       Expense.newRecord(
         id: uuid.v4(),
-        personId: 'pet',
+        personId: 'child',
         date: now,
         amount: 2400,
-        memo: 'キャットフードまとめ買い',
+        memo: '子どもの服',
       ),
       Expense.newRecord(
         id: uuid.v4(),
