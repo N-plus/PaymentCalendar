@@ -30,7 +30,6 @@ class SettingsScreen extends ConsumerWidget {
         children: [
           _SettingsSection(
             title: 'リマインド設定',
-            icon: Icons.notifications,
             children: [
               _SettingsSwitchTile(
                 title: 'リマインド通知',
@@ -68,7 +67,6 @@ class SettingsScreen extends ConsumerWidget {
           ),
           _SettingsSection(
             title: '支払い設定',
-            icon: Icons.payment,
             children: [
               _SettingsSwitchTile(
                 title: '全件支払いに予定を含める',
@@ -83,7 +81,6 @@ class SettingsScreen extends ConsumerWidget {
           ),
           _SettingsSection(
             title: '人の管理',
-            icon: Icons.people,
             children: [
               _SettingsListTile(
                 title: '人の追加・編集',
@@ -101,7 +98,6 @@ class SettingsScreen extends ConsumerWidget {
           ),
           _SettingsSection(
             title: 'その他',
-            icon: Icons.more_horiz,
             children: [
               _SettingsListTile(
                 title: 'アプリ情報',
@@ -135,12 +131,10 @@ class _SettingsSection extends StatelessWidget {
   const _SettingsSection({
     required this.title,
     required this.children,
-    this.icon,
   });
 
   final String title;
   final List<Widget> children;
-  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
@@ -149,20 +143,12 @@ class _SettingsSection extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-          child: Row(
-            children: [
-              if (icon != null) ...[
-                Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
-                const SizedBox(width: 8),
-              ],
-              Text(
-                title,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF9E9E9E),
-                    ),
-              ),
-            ],
+          child: Text(
+            title,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF8E8E93),
+                ),
           ),
         ),
         Card(
