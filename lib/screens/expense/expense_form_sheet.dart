@@ -153,8 +153,6 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
             ),
             child: Row(
               children: [
-                Icon(Icons.calendar_today, color: theme.colorScheme.primary),
-                const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     formatDate(_selectedDate),
