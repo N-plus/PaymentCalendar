@@ -455,6 +455,8 @@ class _PersonManagementScreenState
         onPressed: _addPerson,
         icon: const Icon(Icons.person_add),
         label: const Text('人を追加'),
+        backgroundColor: Colors.white,
+        foregroundColor: Theme.of(context).colorScheme.primary,
       ),
     );
   }
