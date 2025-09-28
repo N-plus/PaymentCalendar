@@ -397,6 +397,7 @@ class _PersonManagementScreenState
                 return Card(
                   margin:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  color: Colors.white,
                   child: ListTile(
                     leading: _buildAvatar(person),
                     title: Text(
