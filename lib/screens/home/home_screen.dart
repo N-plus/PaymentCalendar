@@ -30,8 +30,8 @@ class HomeScreen extends ConsumerWidget {
       backgroundColor: colorScheme.surface.withOpacityValue(0.3),
       appBar: AppBar(
         title: const Text('ホーム'),
-        backgroundColor: colorScheme.surface,
-        foregroundColor: colorScheme.onSurface,
+        backgroundColor: const Color(0xFF3366FF),
+        foregroundColor: Colors.white,
         elevation: 0,
         actions: [
           IconButton(
