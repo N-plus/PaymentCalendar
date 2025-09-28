@@ -92,6 +92,7 @@ class HomeScreen extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: const Color(0xFF3366FF),
         onPressed: () async {
           await showModalBottomSheet<void>(
             context: context,
