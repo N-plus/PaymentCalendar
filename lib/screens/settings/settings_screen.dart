@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:characters/characters.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../models/person.dart';
 import '../../providers/people_provider.dart';
@@ -327,7 +331,11 @@ class _PersonManagementScreenState
       }
     } else {
       notifier.updatePerson(
-        person.copyWith(name: result.name, emoji: result.emoji),
+        person.copyWith(
+          name: result.name,
+          emoji: result.emoji,
+          photoPath: result.photoPath,
+        ),
       );
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('${person.name}を更新しました')),
@@ -336,6 +344,13 @@ class _PersonManagementScreenState
   }
 
   Widget _buildAvatar(Person person) {
+    final photoPath = person.photoPath;
+    if (photoPath != null && photoPath.isNotEmpty) {
+      final file = File(photoPath);
+      if (file.existsSync()) {
+        return CircleAvatar(backgroundImage: FileImage(file));
+      }
+    }
     if (person.emoji != null && person.emoji!.isNotEmpty) {
       return CircleAvatar(child: Text(person.emoji!));
     }
@@ -401,9 +416,11 @@ class _PersonManagementScreenState
                       style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                     subtitle: Text(
-                      person.emoji == null || person.emoji!.isEmpty
-                          ? '絵文字アイコン未設定'
-                          : '絵文字アイコンを使用',
+                      (person.photoPath != null && person.photoPath!.isNotEmpty)
+                          ? '写真を使用'
+                          : person.emoji == null || person.emoji!.isEmpty
+                              ? '絵文字アイコン未設定'
+                              : '絵文字アイコンを使用',
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey.shade600,
@@ -479,6 +496,7 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
   late final TextEditingController _nameController;
   late final TextEditingController _emojiController;
   final _formKey = GlobalKey<FormState>();
+  final ImagePicker _picker = ImagePicker();
 
   final List<String> _suggestedEmojis = const [
     '😀',
@@ -492,12 +510,22 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
     '💼',
   ];
 
+  XFile? _selectedPhoto;
+  String? _existingPhotoPath;
+  bool _usePhoto = false;
+  bool _submitting = false;
+  bool _showPhotoError = false;
+
+  String? get _currentPhotoPath => _selectedPhoto?.path ?? _existingPhotoPath;
+
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.person?.name ?? '');
     _emojiController =
         TextEditingController(text: widget.person?.emoji ?? '');
+    _existingPhotoPath = widget.person?.photoPath;
+    _usePhoto = (_existingPhotoPath != null && _existingPhotoPath!.isNotEmpty);
   }
 
   @override
@@ -508,28 +536,144 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
   }
 
   void _selectEmoji(String emoji) {
+    _setUsePhoto(false);
     setState(() {
       _emojiController.text = emoji;
     });
   }
 
-  void _submit() {
+  void _setUsePhoto(bool value) {
+    if (_usePhoto == value) {
+      return;
+    }
+    setState(() {
+      _usePhoto = value;
+      _showPhotoError = false;
+      if (!value) {
+        _selectedPhoto = null;
+        _existingPhotoPath = null;
+      }
+    });
+  }
+
+  Future<void> _pickPhoto(ImageSource source) async {
+    try {
+      final picked = await _picker.pickImage(source: source);
+      if (picked == null) {
+        return;
+      }
+      setState(() {
+        _selectedPhoto = picked;
+        _existingPhotoPath = null;
+        _usePhoto = true;
+        _showPhotoError = false;
+      });
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('写真の取得に失敗しました')),
+      );
+    }
+  }
+
+  void _removePhoto() {
+    setState(() {
+      _selectedPhoto = null;
+      _existingPhotoPath = null;
+      _showPhotoError = false;
+    });
+  }
+
+  Future<String?> _saveFile(XFile file) async {
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final newPath =
+          '${directory.path}/${DateTime.now().millisecondsSinceEpoch}_${file.name}';
+      final saved = await File(file.path).copy(newPath);
+      return saved.path;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  ImageProvider? _buildPhotoPreview() {
+    final path = _currentPhotoPath;
+    if (path == null || path.isEmpty) {
+      return null;
+    }
+    final file = File(path);
+    if (!file.existsSync()) {
+      return null;
+    }
+    return FileImage(file);
+  }
+
+  Future<void> _submit() async {
+    if (_submitting) {
+      return;
+    }
     if (_formKey.currentState?.validate() != true) {
+      return;
+    }
+
+    setState(() {
+      _submitting = true;
+      _showPhotoError = false;
+    });
+
+    final name = _nameController.text.trim();
+    String? emoji;
+    String? photoPath;
+
+    if (_usePhoto) {
+      if (_selectedPhoto != null) {
+        final saved = await _saveFile(_selectedPhoto!);
+        if (saved == null) {
+          if (mounted) {
+            setState(() => _submitting = false);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('写真の保存に失敗しました')),
+            );
+          }
+          return;
+        }
+        photoPath = saved;
+      } else if (_existingPhotoPath != null && _existingPhotoPath!.isNotEmpty) {
+        photoPath = _existingPhotoPath;
+      } else {
+        if (mounted) {
+          setState(() {
+            _showPhotoError = true;
+            _submitting = false;
+          });
+        }
+        return;
+      }
+    } else {
+      emoji = _emojiController.text.trim().isEmpty
+          ? null
+          : _emojiController.text.trim();
+      photoPath = null;
+    }
+
+    if (!mounted) {
       return;
     }
 
     Navigator.of(context).pop(
       _PersonFormResult(
-        name: _nameController.text.trim(),
-        emoji: _emojiController.text.trim().isEmpty
-            ? null
-            : _emojiController.text.trim(),
+        name: name,
+        emoji: emoji,
+        photoPath: photoPath,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final photoPreview = _buildPhotoPreview();
     return Dialog(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 400),
@@ -563,18 +707,8 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
                   },
                 ),
                 const SizedBox(height: 16),
-                TextFormField(
-                  controller: _emojiController,
-                  decoration: const InputDecoration(
-                    labelText: 'アイコン（絵文字）',
-                    hintText: '例: 😀',
-                    border: OutlineInputBorder(),
-                  ),
-                  inputFormatters: const [],
-                ),
-                const SizedBox(height: 12),
                 Text(
-                  '候補から選択する',
+                  'アイコンの種類',
                   style: Theme.of(context)
                       .textTheme
                       .bodyMedium
@@ -583,29 +717,130 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
-                  runSpacing: 8,
-                  children: _suggestedEmojis
-                      .map(
-                        (emoji) => ChoiceChip(
-                          label: Text(emoji, style: const TextStyle(fontSize: 20)),
-                          selected: _emojiController.text == emoji,
-                          onSelected: (_) => _selectEmoji(emoji),
-                        ),
-                      )
-                      .toList(),
+                  children: [
+                    ChoiceChip(
+                      label: const Text('絵文字'),
+                      selected: !_usePhoto,
+                      onSelected: (selected) {
+                        if (selected) {
+                          _setUsePhoto(false);
+                        }
+                      },
+                    ),
+                    ChoiceChip(
+                      label: const Text('写真'),
+                      selected: _usePhoto,
+                      onSelected: (selected) {
+                        if (selected) {
+                          _setUsePhoto(true);
+                        }
+                      },
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 16),
+                if (_usePhoto) ...[
+                  Center(
+                    child: CircleAvatar(
+                      radius: 40,
+                      backgroundImage: photoPreview,
+                      child: photoPreview == null
+                          ? const Icon(Icons.person, size: 40)
+                          : null,
+                    ),
+                  ),
+                  if (_showPhotoError) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      '写真を選択してください',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: _submitting
+                            ? null
+                            : () => _pickPhoto(ImageSource.gallery),
+                        icon: const Icon(Icons.photo_library),
+                        label: const Text('アルバムから選択'),
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: _submitting
+                            ? null
+                            : () => _pickPhoto(ImageSource.camera),
+                        icon: const Icon(Icons.photo_camera),
+                        label: const Text('カメラで撮影'),
+                      ),
+                      if (_currentPhotoPath != null)
+                        TextButton.icon(
+                          onPressed: _submitting ? null : _removePhoto,
+                          icon: const Icon(Icons.delete_outline),
+                          label: const Text('写真を削除'),
+                        ),
+                    ],
+                  ),
+                ] else ...[
+                  TextFormField(
+                    controller: _emojiController,
+                    decoration: const InputDecoration(
+                      labelText: 'アイコン（絵文字）',
+                      hintText: '例: 😀',
+                      border: OutlineInputBorder(),
+                    ),
+                    inputFormatters: const [],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    '候補から選択する',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _suggestedEmojis
+                        .map(
+                          (emoji) => ChoiceChip(
+                            label: Text(emoji,
+                                style: const TextStyle(fontSize: 20)),
+                            selected: _emojiController.text == emoji,
+                            onSelected: (_) => _selectEmoji(emoji),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ],
                 const SizedBox(height: 24),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: _submitting
+                          ? null
+                          : () => Navigator.of(context).pop(),
                       child: const Text('キャンセル'),
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton(
-                      onPressed: _submit,
-                      child: const Text('保存'),
+                      onPressed: _submitting ? null : () => _submit(),
+                      child: _submitting
+                          ? const SizedBox(
+                              height: 16,
+                              width: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Text('保存'),
                     ),
                   ],
                 ),

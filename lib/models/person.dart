@@ -13,16 +13,20 @@ class Person {
 
   Person copyWith({
     String? name,
-    String? photoPath,
-    String? emoji,
+    Object? photoPath = _noValue,
+    Object? emoji = _noValue,
   }) {
     return Person(
       id: id,
       name: name ?? this.name,
-      photoPath: photoPath ?? this.photoPath,
-      emoji: emoji ?? this.emoji,
+      photoPath: identical(photoPath, _noValue)
+          ? this.photoPath
+          : photoPath as String?,
+      emoji: identical(emoji, _noValue) ? this.emoji : emoji as String?,
     );
   }
+
+  static const Object _noValue = Object();
 
   @override
   bool operator ==(Object other) {
