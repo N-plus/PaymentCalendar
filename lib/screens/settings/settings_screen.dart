@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import '../../models/person.dart';
 import '../../providers/people_provider.dart';
 import '../../providers/settings_provider.dart';
+import '../../widgets/person_avatar.dart';
 
 const _settingsIconColor = Color(0xFF3366FF);
 
@@ -333,20 +334,15 @@ class _PersonManagementScreenState
   }
 
   Widget _buildAvatar(Person person) {
-    final photoPath = person.photoPath;
-    if (photoPath != null && photoPath.isNotEmpty) {
-      final file = File(photoPath);
-      if (file.existsSync()) {
-        return CircleAvatar(backgroundImage: FileImage(file));
-      }
-    }
-    if (person.emoji != null && person.emoji!.isNotEmpty) {
-      return CircleAvatar(child: Text(person.emoji!));
-    }
-    final display = person.name.characters.isNotEmpty
-        ? person.name.characters.first
-        : _emptyEmojiPlaceholder;
-    return CircleAvatar(child: Text(display));
+    return PersonAvatar(
+      person: person,
+      size: 40,
+      backgroundColor: Colors.grey.shade200,
+      textStyle: const TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+      ),
+    );
   }
 
   @override

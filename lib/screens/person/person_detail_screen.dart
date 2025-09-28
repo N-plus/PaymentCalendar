@@ -7,6 +7,7 @@ import '../../models/person.dart';
 import '../../providers/expenses_provider.dart';
 import '../../utils/date_util.dart';
 import '../expense/expense_detail_screen.dart';
+import '../../widgets/person_avatar.dart';
 
 enum _DateFilter { all, thisMonth, lastMonth, custom }
 
@@ -360,36 +361,14 @@ class _PersonDetailScreenState
   }
 
   Widget _buildAvatar(Person person, {double size = 32}) {
-    final radius = size / 2;
-    final placeholder = person.emoji?.isNotEmpty == true
-        ? person.emoji!
-        : (person.name.isNotEmpty ? person.name.substring(0, 1) : '?');
-    if (person.photoPath != null && person.photoPath!.isNotEmpty) {
-      return CircleAvatar(
-        radius: radius,
-        backgroundColor: Colors.grey[200],
-        child: ClipOval(
-          child: Image.asset(
-            person.photoPath!,
-            width: size,
-            height: size,
-            fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => Center(
-              child: Text(
-                placeholder,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-    return CircleAvatar(
-      radius: radius,
-      backgroundColor: Colors.grey[200],
-      child: Text(
-        placeholder,
-        style: const TextStyle(fontWeight: FontWeight.bold),
+    return PersonAvatar(
+      person: person,
+      size: size,
+      backgroundColor: Colors.grey.shade200,
+      textStyle: TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: size * 0.45,
+        color: Colors.grey.shade800,
       ),
     );
   }

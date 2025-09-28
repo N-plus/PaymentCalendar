@@ -9,6 +9,7 @@ import '../../providers/expenses_provider.dart';
 import '../../providers/people_provider.dart';
 import '../../utils/color_utils.dart';
 import '../../utils/date_util.dart';
+import '../../widgets/person_avatar.dart';
 import 'expense_form_sheet.dart';
 
 class ExpenseDetailScreen extends ConsumerWidget {
@@ -94,25 +95,14 @@ class ExpenseDetailScreen extends ConsumerWidget {
   }
 
   Widget _buildAvatar(Person person) {
-    const radius = 28.0;
-    final photoPath = person.photoPath;
-    if (photoPath != null && photoPath.isNotEmpty) {
-      final file = File(photoPath);
-      if (file.existsSync()) {
-        return CircleAvatar(
-          radius: radius,
-          backgroundImage: FileImage(file),
-        );
-      }
-    }
-
-    final display = person.emoji ??
-        (person.name.characters.isNotEmpty ? person.name.characters.first : '?');
-    return CircleAvatar(
-      radius: radius,
-      child: Text(
-        display,
-        style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+    const double size = 56;
+    return PersonAvatar(
+      person: person,
+      size: size,
+      backgroundColor: Colors.grey.shade200,
+      textStyle: const TextStyle(
+        fontSize: 28,
+        fontWeight: FontWeight.bold,
       ),
     );
   }
