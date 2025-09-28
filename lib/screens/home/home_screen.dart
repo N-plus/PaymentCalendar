@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:payment_calendar/utils/color_utils.dart';
@@ -14,6 +12,7 @@ import '../../screens/unpaid/unpaid_screen.dart';
 import '../../utils/date_util.dart';
 import '../expense/expense_form_sheet.dart';
 import '../settings/settings_screen.dart';
+import '../../widgets/person_avatar.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -363,47 +362,15 @@ class _Avatar extends StatelessWidget {
   Widget build(BuildContext context) {
     const double size = 56;
     final colorScheme = Theme.of(context).colorScheme;
-    final photoPath = summary.person.photoPath;
-    if (photoPath != null && File(photoPath).existsSync()) {
-      return Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacityValue(0.1),
-              blurRadius: 6,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Image.file(
-          File(photoPath),
-          fit: BoxFit.cover,
-        ),
-      );
-    }
-    final emoji = summary.person.emoji;
-    final text = emoji ??
-        (summary.person.name.characters.isNotEmpty
-            ? summary.person.name.characters.first
-            : '?');
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: colorScheme.primaryContainer,
-        shape: BoxShape.circle,
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        text,
-        style: const TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-        ),
+    return PersonAvatar(
+      person: summary.person,
+      size: size,
+      showShadow: true,
+      backgroundColor: colorScheme.primaryContainer,
+      textStyle: TextStyle(
+        fontSize: 24,
+        fontWeight: FontWeight.bold,
+        color: colorScheme.onPrimaryContainer,
       ),
     );
   }

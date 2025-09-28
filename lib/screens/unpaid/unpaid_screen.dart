@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:payment_calendar/widgets/radio_option_tile.dart';
@@ -10,6 +8,7 @@ import '../../providers/expenses_provider.dart';
 import '../../providers/people_provider.dart';
 import '../../utils/date_util.dart';
 import '../expense/expense_detail_screen.dart';
+import '../../widgets/person_avatar.dart';
 
 class UnpaidScreen extends ConsumerStatefulWidget {
   const UnpaidScreen({super.key, this.initialPersonId});
@@ -692,32 +691,19 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
   }
 
   Widget _buildSmallAvatar(Person? person) {
-    const double radius = 16;
+    const double size = 32;
     if (person == null) {
       return const CircleAvatar(
-        radius: radius,
+        radius: size / 2,
         child: Text('?', style: TextStyle(fontWeight: FontWeight.bold)),
       );
     }
 
-    final photoPath = person.photoPath;
-    if (photoPath != null && File(photoPath).existsSync()) {
-      return CircleAvatar(
-        radius: radius,
-        backgroundImage: FileImage(File(photoPath)),
-      );
-    }
-
-    final display = person.emoji ??
-        (person.name.characters.isNotEmpty
-            ? person.name.characters.first
-            : '?');
-    return CircleAvatar(
-      radius: radius,
-      child: Text(
-        display,
-        style: const TextStyle(fontWeight: FontWeight.bold),
-      ),
+    return PersonAvatar(
+      person: person,
+      size: size,
+      backgroundColor: Colors.grey.shade300,
+      textStyle: const TextStyle(fontWeight: FontWeight.bold),
     );
   }
 

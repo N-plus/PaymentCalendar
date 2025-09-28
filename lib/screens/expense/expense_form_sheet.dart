@@ -10,6 +10,7 @@ import '../../models/person.dart';
 import '../../providers/expenses_provider.dart';
 import '../../providers/people_provider.dart';
 import '../../utils/date_util.dart';
+import '../../widgets/person_avatar.dart';
 
 class ExpenseFormSheet extends ConsumerStatefulWidget {
   const ExpenseFormSheet({super.key, this.expenseId});
@@ -414,48 +415,15 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
 
   Widget _buildPersonAvatar(Person person, {double size = 56}) {
     final theme = Theme.of(context);
-    final photoPath = person.photoPath;
-    if (photoPath != null && File(photoPath).existsSync()) {
-      return Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacityValue(0.1),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Image.file(
-          File(photoPath),
-          fit: BoxFit.cover,
-        ),
-      );
-    }
-    final emoji = person.emoji;
-    final text = emoji?.isNotEmpty == true
-        ? emoji!
-        : person.name.characters.isNotEmpty
-            ? person.name.characters.first
-            : '?';
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.primaryContainer,
-        shape: BoxShape.circle,
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: size * 0.45,
-          fontWeight: FontWeight.bold,
-        ),
+    return PersonAvatar(
+      person: person,
+      size: size,
+      showShadow: true,
+      backgroundColor: theme.colorScheme.primaryContainer,
+      textStyle: TextStyle(
+        fontSize: size * 0.45,
+        fontWeight: FontWeight.bold,
+        color: theme.colorScheme.onPrimaryContainer,
       ),
     );
   }
