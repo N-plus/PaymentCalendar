@@ -587,6 +587,7 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
       color: const Color(0xFFFFFFFF),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        tileColor: const Color(0xFFFFFFFF),
         leading: Checkbox(
           value: false,
           onChanged: (_) => _markExpenseAsPaid(expense),
