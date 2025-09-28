@@ -18,8 +18,8 @@ class SettingsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('設定'),
         elevation: 0,
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        foregroundColor: Theme.of(context).colorScheme.onSurface,
+        backgroundColor: const Color(0xFF3366FF),
+        foregroundColor: Colors.white,
       ),
       body: ListView(
         padding: EdgeInsets.zero,

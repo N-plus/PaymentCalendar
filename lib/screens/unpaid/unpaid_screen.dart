@@ -72,8 +72,8 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
       backgroundColor: const Color(0xFFFFFAF0),
       appBar: AppBar(
         title: const Text('未払い一覧'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
+        backgroundColor: const Color(0xFF3366FF),
+        foregroundColor: Colors.white,
         elevation: 0,
       ),
       body: Column(
