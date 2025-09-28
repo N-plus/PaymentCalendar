@@ -27,7 +27,7 @@ class HomeScreen extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: colorScheme.surface.withOpacityValue(0.3),
+      backgroundColor: const Color(0xFFFFFAF0),
       appBar: AppBar(
         title: const Text('ホーム'),
         backgroundColor: const Color(0xFF3366FF),
