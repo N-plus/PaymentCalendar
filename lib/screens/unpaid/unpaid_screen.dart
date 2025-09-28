@@ -79,7 +79,7 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
       body: Column(
         children: [
           Container(
-            color: Colors.white,
+            color: const Color(0xFFFFFAF0),
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
