@@ -10,6 +10,8 @@ import '../../models/person.dart';
 import '../../providers/people_provider.dart';
 import '../../providers/settings_provider.dart';
 
+const _settingsIconColor = Color(0xFF3366FF);
+
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
@@ -197,9 +199,7 @@ class _SettingsSwitchTile extends StatelessWidget {
           ? null
           : Icon(
               icon,
-              color: enabled
-                  ? Theme.of(context).colorScheme.primary
-                  : Colors.grey.shade400,
+              color: enabled ? _settingsIconColor : Colors.grey.shade400,
             ),
     );
 
@@ -232,7 +232,7 @@ class _SettingsListTile extends StatelessWidget {
       ),
       leading: leadingIcon == null
           ? null
-          : Icon(leadingIcon, color: Theme.of(context).colorScheme.primary),
+          : Icon(leadingIcon, color: _settingsIconColor),
       trailing: Icon(trailingIcon, color: Colors.grey.shade600),
       onTap: onTap,
     );
