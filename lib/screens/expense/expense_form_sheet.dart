@@ -24,8 +24,6 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
   final _memoController = TextEditingController();
-  final _newPersonNameController = TextEditingController();
-  final _newPersonEmojiController = TextEditingController();
   final _picker = ImagePicker();
 
   DateTime _selectedDate = DateTime.now();
@@ -33,10 +31,6 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
   List<String> _photoPaths = [];
   bool _saving = false;
 
-  bool _showNewPersonForm = false;
-  bool _newPersonUsesPhoto = false;
-  XFile? _newPersonPhoto;
-  bool _addingPerson = false;
 
   @override
   void initState() {
@@ -59,8 +53,6 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
   void dispose() {
     _amountController.dispose();
     _memoController.dispose();
-    _newPersonNameController.dispose();
-    _newPersonEmojiController.dispose();
     super.dispose();
   }
 
@@ -73,7 +65,7 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
   @override
   Widget build(BuildContext context) {
     final people = ref.watch(peopleProvider);
-    if (_personId == null && !_showNewPersonForm && people.isNotEmpty) {
+    if (_personId == null && people.isNotEmpty) {
       _personId = people.first.id;
     }
 
@@ -197,13 +189,8 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
           runSpacing: 12,
           children: [
             for (final person in people) _buildPersonOption(person),
-            _buildAddPersonOption(theme),
           ],
         ),
-        if (_showNewPersonForm) ...[
-          const SizedBox(height: 16),
-          _buildNewPersonForm(context),
-        ],
       ],
     );
   }
@@ -239,195 +226,6 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildAddPersonOption(ThemeData theme) {
-    return GestureDetector(
-      onTap: _toggleNewPersonForm,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: theme.colorScheme.primary, width: 2),
-            color: _showNewPersonForm
-                ? theme.colorScheme.primaryContainer.withOpacityValue(0.4)
-                : theme.colorScheme.surface,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.add, color: theme.colorScheme.primary, size: 20),
-            const SizedBox(width: 6),
-            Text(
-              '新しい人を追加',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNewPersonForm(BuildContext context) {
-    final theme = Theme.of(context);
-    final preview = !_newPersonUsesPhoto
-        ? _newPersonEmojiController.text.characters.isNotEmpty
-            ? _newPersonEmojiController.text.characters.first
-            : _newPersonNameController.text.characters.isNotEmpty
-                ? _newPersonNameController.text.characters.first
-                : '人'
-        : null;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withOpacityValue(0.4),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.dividerColor),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          TextField(
-            controller: _newPersonNameController,
-            decoration: const InputDecoration(
-              labelText: '名前',
-              hintText: '例: 母',
-            ),
-            maxLength: 10,
-            onChanged: (_) => setState(() {}),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'アバタータイプ',
-            style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              _buildAvatarTypeButton('アイコン', false),
-              const SizedBox(width: 8),
-              _buildAvatarTypeButton('写真', true),
-            ],
-          ),
-          const SizedBox(height: 16),
-          if (_newPersonUsesPhoto)
-            _buildNewPersonPhotoPicker()
-          else
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                CircleAvatar(
-                  radius: 28,
-                  backgroundColor: theme.colorScheme.primaryContainer,
-                  child: Text(
-                    preview ?? '人',
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    controller: _newPersonEmojiController,
-                    decoration: const InputDecoration(
-                      labelText: 'アイコン',
-                      hintText: '例: 😀',
-                      helperText: '1文字の絵文字など',
-                    ),
-                    maxLength: 2,
-                    onChanged: (_) => setState(() {}),
-                  ),
-                ),
-              ],
-            ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              TextButton(
-                onPressed: _addingPerson ? null : _cancelNewPerson,
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.black,
-                ),
-                child: const Text('キャンセル'),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: _addingPerson ? null : _addNewPerson,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black,
-                ),
-                child: _addingPerson
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text('追加'),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAvatarTypeButton(String label, bool usesPhoto) {
-    final isSelected = _newPersonUsesPhoto == usesPhoto;
-    final theme = Theme.of(context);
-    return GestureDetector(
-      onTap: () => _setNewPersonAvatarType(usesPhoto),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? theme.colorScheme.primary : theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isSelected ? theme.colorScheme.primary : theme.dividerColor,
-          ),
-        ),
-        child: Text(
-          label,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: isSelected
-                ? theme.colorScheme.onPrimary
-                : theme.colorScheme.onSurface,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNewPersonPhotoPicker() {
-    if (_newPersonPhoto != null) {
-      return Stack(
-        alignment: Alignment.topRight,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.file(
-              File(_newPersonPhoto!.path),
-              width: 96,
-              height: 96,
-              fit: BoxFit.cover,
-            ),
-          ),
-          IconButton(
-            onPressed: _addingPerson ? null : _removeNewPersonPhoto,
-            icon: const Icon(Icons.close),
-            splashRadius: 18,
-          ),
-        ],
-      );
-    }
-    return OutlinedButton.icon(
-      onPressed: _pickNewPersonPhoto,
-      icon: const Icon(Icons.photo),
-      label: const Text('写真を選択'),
     );
   }
 
@@ -665,110 +463,7 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
   void _selectPerson(String personId) {
     setState(() {
       _personId = personId;
-      _showNewPersonForm = false;
-      _resetNewPersonForm();
     });
-  }
-
-  void _toggleNewPersonForm() {
-    setState(() {
-      _showNewPersonForm = !_showNewPersonForm;
-      if (_showNewPersonForm) {
-        _personId = null;
-      } else {
-        _resetNewPersonForm();
-      }
-    });
-  }
-
-  void _setNewPersonAvatarType(bool usesPhoto) {
-    setState(() {
-      _newPersonUsesPhoto = usesPhoto;
-      if (!usesPhoto) {
-        _newPersonPhoto = null;
-      }
-    });
-  }
-
-  Future<void> _pickNewPersonPhoto() async {
-    try {
-      final picked = await _picker.pickImage(source: ImageSource.gallery);
-      if (picked != null) {
-        setState(() => _newPersonPhoto = picked);
-      }
-    } catch (error) {
-      _showMessage('写真の選択に失敗しました');
-    }
-  }
-
-  void _removeNewPersonPhoto() {
-    setState(() => _newPersonPhoto = null);
-  }
-
-  void _cancelNewPerson() {
-    setState(() {
-      _showNewPersonForm = false;
-      _resetNewPersonForm();
-    });
-  }
-
-  Future<void> _addNewPerson() async {
-    final name = _newPersonNameController.text.trim();
-    if (name.isEmpty) {
-      _showMessage('名前を入力してください');
-      return;
-    }
-    if (_newPersonUsesPhoto && _newPersonPhoto == null) {
-      _showMessage('写真を選択してください');
-      return;
-    }
-
-    setState(() => _addingPerson = true);
-
-    String? photoPath;
-    if (_newPersonUsesPhoto && _newPersonPhoto != null) {
-      photoPath = await _saveFile(_newPersonPhoto!);
-      if (photoPath == null) {
-        if (mounted) {
-          setState(() => _addingPerson = false);
-        }
-        return;
-      }
-    }
-
-    final emoji = _newPersonUsesPhoto
-        ? null
-        : _newPersonEmojiController.text.characters.isNotEmpty
-            ? _newPersonEmojiController.text.characters.first
-            : name.characters.isNotEmpty
-                ? name.characters.first
-                : null;
-
-    final newPerson = ref
-        .read(peopleProvider.notifier)
-        .addPerson(name, emoji: emoji, photoPath: photoPath);
-
-    if (!mounted) {
-      return;
-    }
-
-    setState(() {
-      _personId = newPerson?.id ?? _personId;
-      _showNewPersonForm = false;
-      _addingPerson = false;
-      _resetNewPersonForm();
-    });
-
-    if (newPerson != null) {
-      _showMessage('${newPerson.name}を追加しました');
-    }
-  }
-
-  void _resetNewPersonForm() {
-    _newPersonNameController.clear();
-    _newPersonEmojiController.clear();
-    _newPersonPhoto = null;
-    _newPersonUsesPhoto = false;
   }
 
   Future<void> _pickDate() async {
