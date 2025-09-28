@@ -65,7 +65,7 @@ class _PersonDetailScreenState
         : (currentTotal > 0 ? Colors.red[600] : Colors.grey[600]);
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: const Color(0xFFFFFAF0),
       appBar: AppBar(
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
