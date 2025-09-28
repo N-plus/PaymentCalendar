@@ -62,7 +62,8 @@ class HomeScreen extends ConsumerWidget {
                 const Spacer(),
                 Switch(
                   value: includePlanned,
-                  activeColor: const Color(0xFF3366FF),
+                  activeColor: Colors.white,
+                  activeTrackColor: const Color(0xFF3366FF),
                   onChanged: (value) => ref
                       .read(includePlannedInSummaryProvider.notifier)
                       .state = value,
