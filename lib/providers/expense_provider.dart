@@ -11,7 +11,7 @@ class ExpenseProvider extends ChangeNotifier {
   final List<Person> members = const [
     Person(id: 'mother', name: '母', emoji: '👩'),
     Person(id: 'father', name: '父', emoji: '👨'),
-    Person(id: 'pet', name: 'キャラ', emoji: '🐱'),
+    Person(id: 'child', name: '子ども', emoji: '🧒'),
   ];
 
   List<Expense> get expenses => List.unmodifiable(_expenses);
