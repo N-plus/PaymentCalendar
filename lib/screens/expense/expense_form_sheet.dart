@@ -356,6 +356,9 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
               const SizedBox(width: 8),
               ElevatedButton(
                 onPressed: _addingPerson ? null : _addNewPerson,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                ),
                 child: _addingPerson
                     ? const SizedBox(
                         width: 16,
@@ -505,12 +508,18 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
                 children: [
                   ElevatedButton.icon(
                     onPressed: canAddMore ? _captureImage : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                    ),
                     icon: const Icon(Icons.camera_alt, size: 18),
                     label: const Text('カメラ'),
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton.icon(
                     onPressed: canAddMore ? _pickImages : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                    ),
                     icon: const Icon(Icons.photo_library, size: 18),
                     label: const Text('ギャラリー'),
                   ),
@@ -586,6 +595,9 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
         Expanded(
           child: ElevatedButton(
             onPressed: _saving ? null : _save,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+            ),
             child: Text(widget.expenseId == null ? '保存' : '更新'),
           ),
         ),
