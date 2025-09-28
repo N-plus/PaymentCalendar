@@ -196,36 +196,24 @@ class _PersonSummaryTile extends ConsumerWidget {
                     ],
                   ),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    IconButton(
-                      tooltip: '未払い一覧を開く',
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => UnpaidScreen(
-                              initialPersonId: summary.person.id,
-                            ),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.chevron_right),
-                    ),
-                    if (summary.unpaidCount > 0)
-                      _CountBadge(
-                        text: '未払い${summary.unpaidCount}件',
-                        color: colorScheme.error,
-                      ),
-                    if (hasPlanned) ...[
-                      const SizedBox(height: 4),
-                      _CountBadge(
-                        text: '予定${summary.plannedCount}件',
-                        color: colorScheme.secondary,
-                      ),
+                if (summary.unpaidCount > 0 || hasPlanned)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      if (summary.unpaidCount > 0)
+                        _CountBadge(
+                          text: '未払い${summary.unpaidCount}件',
+                          color: colorScheme.error,
+                        ),
+                      if (hasPlanned) ...[
+                        const SizedBox(height: 4),
+                        _CountBadge(
+                          text: '予定${summary.plannedCount}件',
+                          color: colorScheme.secondary,
+                        ),
+                      ],
                     ],
-                  ],
-                ),
+                  ),
               ],
             ),
             const SizedBox(height: 12),
