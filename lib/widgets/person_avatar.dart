@@ -100,7 +100,7 @@ class PersonAvatar extends StatelessWidget {
   }
 }
 
-enum _IllustrationType { mother, father, child }
+enum _IllustrationType { mother, father }
 
 class _BuiltInIllustration {
   _BuiltInIllustration(this.type);
@@ -113,8 +113,6 @@ class _BuiltInIllustration {
         return _BuiltInIllustration(_IllustrationType.mother);
       case 'father':
         return _BuiltInIllustration(_IllustrationType.father);
-      case 'child':
-        return _BuiltInIllustration(_IllustrationType.child);
     }
     return null;
   }
@@ -223,32 +221,6 @@ class _PersonIllustrationPainter extends CustomPainter {
       );
     }
 
-    if (type == _IllustrationType.child) {
-      final Paint capPaint = Paint()..color = palette.hairDark;
-      final Rect capRect = Rect.fromCenter(
-        center: Offset(center.dx, size.height * 0.32),
-        width: size.width * 0.74,
-        height: size.height * 0.38,
-      );
-      canvas.drawArc(capRect, pi, pi, false, capPaint);
-      final Paint brimPaint = Paint()
-        ..color = palette.hairDark.withOpacity(0.9)
-        ..strokeWidth = size.width * 0.08
-        ..style = PaintingStyle.stroke
-        ..strokeCap = StrokeCap.round;
-      canvas.drawArc(
-        Rect.fromCenter(
-          center: Offset(center.dx, size.height * 0.37),
-          width: size.width * 0.8,
-          height: size.height * 0.44,
-        ),
-        pi,
-        pi,
-        false,
-        brimPaint,
-      );
-    }
-
     final Paint eyePaint = Paint()
       ..color = palette.eye
       ..style = PaintingStyle.fill;
@@ -310,16 +282,6 @@ class _PersonIllustrationPainter extends CustomPainter {
           eye: Color(0xFF222933),
           cheek: Color(0xFFB5D4FF),
           smile: Color(0xFF3B77CC),
-        );
-      case _IllustrationType.child:
-        return const _AvatarPalette(
-          background: Color(0xFFFFF9E7),
-          body: Color(0xFFFFD66B),
-          hair: Color(0xFF5A3B20),
-          hairDark: Color(0xFF8B4F1F),
-          eye: Color(0xFF3A2210),
-          cheek: Color(0xFFFFE0A8),
-          smile: Color(0xFFE28A40),
         );
     }
   }
