@@ -586,9 +586,9 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
     return Row(
       children: [
         Expanded(
-          child: OutlinedButton(
+          child: ElevatedButton(
             onPressed: _saving ? null : () => Navigator.of(context).pop(),
-            style: OutlinedButton.styleFrom(
+            style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
             ),
             child: const Text('キャンセル'),
