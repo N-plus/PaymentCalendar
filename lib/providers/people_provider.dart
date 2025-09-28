@@ -12,7 +12,7 @@ class PeopleNotifier extends StateNotifier<List<Person>> {
       : super(const [
           Person(id: 'mother', name: '母', emoji: '👩'),
           Person(id: 'father', name: '父', emoji: '👨'),
-          Person(id: 'pet', name: 'キャラ', emoji: '🐱'),
+          Person(id: 'child', name: '子ども', emoji: '🧒'),
         ]);
 
   final _uuid = const Uuid();
