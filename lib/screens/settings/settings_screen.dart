@@ -313,7 +313,7 @@ class _PersonManagementScreenState
       builder: (context) {
         return _PersonEditDialog(person: person);
       },   // builder を閉じる
-    );     // showDialog を閉じる
+    );   // showDialog を閉じる
 
     if (!mounted || result == null) {
       return;
@@ -687,121 +687,30 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                Text(
-                  widget.person == null ? '人を追加' : '人を編集',
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge
-                      ?.copyWith(fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 24),
-                TextFormField(
-                  controller: _nameController,
-                  decoration: const InputDecoration(
-                    labelText: '名前',
-                    border: OutlineInputBorder(),
+                  Text(
+                    widget.person == null ? '人を追加' : '人を編集',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge
+                        ?.copyWith(fontWeight: FontWeight.w600),
                   ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return '名前を入力してください';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'アイコンの種類',
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyMedium
-                      ?.copyWith(fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  children: [
-                    ChoiceChip(
-                      label: const Text('絵文字'),
-                      selected: !_usePhoto,
-                      onSelected: (selected) {
-                        if (selected) {
-                          _setUsePhoto(false);
-                        }
-                      },
-                    ),
-                    ChoiceChip(
-                      label: const Text('写真'),
-                      selected: _usePhoto,
-                      onSelected: (selected) {
-                        if (selected) {
-                          _setUsePhoto(true);
-                        }
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                if (_usePhoto) ...[
-                  Center(
-                    child: CircleAvatar(
-                      radius: 40,
-                      backgroundImage: photoPreview,
-                      child: photoPreview == null
-                          ? const Icon(Icons.person, size: 40)
-                          : null,
-                    ),
-                  ),
-                  if (_showPhotoError) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      '写真を選択してください',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    alignment: WrapAlignment.center,
-                    children: [
-                      OutlinedButton.icon(
-                        onPressed: _submitting
-                            ? null
-                            : () => _pickPhoto(ImageSource.gallery),
-                        icon: const Icon(Icons.photo_library),
-                        label: const Text('アルバムから選択'),
-                      ),
-                      OutlinedButton.icon(
-                        onPressed: _submitting
-                            ? null
-                            : () => _pickPhoto(ImageSource.camera),
-                        icon: const Icon(Icons.photo_camera),
-                        label: const Text('カメラで撮影'),
-                      ),
-                      if (_currentPhotoPath != null)
-                        TextButton.icon(
-                          onPressed: _submitting ? null : _removePhoto,
-                          icon: const Icon(Icons.delete_outline),
-                          label: const Text('写真を削除'),
-                        ),
-                    ],
-                  ),
-                ] else ...[
+                  const SizedBox(height: 24),
                   TextFormField(
-                    controller: _emojiController,
+                    controller: _nameController,
                     decoration: const InputDecoration(
-                      labelText: 'アイコン（絵文字）',
-                      hintText: '例: 😀',
+                      labelText: '名前',
                       border: OutlineInputBorder(),
                     ),
-                    inputFormatters: const [],
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return '名前を入力してください';
+                      }
+                      return null;
+                    },
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   Text(
-                    '候補から選択する',
+                    'アイコンの種類',
                     style: Theme.of(context)
                         .textTheme
                         .bodyMedium
@@ -810,43 +719,139 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
-                    runSpacing: 8,
-                    children: _suggestedEmojis
-                        .map(
-                          (emoji) => ChoiceChip(
-                            label: Text(emoji,
-                                style: const TextStyle(fontSize: 20)),
-                            selected: _emojiController.text == emoji,
-                            onSelected: (_) => _selectEmoji(emoji),
-                          ),
-                        )
-                        .toList(),
+                    children: [
+                      ChoiceChip(
+                        label: const Text('絵文字'),
+                        selected: !_usePhoto,
+                        onSelected: (selected) {
+                          if (selected) {
+                            _setUsePhoto(false);
+                          }
+                        },
+                      ),
+                      ChoiceChip(
+                        label: const Text('写真'),
+                        selected: _usePhoto,
+                        onSelected: (selected) {
+                          if (selected) {
+                            _setUsePhoto(true);
+                          }
+                        },
+                      ),
+                    ],
                   ),
-                ],
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: _submitting
-                          ? null
-                          : () => Navigator.of(context).pop(),
-                      child: const Text('キャンセル'),
+                  const SizedBox(height: 16),
+                  if (_usePhoto) ...[
+                    Center(
+                      child: CircleAvatar(
+                        radius: 40,
+                        backgroundImage: photoPreview,
+                        child: photoPreview == null
+                            ? const Icon(Icons.person, size: 40)
+                            : null,
+                      ),
                     ),
-                    const SizedBox(width: 8),
-                    ElevatedButton(
-                      onPressed: _submitting ? null : () => _submit(),
-                      child: _submitting
-                          ? SizedBox(
-                              height: 16,
-                              width: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Text('保存'),
+                    if (_showPhotoError) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        '写真を選択してください',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      alignment: WrapAlignment.center,
+                      children: [
+                        OutlinedButton.icon(
+                          onPressed: _submitting
+                              ? null
+                              : () => _pickPhoto(ImageSource.gallery),
+                          icon: const Icon(Icons.photo_library),
+                          label: const Text('アルバムから選択'),
+                        ),
+                        OutlinedButton.icon(
+                          onPressed: _submitting
+                              ? null
+                              : () => _pickPhoto(ImageSource.camera),
+                          icon: const Icon(Icons.photo_camera),
+                          label: const Text('カメラで撮影'),
+                        ),
+                        if (_currentPhotoPath != null)
+                          TextButton.icon(
+                            onPressed: _submitting ? null : _removePhoto,
+                            icon: const Icon(Icons.delete_outline),
+                            label: const Text('写真を削除'),
+                          ),
+                      ],
+                    ),
+                  ] else ...[
+                    TextFormField(
+                      controller: _emojiController,
+                      decoration: const InputDecoration(
+                        labelText: 'アイコン（絵文字）',
+                        hintText: '例: 😀',
+                        border: OutlineInputBorder(),
+                      ),
+                      inputFormatters: const [],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      '候補から選択する',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _suggestedEmojis
+                          .map(
+                            (emoji) => ChoiceChip(
+                              label: Text(
+                                emoji,
+                                style: const TextStyle(fontSize: 20),
+                              ),
+                              selected: _emojiController.text == emoji,
+                              onSelected: (_) => _selectEmoji(emoji),
+                            ),
+                          )
+                          .toList(),
                     ),
                   ],
-                ),
-              ],
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: _submitting
+                            ? null
+                            : () => Navigator.of(context).pop(),
+                        child: const Text('キャンセル'),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: _submitting ? null : () => _submit(),
+                        child: _submitting
+                            ? SizedBox(
+                                height: 16,
+                                width: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text('保存'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
