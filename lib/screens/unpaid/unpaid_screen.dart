@@ -695,6 +695,7 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
     if (person == null) {
       return const CircleAvatar(
         radius: size / 2,
+        backgroundColor: kPersonAvatarBackgroundColor,
         child: Text('?', style: TextStyle(fontWeight: FontWeight.bold)),
       );
     }
@@ -702,7 +703,7 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
     return PersonAvatar(
       person: person,
       size: size,
-      backgroundColor: Colors.grey.shade300,
+      backgroundColor: kPersonAvatarBackgroundColor,
       textStyle: const TextStyle(fontWeight: FontWeight.bold),
     );
   }

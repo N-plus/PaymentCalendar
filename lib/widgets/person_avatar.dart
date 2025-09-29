@@ -6,6 +6,8 @@ import 'package:characters/characters.dart';
 import '../models/person.dart';
 import '../utils/color_utils.dart';
 
+const Color kPersonAvatarBackgroundColor = Color(0xFFEEEEEE);
+
 class PersonAvatar extends StatelessWidget {
   const PersonAvatar({
     super.key,
@@ -73,13 +75,14 @@ class PersonAvatar extends StatelessWidget {
             ? person.name.characters.first
             : '?');
 
-    final Color resolvedBackground = backgroundColor ??
-        Theme.of(context).colorScheme.primaryContainer;
+    final theme = Theme.of(context);
+    final Color resolvedBackground =
+        backgroundColor ?? kPersonAvatarBackgroundColor;
     final TextStyle resolvedStyle = textStyle ??
         TextStyle(
           fontSize: size * 0.42,
           fontWeight: FontWeight.bold,
-          color: Theme.of(context).colorScheme.onPrimaryContainer,
+          color: theme.colorScheme.onSurface,
         );
 
     return SizedBox(

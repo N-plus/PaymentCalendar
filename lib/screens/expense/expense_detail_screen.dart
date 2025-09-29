@@ -99,7 +99,7 @@ class ExpenseDetailScreen extends ConsumerWidget {
     return PersonAvatar(
       person: person,
       size: size,
-      backgroundColor: Colors.grey.shade200,
+      backgroundColor: kPersonAvatarBackgroundColor,
       textStyle: const TextStyle(
         fontSize: 28,
         fontWeight: FontWeight.bold,

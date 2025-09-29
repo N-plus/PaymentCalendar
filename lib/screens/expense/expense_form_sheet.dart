@@ -414,16 +414,15 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
   }
 
   Widget _buildPersonAvatar(Person person, {double size = 56}) {
-    final theme = Theme.of(context);
     return PersonAvatar(
       person: person,
       size: size,
       showShadow: true,
-      backgroundColor: theme.colorScheme.primaryContainer,
+      backgroundColor: kPersonAvatarBackgroundColor,
       textStyle: TextStyle(
         fontSize: size * 0.45,
         fontWeight: FontWeight.bold,
-        color: theme.colorScheme.onPrimaryContainer,
+        color: Theme.of(context).colorScheme.onSurface,
       ),
     );
   }
