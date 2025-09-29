@@ -296,6 +296,8 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
                         FilterChip(
                           label: const Text('全員'),
                           selected: tempPersonId == null,
+                          selectedColor: Colors.white,
+                          checkmarkColor: Colors.black87,
                           onSelected: (selected) {
                             setDialogState(() => tempPersonId = null);
                           },
@@ -304,6 +306,8 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
                           (person) => FilterChip(
                             label: Text(person.name),
                             selected: tempPersonId == person.id,
+                            selectedColor: Colors.white,
+                            checkmarkColor: Colors.black87,
                             onSelected: (selected) {
                               setDialogState(() {
                                 tempPersonId = selected ? person.id : null;
