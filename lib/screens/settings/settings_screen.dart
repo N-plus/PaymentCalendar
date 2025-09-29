@@ -726,6 +726,8 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
                       ChoiceChip(
                         label: const Text('絵文字'),
                         selected: !_usePhoto,
+                        selectedColor: Colors.white,
+                        labelStyle: const TextStyle(color: Colors.black),
                         onSelected: (selected) {
                           if (selected) {
                             _setUsePhoto(false);
@@ -735,6 +737,8 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
                       ChoiceChip(
                         label: const Text('写真'),
                         selected: _usePhoto,
+                        selectedColor: Colors.white,
+                        labelStyle: const TextStyle(color: Colors.black),
                         onSelected: (selected) {
                           if (selected) {
                             _setUsePhoto(true);
@@ -823,16 +827,18 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
                       runSpacing: 8,
                       children: _suggestedEmojis
                           .map(
-                            (emoji) => ChoiceChip(
-                              label: Text(
-                                emoji,
-                                style: const TextStyle(fontSize: 20),
-                              ),
-                              selected: _emojiController.text == emoji,
-                              onSelected: (_) => _selectEmoji(emoji),
+                          (emoji) => ChoiceChip(
+                            label: Text(
+                              emoji,
+                              style: const TextStyle(fontSize: 20),
                             ),
-                          )
-                          .toList(),
+                            selected: _emojiController.text == emoji,
+                            selectedColor: Colors.white,
+                            labelStyle: const TextStyle(color: Colors.black),
+                            onSelected: (_) => _selectEmoji(emoji),
+                          ),
+                        )
+                        .toList(),
                     ),
                   ],
                   const SizedBox(height: 24),
