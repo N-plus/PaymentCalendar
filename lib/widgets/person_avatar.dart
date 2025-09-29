@@ -5,9 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:characters/characters.dart';
 
 import '../models/person.dart';
-import '../utils/color_utils.dart';
 
-const Color kPersonAvatarBackgroundColor = Color(0xFFEEEEEE);
+const Color kPersonAvatarBackgroundColor = Color(0xFFF7F7FA);
 
 class PersonAvatar extends StatelessWidget {
   const PersonAvatar({
@@ -110,7 +109,11 @@ class PersonAvatar extends StatelessWidget {
       return null;
     }
 
-    return _PresetPersonAvatar(type: type, size: size);
+    return _PresetPersonAvatar(
+      type: type,
+      size: size,
+      backgroundColor: backgroundColor,
+    );
   }
 }
 
@@ -132,321 +135,126 @@ class _PresetPersonAvatar extends StatelessWidget {
   const _PresetPersonAvatar({
     required this.type,
     required this.size,
+    this.backgroundColor,
   });
 
   final _PresetAvatarType type;
   final double size;
-
-  static const Color _faceColor = Color(0xFFFFEB3B);
-  static const Color _backgroundColor = Color(0xFFFFFDE7);
-
-  Color get _hairColor {
-    switch (type) {
-      case _PresetAvatarType.child:
-        return const Color(0xFF8D6E63);
-      case _PresetAvatarType.mother:
-        return const Color(0xFF6D4C41);
-      case _PresetAvatarType.father:
-        return const Color(0xFF4E342E);
-    }
-  }
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> hairBehind = _buildHairBehind();
-    final List<Widget> hairFront = _buildHairFront();
-
-    final double faceSize = size * 0.78;
-    final List<Widget> features = [
-      Align(
-        alignment: const Alignment(-0.35, -0.05),
-        child: _buildEye(),
-      ),
-      Align(
-        alignment: const Alignment(0.35, -0.05),
-        child: _buildEye(),
-      ),
-      Align(
-        alignment: const Alignment(0, 0.38),
-        child: SizedBox(
-          width: size * 0.32,
-          height: size * 0.2,
-          child: CustomPaint(
-            painter: _SmilePainter(
-              color: Colors.black,
-              strokeWidth: size * 0.07,
-            ),
-          ),
-        ),
-      ),
-    ];
-
-    final List<Widget> accessories = _buildAccessories();
+    switch (type) {
+      case _PresetAvatarType.child:
+      case _PresetAvatarType.mother:
+      case _PresetAvatarType.father:
+        break;
+    }
 
     return SizedBox(
       width: size,
       height: size,
-      child: ClipOval(
-        child: Container(
-          color: _backgroundColor,
-          child: Stack(
-            clipBehavior: Clip.none,
-            alignment: Alignment.center,
-            children: [
-              ...hairBehind,
-              Align(
-                alignment: Alignment.center,
-                child: Container(
-                  width: faceSize,
-                  height: faceSize,
-                  decoration: const BoxDecoration(
-                    color: _faceColor,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-              ...hairFront,
-              ...accessories,
-              ...features,
-            ],
-          ),
+      child: CustomPaint(
+        painter: _AvatarPainter(
+          backgroundColor:
+              backgroundColor ?? _AvatarPainter.kDefaultBackgroundColor,
         ),
-      ),
-    );
-  }
-
-  List<Widget> _buildHairBehind() {
-    if (type != _PresetAvatarType.mother) {
-      return const [];
-    }
-
-    return [
-      Align(
-        alignment: Alignment.center,
-        child: Container(
-          width: size * 0.95,
-          height: size * 0.95,
-          decoration: BoxDecoration(
-            color: _hairColor,
-            borderRadius: BorderRadius.circular(size * 0.6),
-          ),
-        ),
-      ),
-    ];
-  }
-
-  List<Widget> _buildHairFront() {
-    switch (type) {
-      case _PresetAvatarType.child:
-        return [
-          Align(
-            alignment: Alignment.topCenter,
-            child: Container(
-              margin: EdgeInsets.only(top: size * 0.12),
-              width: size * 0.6,
-              height: size * 0.3,
-              decoration: BoxDecoration(
-                color: _hairColor,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(size * 0.32),
-                  bottomRight: Radius.circular(size * 0.32),
-                  topLeft: Radius.circular(size * 0.5),
-                  topRight: Radius.circular(size * 0.5),
-                ),
-              ),
-            ),
-          ),
-          Align(
-            alignment: Alignment.topCenter,
-            child: Transform.translate(
-              offset: Offset(0, -size * 0.18),
-              child: Container(
-                width: size * 0.22,
-                height: size * 0.28,
-                decoration: BoxDecoration(
-                  color: _hairColor,
-                  borderRadius: BorderRadius.circular(size * 0.2),
-                ),
-              ),
-            ),
-          ),
-        ];
-      case _PresetAvatarType.mother:
-        return [
-          Align(
-            alignment: Alignment.topCenter,
-            child: Container(
-              margin: EdgeInsets.only(top: size * 0.02),
-              width: size * 0.84,
-              height: size * 0.5,
-              decoration: BoxDecoration(
-                color: _hairColor,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(size * 0.4),
-                  bottomRight: Radius.circular(size * 0.4),
-                  topLeft: Radius.circular(size * 0.45),
-                  topRight: Radius.circular(size * 0.45),
-                ),
-              ),
-            ),
-          ),
-        ];
-      case _PresetAvatarType.father:
-        return [
-          Align(
-            alignment: Alignment.topCenter,
-            child: Container(
-              margin: EdgeInsets.only(top: size * 0.08),
-              width: size * 0.78,
-              height: size * 0.34,
-              decoration: BoxDecoration(
-                color: _hairColor,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(size * 0.35),
-                  bottomRight: Radius.circular(size * 0.35),
-                  topLeft: Radius.circular(size * 0.45),
-                  topRight: Radius.circular(size * 0.45),
-                ),
-              ),
-            ),
-          ),
-          Align(
-            alignment: const Alignment(-0.7, -0.2),
-            child: Container(
-              width: size * 0.22,
-              height: size * 0.16,
-              decoration: BoxDecoration(
-                color: _hairColor,
-                borderRadius: BorderRadius.circular(size * 0.12),
-              ),
-            ),
-          ),
-          Align(
-            alignment: const Alignment(0.7, -0.2),
-            child: Container(
-              width: size * 0.22,
-              height: size * 0.16,
-              decoration: BoxDecoration(
-                color: _hairColor,
-                borderRadius: BorderRadius.circular(size * 0.12),
-              ),
-            ),
-          ),
-        ];
-    }
-  }
-
-  List<Widget> _buildAccessories() {
-    if (type != _PresetAvatarType.father) {
-      return const [];
-    }
-
-    final double lensSize = size * 0.32;
-    final double bridgeHeight = size * 0.02;
-
-    return [
-      Align(
-        alignment: const Alignment(-0.35, -0.02),
-        child: Container(
-          width: lensSize,
-          height: lensSize,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: Colors.black,
-              width: size * 0.05,
-            ),
-          ),
-        ),
-      ),
-      Align(
-        alignment: const Alignment(0.35, -0.02),
-        child: Container(
-          width: lensSize,
-          height: lensSize,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: Colors.black,
-              width: size * 0.05,
-            ),
-          ),
-        ),
-      ),
-      Align(
-        alignment: Alignment.center,
-        child: Container(
-          width: size * 0.14,
-          height: bridgeHeight,
-          color: Colors.black,
-        ),
-      ),
-      Align(
-        alignment: const Alignment(-0.85, -0.02),
-        child: Container(
-          width: size * 0.18,
-          height: bridgeHeight,
-          color: Colors.black,
-        ),
-      ),
-      Align(
-        alignment: const Alignment(0.85, -0.02),
-        child: Container(
-          width: size * 0.18,
-          height: bridgeHeight,
-          color: Colors.black,
-        ),
-      ),
-    ];
-  }
-
-  Widget _buildEye() {
-    return Container(
-      width: size * 0.14,
-      height: size * 0.14,
-      decoration: const BoxDecoration(
-        color: Colors.black,
-        shape: BoxShape.circle,
       ),
     );
   }
 }
 
-class _SmilePainter extends CustomPainter {
-  const _SmilePainter({
-    required this.color,
-    required this.strokeWidth,
-  });
+class _AvatarPainter extends CustomPainter {
+  const _AvatarPainter({required this.backgroundColor});
 
-  final Color color;
-  final double strokeWidth;
+  final Color backgroundColor;
+
+  static const Color kDefaultBackgroundColor = Color(0xFFF7F7FA);
+  static const Color _faceColor = Color(0xFFFFE082);
+  static const Color _outlineColor = Color(0xFF333333);
+  static const Color _eyeColor = Color(0xFF000000);
+  static const Color _mouthColor = Color(0xFF000000);
+
+  static const double _faceDiameterFactor = 0.7;
+  static const double _faceStrokeFactor = 2 / 32;
+  static const double _eyeDiameterFactor = 0.12;
+  static const double _eyeOffsetXFactor = 0.16;
+  static const double _eyeOffsetYFactor = 0.08;
+  static const double _mouthWidthFactor = 0.36;
+  static const double _mouthHeightFactor = 0.22;
+  static const double _mouthOffsetYFactor = 0.16;
+  static const double _mouthStrokeFactor = 1.8 / 32;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
+    final double dimension = math.min(size.width, size.height);
+    final Offset center = Offset(size.width / 2, size.height / 2);
 
-    final Rect rect = Rect.fromLTWH(
-      0,
-      strokeWidth,
-      size.width,
-      size.height,
+    final Paint backgroundPaint = Paint()
+      ..color = backgroundColor
+      ..style = PaintingStyle.fill
+      ..isAntiAlias = true;
+    canvas.drawCircle(center, dimension / 2, backgroundPaint);
+
+    final double faceDiameter = dimension * _faceDiameterFactor;
+    final double faceRadius = faceDiameter / 2;
+
+    final Paint facePaint = Paint()
+      ..color = _faceColor
+      ..style = PaintingStyle.fill
+      ..isAntiAlias = true;
+    canvas.drawCircle(center, faceRadius, facePaint);
+
+    final Paint outlinePaint = Paint()
+      ..color = _outlineColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = dimension * _faceStrokeFactor
+      ..strokeCap = StrokeCap.round
+      ..isAntiAlias = true;
+    canvas.drawCircle(center, faceRadius, outlinePaint);
+
+    final Paint featurePaint = Paint()
+      ..color = _eyeColor
+      ..style = PaintingStyle.fill
+      ..isAntiAlias = true;
+    final double eyeRadius = (dimension * _eyeDiameterFactor) / 2;
+    final double eyeOffsetX = dimension * _eyeOffsetXFactor;
+    final double eyeOffsetY = dimension * _eyeOffsetYFactor;
+
+    canvas.drawCircle(
+      center.translate(-eyeOffsetX, -eyeOffsetY),
+      eyeRadius,
+      featurePaint,
+    );
+    canvas.drawCircle(
+      center.translate(eyeOffsetX, -eyeOffsetY),
+      eyeRadius,
+      featurePaint,
     );
 
+    final Rect mouthRect = Rect.fromCenter(
+      center: center.translate(0, dimension * _mouthOffsetYFactor),
+      width: dimension * _mouthWidthFactor,
+      height: dimension * _mouthHeightFactor,
+    );
+    final Paint mouthPaint = Paint()
+      ..color = _mouthColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = dimension * _mouthStrokeFactor
+      ..strokeCap = StrokeCap.round
+      ..isAntiAlias = true;
+
     canvas.drawArc(
-      rect,
+      mouthRect,
       math.pi * 0.15,
       math.pi - (math.pi * 0.3),
       false,
-      paint,
+      mouthPaint,
     );
   }
 
   @override
-  bool shouldRepaint(covariant _SmilePainter oldDelegate) {
-    return color != oldDelegate.color || strokeWidth != oldDelegate.strokeWidth;
+  bool shouldRepaint(covariant _AvatarPainter oldDelegate) {
+    return backgroundColor != oldDelegate.backgroundColor;
   }
 }
