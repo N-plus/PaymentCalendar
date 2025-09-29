@@ -97,3 +97,4 @@ class PersonAvatar extends StatelessWidget {
       ),
     );
   }
+}
