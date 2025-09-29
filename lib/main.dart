@@ -79,6 +79,7 @@ class _RootPageState extends ConsumerState<RootPage> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _index,
+        selectedItemColor: const Color(0xFF3366FF),
         onTap: (value) => setState(() => _index = value),
         items: const [
           BottomNavigationBarItem(
