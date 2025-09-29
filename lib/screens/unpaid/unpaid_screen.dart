@@ -446,7 +446,10 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('キャンセル'),
+                  child: const Text(
+                    'キャンセル',
+                    style: TextStyle(color: Colors.black),
+                  ),
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -461,7 +464,10 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
                     });
                     Navigator.pop(context);
                   },
-                  child: const Text('適用'),
+                  child: const Text(
+                    '適用',
+                    style: TextStyle(color: Colors.black),
+                  ),
                 ),
               ],
             );
