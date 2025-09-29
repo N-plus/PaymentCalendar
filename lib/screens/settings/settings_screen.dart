@@ -748,6 +748,8 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
                     Center(
                       child: CircleAvatar(
                         radius: 40,
+                        backgroundColor:
+                            photoPreview != null ? Colors.white : null,
                         backgroundImage: photoPreview,
                         child: photoPreview == null
                             ? const Icon(Icons.person, size: 40)
