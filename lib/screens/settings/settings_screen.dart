@@ -198,7 +198,7 @@ class _SettingsSwitchTile extends StatelessWidget {
       value: enabled ? value : false,
       activeColor: Colors.white,
       activeTrackColor: const Color(0xFF3366FF),
-      inactiveTrackColor: const Color(0xFFCCCCCC),
+      inactiveTrackColor: const Color(0xFFE0E0E0),
       onChanged: enabled ? onChanged : null,
       secondary: icon == null
           ? null
