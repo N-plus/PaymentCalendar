@@ -728,6 +728,12 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
                         selected: !_usePhoto,
                         selectedColor: Colors.white,
                         labelStyle: const TextStyle(color: Colors.black),
+                        shape: StadiumBorder(
+                          side: BorderSide(
+                            color:
+                                !_usePhoto ? Colors.black26 : Colors.transparent,
+                          ),
+                        ),
                         onSelected: (selected) {
                           if (selected) {
                             _setUsePhoto(false);
@@ -739,6 +745,12 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
                         selected: _usePhoto,
                         selectedColor: Colors.white,
                         labelStyle: const TextStyle(color: Colors.black),
+                        shape: StadiumBorder(
+                          side: BorderSide(
+                            color:
+                                _usePhoto ? Colors.black26 : Colors.transparent,
+                          ),
+                        ),
                         onSelected: (selected) {
                           if (selected) {
                             _setUsePhoto(true);
@@ -831,16 +843,26 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
                       runSpacing: 8,
                       children: _suggestedEmojis
                           .map(
-                          (emoji) => ChoiceChip(
-                            label: Text(
-                              emoji,
-                              style: const TextStyle(fontSize: 20),
-                            ),
-                            selected: _emojiController.text == emoji,
-                            selectedColor: Colors.white,
-                            labelStyle: const TextStyle(color: Colors.black),
-                            onSelected: (_) => _selectEmoji(emoji),
-                          ),
+                          (emoji) {
+                            final isSelected = _emojiController.text == emoji;
+                            return ChoiceChip(
+                              label: Text(
+                                emoji,
+                                style: const TextStyle(fontSize: 20),
+                              ),
+                              selected: isSelected,
+                              selectedColor: Colors.white,
+                              labelStyle: const TextStyle(color: Colors.black),
+                              shape: StadiumBorder(
+                                side: BorderSide(
+                                  color: isSelected
+                                      ? Colors.black26
+                                      : Colors.transparent,
+                                ),
+                              ),
+                              onSelected: (_) => _selectEmoji(emoji),
+                            );
+                          },
                         )
                         .toList(),
                     ),
