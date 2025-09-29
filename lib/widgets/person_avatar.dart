@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:characters/characters.dart';
 
 import '../models/person.dart';
 import '../utils/color_utils.dart';
