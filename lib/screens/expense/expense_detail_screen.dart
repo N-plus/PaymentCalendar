@@ -125,7 +125,7 @@ class ExpenseDetailScreen extends ConsumerWidget {
         const SizedBox(height: 12),
         _InfoRow(
           label: '支払い日時',
-          value: formatDate(expense.paidAt!),
+          value: formatDateTime(expense.paidAt!),
         ),
       ]);
     }
