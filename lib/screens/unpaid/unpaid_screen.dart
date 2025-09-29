@@ -276,9 +276,10 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
               }
             }
 
-              final selectedRange = tempRange;
-              return AlertDialog(
+            final selectedRange = tempRange;
+            return AlertDialog(
               title: const Text('フィルタ・並び替え'),
+              backgroundColor: const Color(0xFFFFFAF0),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
