@@ -364,7 +364,7 @@ class _PersonDetailScreenState
     return PersonAvatar(
       person: person,
       size: size,
-      backgroundColor: Colors.grey.shade200,
+      backgroundColor: kPersonAvatarBackgroundColor,
       textStyle: TextStyle(
         fontWeight: FontWeight.bold,
         fontSize: size * 0.45,

@@ -361,16 +361,15 @@ class _Avatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const double size = 56;
-    final colorScheme = Theme.of(context).colorScheme;
     return PersonAvatar(
       person: summary.person,
       size: size,
       showShadow: true,
-      backgroundColor: colorScheme.primaryContainer,
+      backgroundColor: kPersonAvatarBackgroundColor,
       textStyle: TextStyle(
         fontSize: 24,
         fontWeight: FontWeight.bold,
-        color: colorScheme.onPrimaryContainer,
+        color: Theme.of(context).colorScheme.onSurface,
       ),
     );
   }

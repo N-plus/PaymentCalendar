@@ -346,7 +346,7 @@ class _PersonManagementScreenState
     return PersonAvatar(
       person: person,
       size: 40,
-      backgroundColor: Colors.grey.shade200,
+      backgroundColor: kPersonAvatarBackgroundColor,
       textStyle: const TextStyle(
         fontSize: 20,
         fontWeight: FontWeight.bold,
