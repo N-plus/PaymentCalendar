@@ -833,10 +833,10 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
                     ElevatedButton(
                       onPressed: _submitting ? null : () => _submit(),
                       child: _submitting
-                          ? const SizedBox(
+                          ? SizedBox(
                               height: 16,
                               width: 16,
-                              child: const CircularProgressIndicator(strokeWidth: 2),
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Text('保存'),
                     ),
