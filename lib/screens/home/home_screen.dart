@@ -213,7 +213,7 @@ class _PersonSummaryTile extends ConsumerWidget {
                         const SizedBox(height: 4),
                         _CountBadge(
                           text: '予定${summary.plannedCount}件',
-                          color: colorScheme.secondary,
+                          color: const Color(0xFFEEEEEE),
                         ),
                       ],
                     ],
@@ -386,18 +386,29 @@ class _CountBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final badgeColor = color ?? Theme.of(context).colorScheme.primary;
+    final theme = Theme.of(context);
+    final badgeColor = color ?? theme.colorScheme.primary;
+    final isCustomColor = color != null;
+    final backgroundColor = isCustomColor
+        ? badgeColor
+        : badgeColor.withOpacityValue(0.12);
+    final borderColor = isCustomColor
+        ? Colors.transparent
+        : badgeColor.withOpacityValue(0.3);
+    final textColor = isCustomColor
+        ? theme.colorScheme.onSurface
+        : badgeColor;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: badgeColor.withOpacityValue(0.12),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: badgeColor.withOpacityValue(0.3)),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor),
       ),
       child: Text(
         text,
         style: TextStyle(
-          color: badgeColor,
+          color: textColor,
           fontSize: 12,
           fontWeight: FontWeight.w600,
         ),
