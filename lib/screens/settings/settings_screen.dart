@@ -833,11 +833,17 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
                         onPressed: _submitting
                             ? null
                             : () => Navigator.of(context).pop(),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.black,
+                        ),
                         child: const Text('キャンセル'),
                       ),
                       const SizedBox(width: 8),
                       ElevatedButton(
                         onPressed: _submitting ? null : () => _submit(),
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.black,
+                        ),
                         child: _submitting
                             ? SizedBox(
                                 height: 16,
