@@ -156,7 +156,7 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
         padding: const EdgeInsets.all(16),
         child: SafeArea(
           child: Text(
-            '未払い合計（全体）: ${formatCurrency(total)}',
+            '未払い合計: ${formatCurrency(total)}',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
