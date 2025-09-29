@@ -21,6 +21,7 @@ class RadioOptionTile<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final selected = value == groupValue;
+    const selectedColor = Color(0xFF3366FF);
     final colorScheme = Theme.of(context).colorScheme;
     return Semantics(
       inMutuallyExclusiveGroup: true,
@@ -30,8 +31,9 @@ class RadioOptionTile<T> extends StatelessWidget {
         contentPadding: contentPadding,
         leading: Icon(
           selected ? Icons.radio_button_checked : Icons.radio_button_off,
-          color: selected ? colorScheme.primary : colorScheme.outline,
+          color: selected ? selectedColor : colorScheme.outline,
         ),
+        selectedColor: selectedColor,
         title: title,
         subtitle: subtitle,
         onTap: () => onSelected(value),
