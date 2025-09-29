@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../models/person.dart';
+import '../utils/color_utils.dart';
 
 class PersonAvatar extends StatelessWidget {
   const PersonAvatar({
@@ -35,7 +36,7 @@ class PersonAvatar extends StatelessWidget {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withOpacityValue(0.1),
             blurRadius: 6,
             offset: const Offset(0, 3),
           ),
