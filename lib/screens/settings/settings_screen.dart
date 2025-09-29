@@ -43,7 +43,10 @@ class SettingsScreen extends ConsumerWidget {
                   await ref
                       .read(settingsProvider.notifier)
                       .toggleReminder(value);
-                  if (value && context.mounted) {
+                  if (!context.mounted) {
+                    return;
+                  }
+                  if (value) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('リマインド通知を有効にしました'),
@@ -284,20 +287,22 @@ class _PersonManagementScreenState
       ),
     );
 
-    if (confirmed == true && mounted) {
-      ref.read(peopleProvider.notifier).removePerson(person);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${person.name}を削除しました'),
-          action: SnackBarAction(
-            label: '元に戻す',
-            onPressed: () {
-              ref.read(peopleProvider.notifier).restorePerson(person);
-            },
-          ),
-        ),
-      );
+    if (!mounted || confirmed != true) {
+      return;
     }
+
+    ref.read(peopleProvider.notifier).removePerson(person);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${person.name}を削除しました'),
+        action: SnackBarAction(
+          label: '元に戻す',
+          onPressed: () {
+            ref.read(peopleProvider.notifier).restorePerson(person);
+          },
+        ),
+      ),
+    );
   }
 
   Future<void> _showPersonDialog({Person? person}) async {
