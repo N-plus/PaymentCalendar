@@ -258,6 +258,7 @@ class _PersonDetailScreenState
       builder: (context) {
         return AlertDialog(
           title: const Text('フィルタ・並び替え'),
+          backgroundColor: const Color(0xFFFFFAF0),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
