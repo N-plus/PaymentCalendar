@@ -798,8 +798,17 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
                         if (_currentPhotoPath != null)
                           TextButton.icon(
                             onPressed: _submitting ? null : _removePhoto,
-                            icon: const Icon(Icons.delete_outline),
-                            label: const Text('写真を削除'),
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.black,
+                            ),
+                            icon: const Icon(
+                              Icons.delete_outline,
+                              color: Colors.black,
+                            ),
+                            label: const Text(
+                              '写真を削除',
+                              style: TextStyle(color: Colors.black),
+                            ),
                           ),
                       ],
                     ),
