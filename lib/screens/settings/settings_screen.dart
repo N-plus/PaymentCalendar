@@ -776,6 +776,9 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
                           onPressed: _submitting
                               ? null
                               : () => _pickPhoto(ImageSource.gallery),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.black,
+                          ),
                           icon: const Icon(Icons.photo_library),
                           label: const Text('アルバムから選択'),
                         ),
@@ -783,6 +786,9 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
                           onPressed: _submitting
                               ? null
                               : () => _pickPhoto(ImageSource.camera),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.black,
+                          ),
                           icon: const Icon(Icons.photo_camera),
                           label: const Text('カメラで撮影'),
                         ),
