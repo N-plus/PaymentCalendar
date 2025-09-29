@@ -261,6 +261,28 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
         var tempRange = initialRange;
         return StatefulBuilder(
           builder: (context, setDialogState) {
+            final sortedPeople = [...people]
+              ..sort((a, b) {
+                int order(Person person) {
+                  switch (person.id) {
+                    case 'child':
+                      return 0;
+                    case 'mother':
+                      return 1;
+                    case 'father':
+                      return 2;
+                    default:
+                      return 3;
+                  }
+                }
+
+                final orderA = order(a);
+                final orderB = order(b);
+                if (orderA != orderB) {
+                  return orderA.compareTo(orderB);
+                }
+                return a.name.compareTo(b.name);
+              });
             Future<void> pickRange() async {
               final range = await showDateRangePicker(
                 context: context,
@@ -292,6 +314,7 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
+                      runSpacing: 8,
                       children: [
                         () {
                           final isSelected = tempPersonId == null;
@@ -304,7 +327,7 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
                               side: BorderSide(
                                 color: isSelected
                                     ? Colors.black26
-                                    : Colors.transparent,
+                                    : Colors.black12,
                               ),
                             ),
                             onSelected: (selected) {
@@ -312,7 +335,7 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
                             },
                           );
                         }(),
-                        ...people.map(
+                        ...sortedPeople.map(
                           (person) {
                             final isSelected = tempPersonId == person.id;
                             return FilterChip(
@@ -324,7 +347,7 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
                                 side: BorderSide(
                                   color: isSelected
                                       ? Colors.black26
-                                      : Colors.transparent,
+                                      : Colors.black12,
                                 ),
                               ),
                               onSelected: (selected) {
