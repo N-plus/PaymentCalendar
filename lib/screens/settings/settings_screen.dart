@@ -267,24 +267,26 @@ class _PersonManagementScreenState
   Future<void> _deletePerson(Person person) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('削除確認'),
-        content: Text('${person.name}を削除しますか？'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('キャンセル'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('削除確認'),
+          content: Text('${person.name}を削除しますか？'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('キャンセル'),
             ),
-            child: const Text('削除'),
-          ),
-        ],
-      ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('削除'),
+            ),
+          ],
+        );
+      },
     );
 
     if (!mounted || confirmed != true) {
@@ -308,7 +310,9 @@ class _PersonManagementScreenState
   Future<void> _showPersonDialog({Person? person}) async {
     final result = await showDialog<_PersonFormResult>(
       context: context,
-      builder: (context) => _PersonEditDialog(person: person),
+      builder: (context) {
+        return _PersonEditDialog(person: person);
+      },
     );
 
     if (!mounted || result == null) {
@@ -681,8 +685,8 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
               key: _formKey,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                 Text(
                   widget.person == null ? '人を追加' : '人を編集',
                   style: Theme.of(context)
