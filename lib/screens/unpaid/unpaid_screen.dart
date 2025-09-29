@@ -293,27 +293,47 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
                     Wrap(
                       spacing: 8,
                       children: [
-                        FilterChip(
-                          label: const Text('全員'),
-                          selected: tempPersonId == null,
-                          selectedColor: Colors.white,
-                          checkmarkColor: Colors.black87,
-                          onSelected: (selected) {
-                            setDialogState(() => tempPersonId = null);
-                          },
-                        ),
-                        ...people.map(
-                          (person) => FilterChip(
-                            label: Text(person.name),
-                            selected: tempPersonId == person.id,
+                        () {
+                          final isSelected = tempPersonId == null;
+                          return FilterChip(
+                            label: const Text('全員'),
+                            selected: isSelected,
                             selectedColor: Colors.white,
                             checkmarkColor: Colors.black87,
+                            shape: StadiumBorder(
+                              side: BorderSide(
+                                color: isSelected
+                                    ? Colors.black26
+                                    : Colors.transparent,
+                              ),
+                            ),
                             onSelected: (selected) {
-                              setDialogState(() {
-                                tempPersonId = selected ? person.id : null;
-                              });
+                              setDialogState(() => tempPersonId = null);
                             },
-                          ),
+                          );
+                        }(),
+                        ...people.map(
+                          (person) {
+                            final isSelected = tempPersonId == person.id;
+                            return FilterChip(
+                              label: Text(person.name),
+                              selected: isSelected,
+                              selectedColor: Colors.white,
+                              checkmarkColor: Colors.black87,
+                              shape: StadiumBorder(
+                                side: BorderSide(
+                                  color: isSelected
+                                      ? Colors.black26
+                                      : Colors.transparent,
+                                ),
+                              ),
+                              onSelected: (selected) {
+                                setDialogState(() {
+                                  tempPersonId = selected ? person.id : null;
+                                });
+                              },
+                            );
+                          },
                         ),
                       ],
                     ),
