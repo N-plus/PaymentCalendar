@@ -451,7 +451,10 @@ class _PersonManagementScreenState
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _addPerson,
         icon: const Icon(Icons.person_add),
-        label: const Text('人を追加'),
+        label: const Text(
+          '人を追加',
+          style: TextStyle(color: Colors.black),
+        ),
         backgroundColor: Colors.white,
         foregroundColor: Theme.of(context).colorScheme.primary,
       ),
