@@ -389,15 +389,15 @@ class _CountBadge extends StatelessWidget {
     final theme = Theme.of(context);
     final badgeColor = color ?? theme.colorScheme.primary;
     final isCustomColor = color != null;
-    final backgroundColor = isCustomColor
+    final useSolidStyle = isCustomColor &&
+        ThemeData.estimateBrightnessForColor(badgeColor) == Brightness.light;
+    final backgroundColor = useSolidStyle
         ? badgeColor
         : badgeColor.withOpacityValue(0.12);
-    final borderColor = isCustomColor
+    final borderColor = useSolidStyle
         ? Colors.transparent
         : badgeColor.withOpacityValue(0.3);
-    final textColor = isCustomColor
-        ? theme.colorScheme.onSurface
-        : badgeColor;
+    final textColor = useSolidStyle ? theme.colorScheme.onSurface : badgeColor;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
