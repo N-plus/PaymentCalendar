@@ -312,8 +312,8 @@ class _PersonManagementScreenState
       context: context,
       builder: (context) {
         return _PersonEditDialog(person: person);
-      },
-    );
+      },   // builder を閉じる
+    );     // showDialog を閉じる
 
     if (!mounted || result == null) {
       return;
