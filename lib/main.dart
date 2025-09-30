@@ -38,6 +38,23 @@ class PaymentCalendarApp extends ConsumerWidget {
           surface: const Color(0xFFFFFAF0),
         ),
         scaffoldBackgroundColor: const Color(0xFFFFFAF0),
+        inputDecorationTheme: InputDecorationTheme(
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: Color(0xFFCCCCCC)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: Color(0xFFCCCCCC)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: Color(0xFF333333)),
+          ),
+        ),
+        textSelectionTheme: const TextSelectionThemeData(
+          cursorColor: Color(0xFF333333),
+        ),
         useMaterial3: true,
         fontFamily: 'N'
             'o'

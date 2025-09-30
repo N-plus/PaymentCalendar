@@ -98,9 +98,6 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
                             },
                           )
                         : null,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
                   ),
                   onChanged: (value) => setState(() => searchQuery = value),
                 ),
