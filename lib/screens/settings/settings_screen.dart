@@ -510,7 +510,7 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
     '🐶',
     '🐱',
     '🎓',
-    '💼',
+    '👴',
   ];
 
   XFile? _selectedPhoto;
