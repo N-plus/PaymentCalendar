@@ -884,6 +884,7 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
                       ElevatedButton(
                         onPressed: _submitting ? null : () => _submit(),
                         style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
                           foregroundColor: Colors.black,
                         ),
                         child: _submitting
