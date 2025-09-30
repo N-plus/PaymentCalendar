@@ -702,6 +702,7 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
                     controller: _nameController,
                     decoration: const InputDecoration(
                       labelText: '名前',
+                      labelStyle: TextStyle(color: Colors.black87),
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) {
