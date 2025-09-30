@@ -135,7 +135,6 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
               ],
             ),
           ),
-          Divider(height: 1, color: Colors.grey[300]),
           Expanded(
             child: filteredExpenses.isEmpty
                 ? _buildEmptyState()
