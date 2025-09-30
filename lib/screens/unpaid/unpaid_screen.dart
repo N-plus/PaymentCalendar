@@ -109,8 +109,8 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
                       icon: const Icon(Icons.filter_list, size: 18),
                       label: const Text('フィルタ'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue[50],
-                        foregroundColor: Colors.blue[700],
+                        backgroundColor: const Color(0xFF3366FF),
+                        foregroundColor: Colors.white,
                         elevation: 0,
                       ),
                     ),
