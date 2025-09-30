@@ -122,21 +122,16 @@ class SettingsScreen extends ConsumerWidget {
   void _showAppInfo(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder: (dialogContext) {
-        final theme = Theme.of(dialogContext);
-        return Theme(
-          data: theme.copyWith(
-            dialogBackgroundColor: const Color(0xFFFFFAF0),
-          ),
-          child: const AboutDialog(
-            applicationName: 'Payment Calendar',
-            applicationVersion: '1.0.0',
-            applicationIcon: Icon(Icons.account_balance_wallet),
-            children: [
-              SizedBox(height: 8),
-              Text('家族やグループの支払い予定と精算をまとめて管理できます。'),
-            ],
-          ),
+      builder: (_) {
+        return const AboutDialog(
+          backgroundColor: Color(0xFFFFFAF0),
+          applicationName: 'Payment Calendar',
+          applicationVersion: '1.0.0',
+          applicationIcon: Icon(Icons.account_balance_wallet),
+          children: [
+            SizedBox(height: 8),
+            Text('家族やグループの支払い予定と精算をまとめて管理できます。'),
+          ],
         );
       },
     );
