@@ -124,7 +124,6 @@ class SettingsScreen extends ConsumerWidget {
       context: context,
       builder: (_) {
         return const AboutDialog(
-          backgroundColor: Color(0xFFFFFAF0),
           applicationName: 'Payment Calendar',
           applicationVersion: '1.0.0',
           applicationIcon: Icon(Icons.account_balance_wallet),
