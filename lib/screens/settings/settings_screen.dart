@@ -687,53 +687,53 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       child: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.only(bottom: viewInsetsBottom),
+          padding: EdgeInsets.only(bottom: 24 + viewInsetsBottom),
           child: Container(
             color: const Color(0xFFFFFAF0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 400),
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
-                    child: Form(
-                      key: _formKey,
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 400),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                            Text(
-                              widget.person == null ? '人を追加' : '人を編集',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleLarge
-                                  ?.copyWith(fontWeight: FontWeight.w600),
+                          Text(
+                            widget.person == null ? '人を追加' : '人を編集',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(fontWeight: FontWeight.w600),
+                          ),
+                          const SizedBox(height: 24),
+                          TextFormField(
+                            controller: _nameController,
+                            decoration: const InputDecoration(
+                              labelText: '名前',
+                              labelStyle: TextStyle(color: Colors.black87),
+                              border: OutlineInputBorder(),
                             ),
-                            const SizedBox(height: 24),
-                            TextFormField(
-                              controller: _nameController,
-                              decoration: const InputDecoration(
-                                labelText: '名前',
-                                labelStyle: TextStyle(color: Colors.black87),
-                                border: OutlineInputBorder(),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return '名前を入力してください';
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'アイコンの種類',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(fontWeight: FontWeight.w600),
-                            ),
-                            const SizedBox(height: 8),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return '名前を入力してください';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'アイコンの種類',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(fontWeight: FontWeight.w600),
+                          ),
+                          const SizedBox(height: 8),
                           Wrap(
                             spacing: 8,
                             children: [
@@ -907,7 +907,7 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
                                   foregroundColor: Colors.black,
                                 ),
                                 child: _submitting
-                                    ? SizedBox(
+                                    ? const SizedBox(
                                         height: 16,
                                         width: 16,
                                         child: CircularProgressIndicator(
@@ -923,8 +923,8 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
