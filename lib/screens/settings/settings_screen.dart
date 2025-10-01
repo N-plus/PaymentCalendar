@@ -899,6 +899,9 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
                     children: [
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.black,
+                        ),
                         child: const Text('キャンセル'),
                       ),
                       const SizedBox(width: 8),
