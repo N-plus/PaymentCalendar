@@ -290,9 +290,10 @@ class _PersonSummaryTile extends ConsumerWidget {
       return false;
     }).toList();
 
+    final messenger = ScaffoldMessenger.of(context);
     if (targets.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('支払い対象の明細はありません')), 
+      messenger.showSnackBar(
+        const SnackBar(content: Text('支払い対象の明細はありません')),
       );
       return;
     }
@@ -326,7 +327,7 @@ class _PersonSummaryTile extends ConsumerWidget {
       return;
     }
 
-    if (!context.mounted) {
+    if (!messenger.mounted) {
       return;
     }
 
@@ -337,7 +338,6 @@ class _PersonSummaryTile extends ConsumerWidget {
           includePlanned: includePlannedForPayment,
         );
 
-    final messenger = ScaffoldMessenger.of(context);
     messenger.showSnackBar(
       SnackBar(
         content: Text(

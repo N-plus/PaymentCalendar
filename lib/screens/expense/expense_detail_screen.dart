@@ -292,6 +292,7 @@ class ExpenseDetailScreen extends ConsumerWidget {
     WidgetRef ref,
     Expense expense,
   ) async {
+    final messenger = ScaffoldMessenger.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -312,10 +313,10 @@ class ExpenseDetailScreen extends ConsumerWidget {
 
     if (confirmed == true) {
       ref.read(expensesProvider.notifier).markAsPaid(expense.id);
-      if (!context.mounted) {
+      if (!messenger.mounted) {
         return;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         const SnackBar(
           content: Text('支払い済みにしました'),
           duration: Duration(seconds: 2),
@@ -329,6 +330,7 @@ class ExpenseDetailScreen extends ConsumerWidget {
     WidgetRef ref,
     Expense expense,
   ) async {
+    final messenger = ScaffoldMessenger.of(context);
     final picked = await showDatePicker(
       context: context,
       initialDate: expense.date,
@@ -338,10 +340,10 @@ class ExpenseDetailScreen extends ConsumerWidget {
 
     if (picked != null && picked != expense.date) {
       ref.read(expensesProvider.notifier).changeDate(expense.id, picked);
-      if (!context.mounted) {
+      if (!messenger.mounted) {
         return;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         const SnackBar(
           content: Text('期日を変更しました'),
           duration: Duration(seconds: 2),
@@ -355,6 +357,7 @@ class ExpenseDetailScreen extends ConsumerWidget {
     WidgetRef ref,
     Expense expense,
   ) async {
+    final messenger = ScaffoldMessenger.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -375,10 +378,10 @@ class ExpenseDetailScreen extends ConsumerWidget {
 
     if (confirmed == true) {
       ref.read(expensesProvider.notifier).markAsUnpaid(expense.id);
-      if (!context.mounted) {
+      if (!messenger.mounted) {
         return;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         const SnackBar(
           content: Text('未払いに戻しました'),
           duration: Duration(seconds: 2),
@@ -388,6 +391,7 @@ class ExpenseDetailScreen extends ConsumerWidget {
   }
 
   Future<void> _deleteExpense(BuildContext context, WidgetRef ref) async {
+    final navigator = Navigator.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -412,10 +416,10 @@ class ExpenseDetailScreen extends ConsumerWidget {
 
     if (confirmed == true) {
       ref.read(expensesProvider.notifier).deleteExpense(expenseId);
-      if (!context.mounted) {
+      if (!navigator.mounted) {
         return;
       }
-      Navigator.of(context).pop();
+      navigator.pop();
     }
   }
 
