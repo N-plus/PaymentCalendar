@@ -683,30 +683,26 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
   Widget build(BuildContext context) {
     final photoPreview = _buildPhotoPreview();
     final viewInsetsBottom = MediaQuery.of(context).viewInsets.bottom;
-    const backgroundColor = Color(0xFFFFFAF0);
     return Dialog(
-      backgroundColor: backgroundColor,
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       child: SafeArea(
-        child: Container(
-          color: backgroundColor,
-          child: SingleChildScrollView(
-            padding: EdgeInsets.only(bottom: viewInsetsBottom),
+        child: SingleChildScrollView(
+          padding: EdgeInsets.only(bottom: viewInsetsBottom),
+          child: Container(
+            color: const Color(0xFFFFFAF0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  color: backgroundColor,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 400),
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 400),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                             Text(
                               widget.person == null ? '人を追加' : '人を編集',
                               style: Theme.of(context)
