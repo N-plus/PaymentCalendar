@@ -682,236 +682,249 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
   @override
   Widget build(BuildContext context) {
     final photoPreview = _buildPhotoPreview();
-    final bottomPadding = 24 + MediaQuery.of(context).viewInsets.bottom;
+    final viewInsetsBottom = MediaQuery.of(context).viewInsets.bottom;
     return Dialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       child: SafeArea(
         child: SingleChildScrollView(
-          child: Container(
-            color: const Color(0xFFFFFAF0),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 400),
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(24, 24, 24, bottomPadding),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                  Text(
-                    widget.person == null ? '人を追加' : '人を編集',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleLarge
-                        ?.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 24),
-                  TextFormField(
-                    controller: _nameController,
-                    decoration: const InputDecoration(
-                      labelText: '名前',
-                      labelStyle: TextStyle(color: Colors.black87),
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return '名前を入力してください';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'アイコンの種類',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium
-                        ?.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    children: [
-                      ChoiceChip(
-                        label: const Text('絵文字'),
-                        selected: !_usePhoto,
-                        selectedColor: Colors.white,
-                        labelStyle: const TextStyle(color: Colors.black),
-                        shape: StadiumBorder(
-                          side: BorderSide(
-                            color:
-                                !_usePhoto ? Colors.black26 : Colors.transparent,
+          padding: EdgeInsets.only(bottom: viewInsetsBottom),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                color: const Color(0xFFFFFAF0),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 400),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.person == null ? '人を追加' : '人を編集',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(fontWeight: FontWeight.w600),
                           ),
-                        ),
-                        onSelected: (selected) {
-                          if (selected) {
-                            _setUsePhoto(false);
-                          }
-                        },
-                      ),
-                      ChoiceChip(
-                        label: const Text('写真'),
-                        selected: _usePhoto,
-                        selectedColor: Colors.white,
-                        labelStyle: const TextStyle(color: Colors.black),
-                        shape: StadiumBorder(
-                          side: BorderSide(
-                            color:
-                                _usePhoto ? Colors.black26 : Colors.transparent,
-                          ),
-                        ),
-                        onSelected: (selected) {
-                          if (selected) {
-                            _setUsePhoto(true);
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  if (_usePhoto) ...[
-                    Center(
-                      child: CircleAvatar(
-                        radius: 40,
-                        backgroundColor: _usePhoto ? Colors.white : null,
-                        backgroundImage: photoPreview,
-                        child: photoPreview == null
-                            ? const Icon(Icons.person, size: 40)
-                            : null,
-                      ),
-                    ),
-                    if (_showPhotoError) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        '写真を選択してください',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      alignment: WrapAlignment.center,
-                      children: [
-                        OutlinedButton.icon(
-                          onPressed: _submitting
-                              ? null
-                              : () => _pickPhoto(ImageSource.gallery),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.black,
-                          ),
-                          icon: const Icon(Icons.photo_library),
-                          label: const Text('アルバムから選択'),
-                        ),
-                        OutlinedButton.icon(
-                          onPressed: _submitting
-                              ? null
-                              : () => _pickPhoto(ImageSource.camera),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.black,
-                          ),
-                          icon: const Icon(Icons.photo_camera),
-                          label: const Text('カメラで撮影'),
-                        ),
-                        if (_currentPhotoPath != null)
-                          OutlinedButton.icon(
-                            onPressed: _submitting ? null : _removePhoto,
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.black,
-                              side: const BorderSide(color: Colors.black),
+                          const SizedBox(height: 24),
+                          TextFormField(
+                            controller: _nameController,
+                            decoration: const InputDecoration(
+                              labelText: '名前',
+                              labelStyle: TextStyle(color: Colors.black87),
+                              border: OutlineInputBorder(),
                             ),
-                            icon: const Icon(Icons.delete_outline),
-                            label: const Text('写真を削除'),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return '名前を入力してください';
+                              }
+                              return null;
+                            },
                           ),
-                      ],
-                    ),
-                  ] else ...[
-                    TextFormField(
-                      controller: _emojiController,
-                      decoration: const InputDecoration(
-                        labelText: 'アイコン（絵文字）',
-                        hintText: '例: 😀',
-                        border: OutlineInputBorder(),
-                      ),
-                      inputFormatters: const [],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      '候補から選択する',
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyMedium
-                          ?.copyWith(fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: _suggestedEmojis
-                          .map(
-                          (emoji) {
-                            final isSelected = _emojiController.text == emoji;
-                            return ChoiceChip(
-                              label: Text(
-                                emoji,
-                                style: const TextStyle(fontSize: 20),
+                          const SizedBox(height: 16),
+                          Text(
+                            'アイコンの種類',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(fontWeight: FontWeight.w600),
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            children: [
+                              ChoiceChip(
+                                label: const Text('絵文字'),
+                                selected: !_usePhoto,
+                                selectedColor: Colors.white,
+                                labelStyle: const TextStyle(color: Colors.black),
+                                shape: StadiumBorder(
+                                  side: BorderSide(
+                                    color: !_usePhoto
+                                        ? Colors.black26
+                                        : Colors.transparent,
+                                  ),
+                                ),
+                                onSelected: (selected) {
+                                  if (selected) {
+                                    _setUsePhoto(false);
+                                  }
+                                },
                               ),
-                              selected: isSelected,
-                              selectedColor: Colors.white,
-                              labelStyle: const TextStyle(color: Colors.black),
-                              shape: StadiumBorder(
-                                side: BorderSide(
-                                  color: isSelected
-                                      ? Colors.black26
-                                      : Colors.transparent,
+                              ChoiceChip(
+                                label: const Text('写真'),
+                                selected: _usePhoto,
+                                selectedColor: Colors.white,
+                                labelStyle: const TextStyle(color: Colors.black),
+                                shape: StadiumBorder(
+                                  side: BorderSide(
+                                    color: _usePhoto
+                                        ? Colors.black26
+                                        : Colors.transparent,
+                                  ),
+                                ),
+                                onSelected: (selected) {
+                                  if (selected) {
+                                    _setUsePhoto(true);
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          if (_usePhoto) ...[
+                            Center(
+                              child: CircleAvatar(
+                                radius: 40,
+                                backgroundColor:
+                                    _usePhoto ? Colors.white : null,
+                                backgroundImage: photoPreview,
+                                child: photoPreview == null
+                                    ? const Icon(Icons.person, size: 40)
+                                    : null,
+                              ),
+                            ),
+                            if (_showPhotoError) ...[
+                              const SizedBox(height: 8),
+                              Text(
+                                '写真を選択してください',
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.error,
+                                  fontSize: 12,
                                 ),
                               ),
-                              onSelected: (_) => _selectEmoji(emoji),
-                            );
-                          },
-                        )
-                        .toList(),
-                    ),
-                  ],
-                  const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: _submitting
-                            ? null
-                            : () => Navigator.of(context).pop(),
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.black,
-                        ),
-                        child: const Text('キャンセル'),
-                      ),
-                      const SizedBox(width: 8),
-                      ElevatedButton(
-                        onPressed: _submitting ? null : () => _submit(),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                        ),
-                        child: _submitting
-                            ? SizedBox(
-                                height: 16,
-                                width: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
+                            ],
+                            const SizedBox(height: 12),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              alignment: WrapAlignment.center,
+                              children: [
+                                OutlinedButton.icon(
+                                  onPressed: _submitting
+                                      ? null
+                                      : () => _pickPhoto(ImageSource.gallery),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: Colors.black,
+                                  ),
+                                  icon: const Icon(Icons.photo_library),
+                                  label: const Text('アルバムから選択'),
                                 ),
-                              )
-                            : const Text('保存'),
+                                OutlinedButton.icon(
+                                  onPressed: _submitting
+                                      ? null
+                                      : () => _pickPhoto(ImageSource.camera),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: Colors.black,
+                                  ),
+                                  icon: const Icon(Icons.photo_camera),
+                                  label: const Text('カメラで撮影'),
+                                ),
+                                if (_currentPhotoPath != null)
+                                  OutlinedButton.icon(
+                                    onPressed: _submitting ? null : _removePhoto,
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: Colors.black,
+                                      side: const BorderSide(color: Colors.black),
+                                    ),
+                                    icon: const Icon(Icons.delete_outline),
+                                    label: const Text('写真を削除'),
+                                  ),
+                              ],
+                            ),
+                          ] else ...[
+                            TextFormField(
+                              controller: _emojiController,
+                              decoration: const InputDecoration(
+                                labelText: 'アイコン（絵文字）',
+                                hintText: '例: 😀',
+                                border: OutlineInputBorder(),
+                              ),
+                              inputFormatters: const [],
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              '候補から選択する',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(fontWeight: FontWeight.w600),
+                            ),
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: _suggestedEmojis
+                                  .map(
+                                    (emoji) {
+                                      final isSelected =
+                                          _emojiController.text == emoji;
+                                      return ChoiceChip(
+                                        label: Text(
+                                          emoji,
+                                          style: const TextStyle(fontSize: 20),
+                                        ),
+                                        selected: isSelected,
+                                        selectedColor: Colors.white,
+                                        labelStyle:
+                                            const TextStyle(color: Colors.black),
+                                        shape: StadiumBorder(
+                                          side: BorderSide(
+                                            color: isSelected
+                                                ? Colors.black26
+                                                : Colors.transparent,
+                                          ),
+                                        ),
+                                        onSelected: (_) => _selectEmoji(emoji),
+                                      );
+                                    },
+                                  )
+                                  .toList(),
+                            ),
+                          ],
+                          const SizedBox(height: 24),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              TextButton(
+                                onPressed: _submitting
+                                    ? null
+                                    : () => Navigator.of(context).pop(),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: Colors.black,
+                                ),
+                                child: const Text('キャンセル'),
+                              ),
+                              const SizedBox(width: 8),
+                              ElevatedButton(
+                                onPressed: _submitting ? null : () => _submit(),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: Colors.black,
+                                ),
+                                child: _submitting
+                                    ? SizedBox(
+                                        height: 16,
+                                        width: 16,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : const Text('保存'),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),
