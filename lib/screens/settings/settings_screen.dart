@@ -40,14 +40,15 @@ class SettingsScreen extends ConsumerWidget {
                 value: settings.reminderEnabled,
                 icon: Icons.alarm,
                 onChanged: (value) async {
+                  final messenger = ScaffoldMessenger.of(context);
                   await ref
                       .read(settingsProvider.notifier)
                       .toggleReminder(value);
-                  if (!context.mounted) {
+                  if (!messenger.mounted) {
                     return;
                   }
                   if (value) {
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    messenger.showSnackBar(
                       const SnackBar(
                         content: Text('リマインド通知を有効にしました'),
                         duration: Duration(seconds: 2),
