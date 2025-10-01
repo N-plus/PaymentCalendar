@@ -681,19 +681,23 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
   @override
   Widget build(BuildContext context) {
     final photoPreview = _buildPhotoPreview();
+    final bottomPadding = 24 + MediaQuery.of(context).viewInsets.bottom;
     return Dialog(
-      child: Container(
-        color: const Color(0xFFFFFAF0),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 400),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      child: SafeArea(
+        child: SingleChildScrollView(
+          child: Container(
+            color: const Color(0xFFFFFAF0),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 400),
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(24, 24, 24, bottomPadding),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                   Text(
                     widget.person == null ? '人を追加' : '人を編集',
                     style: Theme.of(context)
