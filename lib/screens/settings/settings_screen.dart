@@ -687,13 +687,15 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       child: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.only(bottom: 24 + viewInsetsBottom),
+          padding: EdgeInsets.only(bottom: viewInsetsBottom),
           child: Container(
             color: const Color(0xFFFFFAF0),
+            padding: const EdgeInsets.all(16),
             child: Form(
               key: _formKey,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 400),
@@ -887,43 +889,37 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
                             ),
                           ],
                           const SizedBox(height: 24),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              TextButton(
-                                onPressed: _submitting
-                                    ? null
-                                    : () => Navigator.of(context).pop(),
-                                style: TextButton.styleFrom(
-                                  foregroundColor: Colors.black,
-                                ),
-                                child: const Text('キャンセル'),
-                              ),
-                              const SizedBox(width: 8),
-                              ElevatedButton(
-                                onPressed: _submitting ? null : () => _submit(),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white,
-                                  foregroundColor: Colors.black,
-                                ),
-                                child: _submitting
-                                    ? const SizedBox(
-                                        height: 16,
-                                        width: 16,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                        ),
-                                      )
-                                    : const Text('保存'),
-                              ),
-                            ],
-                          ),
                         ],
                       ),
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text('キャンセル'),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: _submitting ? null : _submit,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black,
+                        ),
+                        child: _submitting
+                            ? const SizedBox(
+                                height: 16,
+                                width: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Text('保存'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
