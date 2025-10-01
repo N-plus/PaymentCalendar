@@ -117,11 +117,11 @@ class PersonAvatar extends StatelessWidget {
   }
 }
 
-enum _PresetAvatarType { child, mother, father;
+enum _PresetAvatarType {
+  mother,
+  father;
   static _PresetAvatarType? fromPerson(Person person) {
     switch (person.id) {
-      case 'child':
-        return _PresetAvatarType.child;
       case 'mother':
         return _PresetAvatarType.mother;
       case 'father':
@@ -145,7 +145,6 @@ class _PresetPersonAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     switch (type) {
-      case _PresetAvatarType.child:
       case _PresetAvatarType.mother:
       case _PresetAvatarType.father:
         break;
@@ -156,9 +155,6 @@ class _PresetPersonAvatar extends StatelessWidget {
 
     final CustomPainter painter;
     switch (type) {
-      case _PresetAvatarType.child:
-        painter = _ChildAvatarPainter(backgroundColor: resolvedBackgroundColor);
-        break;
       case _PresetAvatarType.mother:
       case _PresetAvatarType.father:
         painter = _AvatarPainter(backgroundColor: resolvedBackgroundColor);
@@ -266,78 +262,6 @@ class _AvatarPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _AvatarPainter oldDelegate) {
-    return backgroundColor != oldDelegate.backgroundColor;
-  }
-}
-
-class _ChildAvatarPainter extends _AvatarPainter {
-  const _ChildAvatarPainter({required super.backgroundColor});
-
-  static const Color _hairColor = Color(0xFF1E64F0);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    super.paint(canvas, size);
-
-    final double dimension = math.min(size.width, size.height);
-    final Offset center = Offset(size.width / 2, size.height / 2);
-    final double faceRadius = dimension * _AvatarPainter._faceDiameterFactor / 2;
-
-    final Paint hairPaint = Paint()
-      ..color = _hairColor
-      ..style = PaintingStyle.fill
-      ..isAntiAlias = true;
-
-    final Path hairPath = Path();
-    final double hairWidth = dimension * 0.95;
-    final double hairHeight = dimension * 0.9;
-    final Rect hairArcRect = Rect.fromCenter(
-      center: center.translate(0, -dimension * 0.12),
-      width: hairWidth,
-      height: hairHeight,
-    );
-    hairPath.addArc(hairArcRect, math.pi, math.pi);
-    hairPath.lineTo(center.dx + hairWidth / 2, center.dy - dimension * 0.08);
-    hairPath.quadraticBezierTo(
-      center.dx,
-      center.dy - dimension * 0.02,
-      center.dx - hairWidth / 2,
-      center.dy - dimension * 0.08,
-    );
-    hairPath.close();
-
-    canvas.drawPath(hairPath, hairPaint);
-
-    final Path fringePath = Path()
-      ..moveTo(center.dx - dimension * 0.2, center.dy - faceRadius * 0.45)
-      ..quadraticBezierTo(
-        center.dx - dimension * 0.05,
-        center.dy - faceRadius * 0.75,
-        center.dx + dimension * 0.1,
-        center.dy - faceRadius * 0.4,
-      )
-      ..lineTo(center.dx + dimension * 0.02, center.dy - faceRadius * 0.1)
-      ..quadraticBezierTo(
-        center.dx - dimension * 0.1,
-        center.dy - faceRadius * 0.18,
-        center.dx - dimension * 0.2,
-        center.dy - faceRadius * 0.22,
-      )
-      ..close();
-
-    canvas.drawPath(fringePath, hairPaint);
-
-    final Paint outlinePaint = Paint()
-      ..color = _AvatarPainter._outlineColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = dimension * _AvatarPainter._faceStrokeFactor
-      ..strokeCap = StrokeCap.round
-      ..isAntiAlias = true;
-    canvas.drawCircle(center, faceRadius, outlinePaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _ChildAvatarPainter oldDelegate) {
     return backgroundColor != oldDelegate.backgroundColor;
   }
 }
