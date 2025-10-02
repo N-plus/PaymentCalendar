@@ -845,6 +845,7 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
                                 labelText: 'アイコン（絵文字）',
                                 hintText: '例: 😀',
                                 border: OutlineInputBorder(),
+                                labelStyle: TextStyle(color: Colors.black),
                               ),
                               style: const TextStyle(color: Colors.black),
                               inputFormatters: const [],
