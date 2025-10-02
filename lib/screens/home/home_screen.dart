@@ -161,6 +161,7 @@ class _PersonSummaryTile extends ConsumerWidget {
         (includePlannedForPayment && summary.plannedCount > 0);
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
+    const unpaidColor = Color(0xFFF44336);
 
     return Card(
       elevation: 4,
@@ -193,7 +194,7 @@ class _PersonSummaryTile extends ConsumerWidget {
                         style: textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: hasUnpaid
-                              ? colorScheme.error
+                              ? unpaidColor
                               : textTheme.headlineSmall?.color,
                         ),
                       ),
@@ -207,7 +208,7 @@ class _PersonSummaryTile extends ConsumerWidget {
                       if (summary.unpaidCount > 0)
                         _CountBadge(
                           text: '未払い${summary.unpaidCount}件',
-                          color: colorScheme.error,
+                          color: unpaidColor,
                         ),
                       if (hasPlanned) ...[
                         const SizedBox(height: 4),
