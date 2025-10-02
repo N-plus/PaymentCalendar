@@ -846,6 +846,7 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
                                 hintText: '例: 😀',
                                 border: OutlineInputBorder(),
                               ),
+                              style: const TextStyle(color: Colors.black),
                               inputFormatters: const [],
                             ),
                             const SizedBox(height: 12),
