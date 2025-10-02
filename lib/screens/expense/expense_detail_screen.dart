@@ -264,8 +264,11 @@ class ExpenseDetailScreen extends ConsumerWidget {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () => _openEditor(context),
-                  icon: const Icon(Icons.edit),
+                  icon: const Icon(Icons.edit, color: Colors.black),
                   label: const Text('編集'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.black,
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
