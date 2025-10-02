@@ -156,7 +156,7 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.red[600],
+              color: const Color(0xFFF44336),
             ),
             textAlign: TextAlign.center,
           ),
