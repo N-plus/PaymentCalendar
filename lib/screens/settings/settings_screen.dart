@@ -902,7 +902,10 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
                         style: TextButton.styleFrom(
                           foregroundColor: Colors.black,
                         ),
-                        child: const Text('キャンセル'),
+                        child: const Text(
+                          'キャンセル',
+                          style: TextStyle(color: Colors.black),
+                        ),
                       ),
                       const SizedBox(width: 8),
                       ElevatedButton(
