@@ -206,7 +206,7 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? theme.colorScheme.primary : theme.dividerColor,
+            color: isSelected ? Colors.black : theme.dividerColor,
             width: 2,
           ),
           color: isSelected ? Colors.white : theme.colorScheme.surface,
@@ -220,8 +220,7 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
               person.name,
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
-                color:
-                    isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface,
+                color: isSelected ? Colors.black : theme.colorScheme.onSurface,
               ),
             ),
           ],
