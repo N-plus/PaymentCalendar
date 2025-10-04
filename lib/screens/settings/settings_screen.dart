@@ -125,7 +125,7 @@ class SettingsScreen extends ConsumerWidget {
       context: context,
       builder: (_) {
         return const AboutDialog(
-          applicationName: 'Payment Calendar',
+          applicationName: 'Pay Check',
           applicationVersion: '1.0.0',
           applicationIcon: Icon(Icons.account_balance_wallet),
           children: [
