@@ -687,10 +687,14 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       child: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.only(bottom: viewInsetsBottom),
           child: Container(
             color: const Color(0xFFFFFAF0),
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.fromLTRB(
+              16,
+              16,
+              16,
+              16 + viewInsetsBottom,
+            ),
             child: Form(
               key: _formKey,
               child: Column(
