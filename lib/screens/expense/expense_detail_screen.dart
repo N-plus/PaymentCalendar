@@ -497,7 +497,7 @@ class _StatusChip extends StatelessWidget {
     final String label;
     switch (status) {
       case ExpenseStatus.unpaid:
-        color = const Color(0xFFF44336);
+        color = const Color(0xFFFF0033);
         label = '未払い';
         break;
       case ExpenseStatus.planned:
