@@ -582,6 +582,7 @@ class _CategoryFormDialogState extends State<_CategoryFormDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      backgroundColor: const Color(0xFFFFFAF0),
       title: Text(_isEditing ? 'カテゴリーを編集' : 'カテゴリーを追加'),
       content: TextField(
         controller: _controller,
