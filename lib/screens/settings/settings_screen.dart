@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:characters/characters.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -10,15 +9,16 @@ import '../../models/person.dart';
 import '../../providers/people_provider.dart';
 import '../../providers/settings_provider.dart';
 import '../../widgets/person_avatar.dart';
+import 'theme_color_screen.dart';
 
-const _themeColorOptions = <Color>[
-  Color(0xFF3366FF),
-  Color(0xFFFF6B6B),
-  Color(0xFFFFA000),
-  Color(0xFF2BB673),
-  Color(0xFF9C27B0),
-  Color(0xFF00B0FF),
-];
+String _resolveThemeColorName(Color color) {
+  for (final option in themeColorOptions) {
+    if (option.color.value == color.value) {
+      return option.name;
+    }
+  }
+  return 'カスタムカラー';
+}
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -42,34 +42,15 @@ class SettingsScreen extends ConsumerWidget {
           _SettingsSection(
             title: 'テーマカラー',
             children: [
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'アプリ全体のアクセントカラーを変更できます',
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyMedium
-                          ?.copyWith(color: Colors.grey.shade600),
-                    ),
-                    const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 12,
-                      runSpacing: 12,
-                      children: [
-                        for (final color in _themeColorOptions)
-                          _ThemeColorOption(
-                            color: color,
-                            selected: color.value == settings.themeColor.value,
-                            onSelected: () => ref
-                                .read(settingsProvider.notifier)
-                                .setThemeColor(color),
-                          ),
-                      ],
-                    ),
-                  ],
+              _SettingsListTile(
+                title: 'テーマカラー',
+                subtitle: '現在: ${_resolveThemeColorName(settings.themeColor)}',
+                leadingIcon: Icons.palette,
+                accentColor: colorScheme.primary,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const ThemeColorScreen(),
+                  ),
                 ),
               ),
             ],
@@ -302,47 +283,6 @@ class _SettingsListTile extends StatelessWidget {
             ),
       trailing: Icon(trailingIcon, color: Colors.grey.shade600),
       onTap: onTap,
-    );
-  }
-}
-
-class _ThemeColorOption extends StatelessWidget {
-  const _ThemeColorOption({
-    required this.color,
-    required this.selected,
-    required this.onSelected,
-  });
-
-  final Color color;
-  final bool selected;
-  final VoidCallback onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final borderColor = selected
-        ? color
-        : Theme.of(context).colorScheme.outline.withOpacity(0.5);
-    return GestureDetector(
-      onTap: onSelected,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: borderColor,
-            width: selected ? 4 : 2,
-          ),
-        ),
-        child: selected
-            ? const Icon(
-                Icons.check,
-                color: Colors.white,
-              )
-            : null,
-      ),
     );
   }
 }
