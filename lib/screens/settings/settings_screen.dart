@@ -152,14 +152,75 @@ class SettingsScreen extends ConsumerWidget {
   void _showAppInfo(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder: (_) {
-        return const AboutDialog(
-          applicationName: 'Pay Check',
-          applicationVersion: '1.0.0',
-          applicationIcon: Icon(Icons.account_balance_wallet),
-          children: [
-            SizedBox(height: 8),
-            Text('家族やグループの支払い予定と精算をまとめて管理できます。'),
+      builder: (dialogContext) {
+        final textTheme = Theme.of(dialogContext).textTheme;
+
+        return AlertDialog(
+          backgroundColor: const Color(0xFFFFFAF0),
+          contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+          actionsPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(
+                    Icons.account_balance_wallet,
+                    size: 48,
+                    color: Colors.black87,
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Pay Check',
+                          style: textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'バージョン 1.0.0',
+                          style: textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              const Text('家族やグループの支払い予定と精算をまとめて管理できます。'),
+              const SizedBox(height: 12),
+            ],
+          ),
+          actionsAlignment: MainAxisAlignment.end,
+          actions: [
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.black,
+              ),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                showLicensePage(
+                  context: context,
+                  applicationName: 'Pay Check',
+                  applicationVersion: '1.0.0',
+                );
+              },
+              child: const Text('View licenses'),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.black,
+              ),
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Close'),
+            ),
           ],
         );
       },
