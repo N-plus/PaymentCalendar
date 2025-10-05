@@ -526,6 +526,7 @@ class _PersonManagementScreenState
                       ),
                     ),
                     trailing: PopupMenuButton<String>(
+                      color: const Color(0xFFF2F2F2),
                       onSelected: (value) {
                         switch (value) {
                           case 'edit':
