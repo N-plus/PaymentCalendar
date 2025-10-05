@@ -448,45 +448,16 @@ class _CategoryManagementScreenState
   }
 
   Future<String?> _showCategoryDialog({String? initialValue}) {
-    final controller = TextEditingController(text: initialValue ?? '');
     return showDialog<String>(
       context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            final text = controller.text.trim();
-            final isEditing = initialValue != null;
-            return AlertDialog(
-              title: Text(isEditing ? 'カテゴリーを編集' : 'カテゴリーを追加'),
-              content: TextField(
-                controller: controller,
-                autofocus: true,
-                decoration: const InputDecoration(hintText: 'カテゴリー名'),
-                onChanged: (_) => setState(() {}),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('キャンセル'),
-                ),
-                ElevatedButton(
-                  onPressed:
-                      text.isEmpty ? null : () => Navigator.of(context).pop(text),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    foregroundColor: Colors.white,
-                  ),
-                  child: const Text('保存'),
-                ),
-              ],
-            );
-          },
+      builder: (dialogContext) {
+        return _CategoryFormDialog(
+          initialValue: initialValue,
+          onCancel: () => Navigator.of(dialogContext).pop(),
+          onSave: (value) => Navigator.of(dialogContext).pop(value),
         );
       },
-    ).then((value) {
-      controller.dispose();
-      return value;
-    });
+    );
   }
 
   void _showFeedback(String message, {bool isError = false}) {
@@ -556,6 +527,82 @@ class _CategoryManagementScreenState
           );
         },
       ),
+    );
+  }
+}
+
+class _CategoryFormDialog extends StatefulWidget {
+  const _CategoryFormDialog({
+    this.initialValue,
+    required this.onSave,
+    required this.onCancel,
+  });
+
+  final String? initialValue;
+  final ValueChanged<String> onSave;
+  final VoidCallback onCancel;
+
+  @override
+  State<_CategoryFormDialog> createState() => _CategoryFormDialogState();
+}
+
+class _CategoryFormDialogState extends State<_CategoryFormDialog> {
+  late final TextEditingController _controller;
+
+  bool get _isEditing => widget.initialValue != null;
+  bool get _isInputValid => _controller.text.trim().isNotEmpty;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialValue ?? '');
+    _controller.addListener(_onTextChanged);
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_onTextChanged);
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onTextChanged() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  void _handleSave() {
+    if (!_isInputValid) {
+      return;
+    }
+    widget.onSave(_controller.text.trim());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(_isEditing ? 'カテゴリーを編集' : 'カテゴリーを追加'),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        decoration: const InputDecoration(hintText: 'カテゴリー名'),
+        onSubmitted: (_) => _handleSave(),
+      ),
+      actions: [
+        TextButton(
+          onPressed: widget.onCancel,
+          child: const Text('キャンセル'),
+        ),
+        ElevatedButton(
+          onPressed: _isInputValid ? _handleSave : null,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            foregroundColor: Colors.white,
+          ),
+          child: const Text('保存'),
+        ),
+      ],
     );
   }
 }
