@@ -153,6 +153,7 @@ class ExpenseDetailScreen extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Card(
+        color: Colors.white,
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
