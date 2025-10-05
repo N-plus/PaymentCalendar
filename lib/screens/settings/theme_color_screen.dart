@@ -18,7 +18,6 @@ const themeColorOptions = <ThemeColorOption>[
   ThemeColorOption(name: 'ナチュラルウッド', color: Color(0xFFE8CFA9)),
   ThemeColorOption(name: 'ディープブルー', color: Color(0xFF1A2947)),
   ThemeColorOption(name: 'オレンジ', color: Color(0xFFFF9800)),
-  ThemeColorOption(name: '青', color: Color(0xFF3366FF)),
   ThemeColorOption(name: '水色', color: Color(0xFF00BCD4)),
   ThemeColorOption(name: '赤', color: Color(0xFFFF0033)),
   ThemeColorOption(name: 'ワインレッド', color: Color(0xFFB71C1C)),
