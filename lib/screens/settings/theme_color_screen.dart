@@ -37,8 +37,8 @@ class ThemeColorScreen extends ConsumerWidget {
       backgroundColor: const Color(0xFFFFFAF0),
       appBar: AppBar(
         title: const Text('テーマカラー'),
-        backgroundColor: const Color(0xFFFFFAF0),
-        foregroundColor: Theme.of(context).colorScheme.onSurface,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
         elevation: 0,
       ),
       body: ListView.separated(
