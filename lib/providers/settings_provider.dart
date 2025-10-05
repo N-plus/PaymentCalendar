@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/expense.dart';
 import '../models/settings.dart';
@@ -12,10 +13,15 @@ final reminderServiceProvider = Provider<ReminderService>((ref) {
   throw UnimplementedError('ReminderService must be provided in main.dart');
 });
 
+final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
+  throw UnimplementedError('SharedPreferences must be provided in main.dart');
+});
+
 final settingsProvider =
     StateNotifierProvider<SettingsNotifier, SettingsState>((ref) {
   final service = ref.watch(reminderServiceProvider);
-  return SettingsNotifier(service);
+  final preferences = ref.watch(sharedPreferencesProvider);
+  return SettingsNotifier(service, preferences);
 });
 
 final reminderCoordinatorProvider = Provider<void>((ref) {
@@ -30,9 +36,15 @@ final reminderCoordinatorProvider = Provider<void>((ref) {
 });
 
 class SettingsNotifier extends StateNotifier<SettingsState> {
-  SettingsNotifier(this._reminderService) : super(const SettingsState());
+  SettingsNotifier(this._reminderService, this._preferences)
+      : super(const SettingsState()) {
+    unawaited(_restoreSettings());
+  }
 
   final ReminderService _reminderService;
+  final SharedPreferences _preferences;
+
+  static const _themeColorKey = 'theme_color';
 
   Future<void> toggleReminder(bool value) async {
     state = state.copyWith(reminderEnabled: value);
@@ -60,6 +72,18 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
 
   void setQuickPayIncludesPlanned(bool value) {
     state = state.copyWith(quickPayIncludesPlanned: value);
+  }
+
+  Future<void> setThemeColor(Color color) async {
+    state = state.copyWith(themeColor: color);
+    await _preferences.setInt(_themeColorKey, color.value);
+  }
+
+  Future<void> _restoreSettings() async {
+    final colorValue = _preferences.getInt(_themeColorKey);
+    if (colorValue != null) {
+      state = state.copyWith(themeColor: Color(colorValue));
+    }
   }
 
   Future<void> refreshReminders(List<Expense> expenses) async {

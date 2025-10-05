@@ -66,12 +66,13 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
 
     final total =
         filteredExpenses.fold<int>(0, (sum, expense) => sum + expense.amount);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFFAF0),
       appBar: AppBar(
         title: const Text('未払い一覧'),
-        backgroundColor: const Color(0xFF3366FF),
+        backgroundColor: colorScheme.primary,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -109,7 +110,7 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
                       icon: const Icon(Icons.filter_list, size: 18),
                       label: const Text('フィルタ'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF3366FF),
+                        backgroundColor: colorScheme.primary,
                         foregroundColor: Colors.white,
                         elevation: 0,
                       ),
