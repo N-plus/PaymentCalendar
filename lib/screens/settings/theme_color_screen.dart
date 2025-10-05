@@ -42,43 +42,54 @@ class ThemeColorScreen extends ConsumerWidget {
         elevation: 0,
       ),
       body: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        padding: const EdgeInsets.symmetric(vertical: 16),
         itemBuilder: (context, index) {
           final option = themeColorOptions[index];
           final isSelected = option.color.value == selectedColorValue;
-          return Card(
-            color: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: ListTile(
-              leading: Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: option.color,
-                  shape: BoxShape.circle,
+          final borderRadius = BorderRadius.vertical(
+            top: index == 0 ? const Radius.circular(12) : Radius.zero,
+            bottom: index == themeColorOptions.length - 1
+                ? const Radius.circular(12)
+                : Radius.zero,
+          );
+
+          return ClipRRect(
+            borderRadius: borderRadius,
+            child: Material(
+              color: Colors.white,
+              child: ListTile(
+                leading: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: option.color,
+                    shape: BoxShape.circle,
+                  ),
                 ),
+                title: Text(
+                  option.name,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                trailing: isSelected
+                    ? Icon(
+                        Icons.check,
+                        color: Theme.of(context).colorScheme.primary,
+                      )
+                    : null,
+                onTap: () async {
+                  await ref
+                      .read(settingsProvider.notifier)
+                      .setThemeColor(option.color);
+                },
               ),
-              title: Text(
-                option.name,
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-              trailing: isSelected
-                  ? Icon(
-                      Icons.check,
-                      color: Theme.of(context).colorScheme.primary,
-                    )
-                  : null,
-              onTap: () async {
-                await ref
-                    .read(settingsProvider.notifier)
-                    .setThemeColor(option.color);
-              },
             ),
           );
         },
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        separatorBuilder: (context, _) => const Divider(
+          height: 1,
+          thickness: 0.5,
+          color: Color(0xFFE0E0E0),
+        ),
         itemCount: themeColorOptions.length,
       ),
     );
