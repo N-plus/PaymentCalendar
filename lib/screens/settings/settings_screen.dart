@@ -40,22 +40,6 @@ class SettingsScreen extends ConsumerWidget {
         padding: EdgeInsets.zero,
         children: [
           _SettingsSection(
-            title: 'テーマカラー',
-            children: [
-              _SettingsListTile(
-                title: 'テーマカラー',
-                subtitle: '現在: ${_resolveThemeColorName(settings.themeColor)}',
-                leadingIcon: Icons.palette,
-                accentColor: colorScheme.primary,
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const ThemeColorScreen(),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          _SettingsSection(
             title: 'リマインド設定',
             children: [
               _SettingsSwitchTile(
@@ -126,6 +110,22 @@ class SettingsScreen extends ConsumerWidget {
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (_) => const _PersonManagementScreen(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          _SettingsSection(
+            title: 'テーマカラー',
+            children: [
+              _SettingsListTile(
+                title: 'テーマカラー',
+                subtitle: '現在: ${_resolveThemeColorName(settings.themeColor)}',
+                leadingIcon: Icons.palette,
+                accentColor: colorScheme.primary,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const ThemeColorScreen(),
                   ),
                 ),
               ),
