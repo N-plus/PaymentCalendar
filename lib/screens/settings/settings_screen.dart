@@ -11,7 +11,14 @@ import '../../providers/people_provider.dart';
 import '../../providers/settings_provider.dart';
 import '../../widgets/person_avatar.dart';
 
-const _settingsIconColor = Color(0xFF3366FF);
+const _themeColorOptions = <Color>[
+  Color(0xFF3366FF),
+  Color(0xFFFF6B6B),
+  Color(0xFFFFA000),
+  Color(0xFF2BB673),
+  Color(0xFF9C27B0),
+  Color(0xFF00B0FF),
+];
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -20,17 +27,53 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
     final people = ref.watch(peopleProvider);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('設定'),
         elevation: 0,
-        backgroundColor: const Color(0xFF3366FF),
+        backgroundColor: colorScheme.primary,
         foregroundColor: Colors.white,
       ),
       body: ListView(
         padding: EdgeInsets.zero,
         children: [
+          _SettingsSection(
+            title: 'テーマカラー',
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'アプリ全体のアクセントカラーを変更できます',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.copyWith(color: Colors.grey.shade600),
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      children: [
+                        for (final color in _themeColorOptions)
+                          _ThemeColorOption(
+                            color: color,
+                            selected: color.value == settings.themeColor.value,
+                            onSelected: () => ref
+                                .read(settingsProvider.notifier)
+                                .setThemeColor(color),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
           _SettingsSection(
             title: 'リマインド設定',
             children: [
@@ -39,6 +82,7 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: '毎日20:00に未払いがある場合に通知します',
                 value: settings.reminderEnabled,
                 icon: Icons.alarm,
+                accentColor: colorScheme.primary,
                 onChanged: (value) async {
                   final messenger = ScaffoldMessenger.of(context);
                   await ref
@@ -64,6 +108,7 @@ class SettingsScreen extends ConsumerWidget {
                 value: settings.plannedReminderEnabled,
                 icon: Icons.schedule,
                 enabled: settings.reminderEnabled,
+                accentColor: colorScheme.primary,
                 onChanged: (value) async {
                   await ref
                       .read(settingsProvider.notifier)
@@ -80,6 +125,7 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: 'ホームの全件支払いボタンで予定も対象にします',
                 value: settings.quickPayIncludesPlanned,
                 icon: Icons.event,
+                accentColor: colorScheme.primary,
                 onChanged: (value) => ref
                     .read(settingsProvider.notifier)
                     .setQuickPayIncludesPlanned(value),
@@ -95,6 +141,7 @@ class SettingsScreen extends ConsumerWidget {
                     ? 'まだ人が登録されていません'
                     : '登録済み: ${people.length}人',
                 leadingIcon: Icons.person_add,
+                accentColor: colorScheme.primary,
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (_) => const _PersonManagementScreen(),
@@ -110,6 +157,7 @@ class SettingsScreen extends ConsumerWidget {
                 title: 'アプリ情報',
                 subtitle: 'バージョン情報、ライセンス等',
                 leadingIcon: Icons.info_outline,
+                accentColor: colorScheme.primary,
                 onTap: () => _showAppInfo(context),
               ),
             ],
@@ -180,6 +228,7 @@ class _SettingsSwitchTile extends StatelessWidget {
     required this.onChanged,
     this.icon,
     this.enabled = true,
+    this.accentColor,
   });
 
   final String title;
@@ -188,6 +237,7 @@ class _SettingsSwitchTile extends StatelessWidget {
   final ValueChanged<bool> onChanged;
   final IconData? icon;
   final bool enabled;
+  final Color? accentColor;
 
   @override
   Widget build(BuildContext context) {
@@ -202,14 +252,16 @@ class _SettingsSwitchTile extends StatelessWidget {
       ),
       value: enabled ? value : false,
       activeColor: Colors.white,
-      activeTrackColor: const Color(0xFF3366FF),
+      activeTrackColor: accentColor ?? Theme.of(context).colorScheme.primary,
       inactiveTrackColor: const Color(0xFFEEEEEE),
       onChanged: enabled ? onChanged : null,
       secondary: icon == null
           ? null
           : Icon(
               icon,
-              color: enabled ? _settingsIconColor : Colors.grey.shade400,
+              color: enabled
+                  ? (accentColor ?? Theme.of(context).colorScheme.primary)
+                  : Colors.grey.shade400,
             ),
     );
 
@@ -224,6 +276,7 @@ class _SettingsListTile extends StatelessWidget {
     required this.onTap,
     this.leadingIcon,
     this.trailingIcon = Icons.chevron_right,
+    this.accentColor,
   });
 
   final String title;
@@ -231,6 +284,7 @@ class _SettingsListTile extends StatelessWidget {
   final VoidCallback onTap;
   final IconData? leadingIcon;
   final IconData trailingIcon;
+  final Color? accentColor;
 
   @override
   Widget build(BuildContext context) {
@@ -242,9 +296,53 @@ class _SettingsListTile extends StatelessWidget {
       ),
       leading: leadingIcon == null
           ? null
-          : Icon(leadingIcon, color: _settingsIconColor),
+          : Icon(
+              leadingIcon,
+              color: accentColor ?? Theme.of(context).colorScheme.primary,
+            ),
       trailing: Icon(trailingIcon, color: Colors.grey.shade600),
       onTap: onTap,
+    );
+  }
+}
+
+class _ThemeColorOption extends StatelessWidget {
+  const _ThemeColorOption({
+    required this.color,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  final Color color;
+  final bool selected;
+  final VoidCallback onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final borderColor = selected
+        ? color
+        : Theme.of(context).colorScheme.outline.withOpacity(0.5);
+    return GestureDetector(
+      onTap: onSelected,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: borderColor,
+            width: selected ? 4 : 2,
+          ),
+        ),
+        child: selected
+            ? const Icon(
+                Icons.check,
+                color: Colors.white,
+              )
+            : null,
+      ),
     );
   }
 }
@@ -464,9 +562,9 @@ class _PersonManagementScreenState
             ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _addPerson,
-        icon: const Icon(
+        icon: Icon(
           Icons.person_add,
-          color: Color(0xFF3366FF),
+          color: Theme.of(context).colorScheme.primary,
         ),
         label: const Text(
           '人を追加',

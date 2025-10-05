@@ -29,7 +29,7 @@ class HomeScreen extends ConsumerWidget {
       backgroundColor: const Color(0xFFFFFAF0),
       appBar: AppBar(
         title: const Text('ホーム'),
-        backgroundColor: const Color(0xFF3366FF),
+        backgroundColor: colorScheme.primary,
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [
@@ -62,7 +62,7 @@ class HomeScreen extends ConsumerWidget {
                 Switch(
                   value: includePlanned,
                   activeColor: Colors.white,
-                  activeTrackColor: const Color(0xFF3366FF),
+                  activeTrackColor: colorScheme.primary,
                   inactiveTrackColor: const Color(0xFFEEEEEE),
                   onChanged: (value) => ref
                       .read(includePlannedInSummaryProvider.notifier)
@@ -92,7 +92,7 @@ class HomeScreen extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFF3366FF),
+        backgroundColor: colorScheme.primary,
         onPressed: () async {
           await showModalBottomSheet<void>(
             context: context,

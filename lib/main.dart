@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'providers/settings_provider.dart';
 import 'screens/home/home_screen.dart';
@@ -12,10 +13,12 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final reminderService = ReminderService(FlutterLocalNotificationsPlugin());
   await reminderService.initialize();
+  final preferences = await SharedPreferences.getInstance();
   runApp(
     ProviderScope(
       overrides: [
         reminderServiceProvider.overrideWithValue(reminderService),
+        sharedPreferencesProvider.overrideWithValue(preferences),
       ],
       child: const PaymentCalendarApp(),
     ),
@@ -28,16 +31,27 @@ class PaymentCalendarApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(reminderCoordinatorProvider);
+    final settings = ref.watch(settingsProvider);
+    final themeColor = settings.themeColor;
+    final colorScheme = ColorScheme.fromSeed(seedColor: themeColor).copyWith(
+      background: const Color(0xFFFFFAF0),
+      surface: const Color(0xFFFFFAF0),
+      primary: themeColor,
+    );
     return MaterialApp(
       title: 'Payment Calendar',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF3366CC))
-            .copyWith(
-          background: const Color(0xFFFFFAF0),
-          surface: const Color(0xFFFFFAF0),
-        ),
+        colorScheme: colorScheme,
         scaffoldBackgroundColor: const Color(0xFFFFFAF0),
+        appBarTheme: AppBarTheme(
+          backgroundColor: colorScheme.primary,
+          foregroundColor: Colors.white,
+        ),
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+          backgroundColor: colorScheme.primary,
+          foregroundColor: Colors.white,
+        ),
         inputDecorationTheme: InputDecorationTheme(
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
@@ -96,7 +110,7 @@ class _RootPageState extends ConsumerState<RootPage> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _index,
-        selectedItemColor: const Color(0xFF3366FF),
+        selectedItemColor: Theme.of(context).colorScheme.primary,
         onTap: (value) => setState(() => _index = value),
         items: const [
           BottomNavigationBarItem(
