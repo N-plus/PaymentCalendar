@@ -298,7 +298,7 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'カテゴリー（任意）',
+          'カテゴリー',
           style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
