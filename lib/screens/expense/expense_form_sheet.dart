@@ -11,6 +11,7 @@ import '../../models/expense_category.dart';
 import '../../providers/categories_provider.dart';
 import '../../providers/expenses_provider.dart';
 import '../../providers/people_provider.dart';
+import '../../utils/category_visuals.dart';
 import '../../utils/date_util.dart';
 import '../../widgets/person_avatar.dart';
 
@@ -305,11 +306,26 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
         DropdownButtonFormField<String>(
           value: effectiveValue,
           items: [
-            for (final category in categories)
-              DropdownMenuItem<String>(
-                value: category,
-                child: Text(category),
-              ),
+              for (final category in categories)
+                DropdownMenuItem<String>(
+                  value: category,
+                  child: Builder(
+                    builder: (context) {
+                      final visual = categoryVisualFor(category);
+                      return Row(
+                        children: [
+                          Icon(
+                            visual.icon,
+                            color: visual.color,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(category),
+                        ],
+                      );
+                    },
+                  ),
+                ),
           ],
           decoration: const InputDecoration(
             hintText: '選択しない場合は「その他」になります',

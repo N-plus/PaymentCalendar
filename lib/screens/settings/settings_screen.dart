@@ -11,6 +11,7 @@ import '../../providers/categories_provider.dart';
 import '../../providers/people_provider.dart';
 import '../../providers/settings_provider.dart';
 import '../../widgets/person_avatar.dart';
+import '../../utils/category_visuals.dart';
 import 'theme_color_screen.dart';
 
 String _resolveThemeColorName(Color color) {
@@ -495,10 +496,16 @@ class _CategoryManagementScreenState
         itemBuilder: (context, index) {
           final category = categories[index];
           final isFallback = category == ExpenseCategory.fallback;
+          final visual = categoryVisualFor(category);
           return Card(
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             color: Colors.white,
             child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor: visual.color.withOpacity(0.15),
+                foregroundColor: visual.color,
+                child: Icon(visual.icon),
+              ),
               title: Text(category,
                   style: const TextStyle(fontWeight: FontWeight.w600)),
               subtitle: isFallback
