@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'expense_category.dart';
+
 enum ExpenseStatus { unpaid, planned, paid }
 
 class Expense {
@@ -11,6 +13,7 @@ class Expense {
     required this.amount,
     required this.memo,
     required this.status,
+    required this.category,
     this.photoPaths = const <String>[],
     this.paidAt,
     required this.createdAt,
@@ -22,6 +25,7 @@ class Expense {
     required DateTime date,
     required int amount,
     String memo = '',
+    String? category,
     List<String> photoPaths = const <String>[],
   }) {
     final now = DateUtils.dateOnly(DateTime.now());
@@ -33,6 +37,9 @@ class Expense {
       amount: amount,
       memo: memo,
       status: status,
+      category: (category == null || category.isEmpty)
+          ? ExpenseCategory.fallback
+          : category,
       photoPaths: List<String>.unmodifiable(photoPaths),
       createdAt: DateTime.now(),
     );
@@ -44,6 +51,7 @@ class Expense {
   final int amount;
   final String memo;
   final ExpenseStatus status;
+  final String category;
   final List<String> photoPaths;
   final DateTime? paidAt;
   final DateTime createdAt;
@@ -59,6 +67,7 @@ class Expense {
     int? amount,
     String? memo,
     ExpenseStatus? status,
+    String? category,
     List<String>? photoPaths,
     DateTime? paidAt,
     DateTime? createdAt,
@@ -70,6 +79,7 @@ class Expense {
       amount: amount ?? this.amount,
       memo: memo ?? this.memo,
       status: status ?? this.status,
+      category: category ?? this.category,
       photoPaths: photoPaths != null
           ? List<String>.unmodifiable(photoPaths)
           : this.photoPaths,
@@ -114,6 +124,7 @@ class Expense {
         other.amount == amount &&
         other.memo == memo &&
         other.status == status &&
+        other.category == category &&
         listEquals(other.photoPaths, photoPaths) &&
         other.paidAt == paidAt &&
         other.createdAt == createdAt;
@@ -127,6 +138,7 @@ class Expense {
         amount,
         memo,
         status,
+        category,
         Object.hashAll(photoPaths),
         paidAt,
         createdAt,

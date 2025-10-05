@@ -7,6 +7,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:payment_calendar/utils/color_utils.dart';
 
 import '../../models/person.dart';
+import '../../models/expense_category.dart';
+import '../../providers/categories_provider.dart';
 import '../../providers/expenses_provider.dart';
 import '../../providers/people_provider.dart';
 import '../../utils/date_util.dart';
@@ -29,6 +31,7 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
 
   DateTime _selectedDate = DateTime.now();
   String? _personId;
+  String? _selectedCategory;
   List<String> _photoPaths = [];
   bool _saving = false;
 
@@ -46,6 +49,7 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
       _personId = expense.personId;
       _amountController.text = expense.amount.toString();
       _memoController.text = expense.memo;
+      _selectedCategory = expense.category;
       _photoPaths = List<String>.from(expense.photoPaths);
     }
   }
@@ -66,6 +70,7 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
   @override
   Widget build(BuildContext context) {
     final people = ref.watch(peopleProvider);
+    final categories = ref.watch(categoriesProvider);
     if (_personId == null && people.isNotEmpty) {
       _personId = people.first.id;
     }
@@ -91,6 +96,8 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
                   _buildPersonSection(context, people),
                   const SizedBox(height: 24),
                   _buildAmountSection(context),
+                  const SizedBox(height: 24),
+                  _buildCategorySection(context, categories),
                   const SizedBox(height: 24),
                   _buildMemoSection(context),
                   const SizedBox(height: 24),
@@ -274,10 +281,45 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
         const SizedBox(height: 8),
         TextFormField(
           controller: _memoController,
-          maxLines: 3,
+          maxLines: 2,
           decoration: const InputDecoration(
             hintText: '詳細を入力…',
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCategorySection(BuildContext context, List<String> categories) {
+    final theme = Theme.of(context);
+    final effectiveValue =
+        categories.contains(_selectedCategory) ? _selectedCategory : null;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'カテゴリー（任意）',
+          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          value: effectiveValue,
+          items: [
+            for (final category in categories)
+              DropdownMenuItem<String>(
+                value: category,
+                child: Text(category),
+              ),
+          ],
+          decoration: const InputDecoration(
+            hintText: '選択しない場合は「その他」になります',
+          ),
+          onChanged: (value) {
+            setState(() {
+              _selectedCategory = value;
+            });
+          },
+          isExpanded: true,
         ),
       ],
     );
@@ -511,6 +553,9 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
 
     final amount = int.parse(_amountController.text);
     final memo = _memoController.text.trim();
+    final category = (_selectedCategory == null || _selectedCategory!.isEmpty)
+        ? ExpenseCategory.fallback
+        : _selectedCategory!;
 
     if (widget.expenseId == null) {
       ref.read(expensesProvider.notifier).addExpense(
@@ -518,6 +563,7 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
             date: _selectedDate,
             amount: amount,
             memo: memo,
+            category: category,
             photoPaths: _photoPaths,
           );
     } else {
@@ -529,6 +575,7 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
         date: _selectedDate,
         amount: amount,
         memo: memo,
+        category: category,
         photoPaths: _photoPaths,
       );
       ref.read(expensesProvider.notifier).updateExpense(updated);

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/expense.dart';
+import '../models/expense_category.dart';
 
 final expensesProvider =
     StateNotifierProvider<ExpensesNotifier, List<Expense>>((ref) {
@@ -22,6 +23,7 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
         date: now.subtract(const Duration(days: 2)),
         amount: 1560,
         memo: 'スーパーでの買い物',
+        category: ExpenseCategory.fallback,
       ),
       Expense.newRecord(
         id: uuid.v4(),
@@ -29,6 +31,7 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
         date: now.subtract(const Duration(days: 1)),
         amount: 780,
         memo: '電車代',
+        category: ExpenseCategory.fallback,
       ),
       Expense.newRecord(
         id: uuid.v4(),
@@ -36,6 +39,7 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
         date: now,
         amount: 2400,
         memo: '子どもの服',
+        category: ExpenseCategory.fallback,
       ),
       Expense.newRecord(
         id: uuid.v4(),
@@ -43,6 +47,7 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
         date: now.add(const Duration(days: 3)),
         amount: 4200,
         memo: '美容院（予約）',
+        category: ExpenseCategory.fallback,
       ),
       Expense(
         id: uuid.v4(),
@@ -51,6 +56,7 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
         amount: 3200,
         memo: 'ガソリン代',
         status: ExpenseStatus.paid,
+        category: ExpenseCategory.fallback,
         paidAt: DateTime.now().subtract(const Duration(days: 2)),
         createdAt: DateTime.now().subtract(const Duration(days: 7)),
       ),
@@ -64,6 +70,7 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
     required DateTime date,
     required int amount,
     String memo = '',
+    String? category,
     List<String> photoPaths = const [],
   }) {
     final expense = Expense.newRecord(
@@ -72,6 +79,7 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
       date: date,
       amount: amount,
       memo: memo,
+      category: category,
       photoPaths: photoPaths,
     );
     state = [...state, expense];
@@ -118,6 +126,16 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
     state = [
       for (final e in state)
         if (e.id == id) e.adjustStatus(date: date) else e,
+    ];
+  }
+
+  void replaceCategory(String from, String to) {
+    if (from == to) {
+      return;
+    }
+    state = [
+      for (final e in state)
+        if (e.category == from) e.copyWith(category: to) else e,
     ];
   }
 
