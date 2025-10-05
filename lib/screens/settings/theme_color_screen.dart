@@ -14,7 +14,7 @@ class ThemeColorOption {
 }
 
 const themeColorOptions = <ThemeColorOption>[
-  ThemeColorOption(name: 'ブルーデニム', color: Color(0xFF3366FF)),
+  ThemeColorOption(name: 'ロイヤルブルー', color: Color(0xFF3366FF)),
   ThemeColorOption(name: 'ナチュラルウッド', color: Color(0xFFE8CFA9)),
   ThemeColorOption(name: 'ディープブルー', color: Color(0xFF1A2947)),
   ThemeColorOption(name: 'オレンジ', color: Color(0xFFFF9800)),
