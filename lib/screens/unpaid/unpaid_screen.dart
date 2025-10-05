@@ -86,7 +86,7 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
                 TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
-                    hintText: 'メモや人名で検索...',
+                    hintText: 'メモ・カテゴリーや人名で検索...',
                     prefixIcon: const Icon(Icons.search),
                     suffixIcon: searchQuery.isNotEmpty
                         ? IconButton(
@@ -183,9 +183,12 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
     final query = searchQuery.trim().toLowerCase();
     if (query.isNotEmpty) {
       final memo = expense.memo.toLowerCase();
+      final category = expense.category.toLowerCase();
       final personName =
           peopleMap[expense.personId]?.name.toLowerCase() ?? '';
-      if (!memo.contains(query) && !personName.contains(query)) {
+      if (!memo.contains(query) &&
+          !personName.contains(query) &&
+          !category.contains(query)) {
         return false;
       }
     }
@@ -656,7 +659,7 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                expense.memo.isEmpty ? '記録' : expense.memo,
+                expense.category,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(

@@ -110,6 +110,9 @@ class ExpenseDetailScreen extends ConsumerWidget {
   Widget _buildDetailInfo(BuildContext context, Expense expense) {
     final rows = <Widget>[
       _InfoRow(label: '日付', value: formatDate(expense.date)),
+      const SizedBox(height: 12),
+      _InfoRow(label: 'カテゴリー', value: expense.category),
+      const SizedBox(height: 12),
       _InfoRow(label: '金額', value: formatCurrency(expense.amount)),
     ];
 

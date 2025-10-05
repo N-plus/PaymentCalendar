@@ -6,6 +6,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../models/person.dart';
+import '../../models/expense_category.dart';
+import '../../providers/categories_provider.dart';
 import '../../providers/people_provider.dart';
 import '../../providers/settings_provider.dart';
 import '../../widgets/person_avatar.dart';
@@ -27,6 +29,7 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
     final people = ref.watch(peopleProvider);
+    final categories = ref.watch(categoriesProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
@@ -110,6 +113,22 @@ class SettingsScreen extends ConsumerWidget {
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (_) => const _PersonManagementScreen(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          _SettingsSection(
+            title: 'カテゴリー管理',
+            children: [
+              _SettingsListTile(
+                title: 'カテゴリーの追加・編集',
+                subtitle: '登録済み: ${categories.length}件',
+                leadingIcon: Icons.category,
+                accentColor: colorScheme.primary,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const _CategoryManagementScreen(),
                   ),
                 ),
               ),
@@ -344,6 +363,199 @@ class _SettingsListTile extends StatelessWidget {
             ),
       trailing: Icon(trailingIcon, color: Colors.grey.shade600),
       onTap: onTap,
+    );
+  }
+}
+
+class _CategoryManagementScreen extends ConsumerStatefulWidget {
+  const _CategoryManagementScreen();
+
+  @override
+  ConsumerState<_CategoryManagementScreen> createState() =>
+      _CategoryManagementScreenState();
+}
+
+class _CategoryManagementScreenState
+    extends ConsumerState<_CategoryManagementScreen> {
+  Future<void> _addCategory() async {
+    final name = await _showCategoryDialog();
+    if (!mounted || name == null) {
+      return;
+    }
+    final created =
+        ref.read(categoriesProvider.notifier).addCategory(name.trim());
+    _showFeedback(
+      created
+          ? 'カテゴリー「$name」を追加しました'
+          : '追加に失敗しました（同名のカテゴリーが存在しないか確認してください）',
+      isError: !created,
+    );
+  }
+
+  Future<void> _editCategory(String original) async {
+    final name = await _showCategoryDialog(initialValue: original);
+    if (!mounted || name == null || name.trim() == original) {
+      return;
+    }
+    final updated = ref
+        .read(categoriesProvider.notifier)
+        .renameCategory(original, name.trim());
+    _showFeedback(
+      updated
+          ? 'カテゴリーを「$name」に変更しました'
+          : '変更に失敗しました（同名のカテゴリーが存在しないか確認してください）',
+      isError: !updated,
+    );
+  }
+
+  Future<void> _deleteCategory(String category) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('削除確認'),
+          content: Text('カテゴリー「$category」を削除しますか？'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('キャンセル'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('削除'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (!mounted || confirmed != true) {
+      return;
+    }
+
+    final removed =
+        ref.read(categoriesProvider.notifier).removeCategory(category);
+    _showFeedback(
+      removed
+          ? 'カテゴリー「$category」を削除しました（既存の記録は「${ExpenseCategory.fallback}」になります）'
+          : '削除に失敗しました',
+      isError: !removed,
+    );
+  }
+
+  Future<String?> _showCategoryDialog({String? initialValue}) {
+    final controller = TextEditingController(text: initialValue ?? '');
+    return showDialog<String>(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            final text = controller.text.trim();
+            final isEditing = initialValue != null;
+            return AlertDialog(
+              title: Text(isEditing ? 'カテゴリーを編集' : 'カテゴリーを追加'),
+              content: TextField(
+                controller: controller,
+                autofocus: true,
+                decoration: const InputDecoration(hintText: 'カテゴリー名'),
+                onChanged: (_) => setState(() {}),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('キャンセル'),
+                ),
+                ElevatedButton(
+                  onPressed:
+                      text.isEmpty ? null : () => Navigator.of(context).pop(text),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('保存'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    ).then((value) {
+      controller.dispose();
+      return value;
+    });
+  }
+
+  void _showFeedback(String message, {bool isError = false}) {
+    if (!mounted) {
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.redAccent : null,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final categories = ref.watch(categoriesProvider);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('カテゴリー管理'),
+        elevation: 0,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        foregroundColor: Theme.of(context).colorScheme.onSurface,
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _addCategory,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Colors.white,
+        child: const Icon(Icons.add),
+      ),
+      body: ListView.builder(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        itemCount: categories.length,
+        itemBuilder: (context, index) {
+          final category = categories[index];
+          final isFallback = category == ExpenseCategory.fallback;
+          return Card(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            color: Colors.white,
+            child: ListTile(
+              title: Text(category,
+                  style: const TextStyle(fontWeight: FontWeight.w600)),
+              subtitle: isFallback
+                  ? const Text('未選択時に自動で設定されます',
+                      style: TextStyle(fontSize: 12))
+                  : null,
+              trailing: isFallback
+                  ? const Chip(label: Text('既定'))
+                  : Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit),
+                          tooltip: '編集',
+                          onPressed: () => _editCategory(category),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete),
+                          tooltip: '削除',
+                          onPressed: () => _deleteCategory(category),
+                        ),
+                      ],
+                    ),
+              onTap: isFallback ? null : () => _editCategory(category),
+            ),
+          );
+        },
+      ),
     );
   }
 }
