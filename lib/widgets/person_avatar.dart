@@ -117,13 +117,16 @@ class PersonAvatar extends StatelessWidget {
 
 enum _PresetAvatarType {
   mother,
-  father;
+  father,
+  child;
   static _PresetAvatarType? fromPerson(Person person) {
     switch (person.id) {
       case 'mother':
         return _PresetAvatarType.mother;
       case 'father':
         return _PresetAvatarType.father;
+      case 'child':
+        return _PresetAvatarType.child;
     }
     return null;
   }
@@ -152,6 +155,9 @@ class _PresetPersonAvatar extends StatelessWidget {
         break;
       case _PresetAvatarType.father:
         assetName = 'assets/images/father.png';
+        break;
+      case _PresetAvatarType.child:
+        assetName = 'assets/images/children.png';
         break;
     }
 
