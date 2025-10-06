@@ -19,6 +19,7 @@ dependencies:
   multi_dropdown:
     path: packages/multi_dropdown
   shared_preferences: ^2.2.2
+  photo_manager: ^2.8.1
 
 dev_dependencies:
   flutter_test:

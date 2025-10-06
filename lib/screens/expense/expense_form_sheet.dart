@@ -14,6 +14,7 @@ import '../../providers/people_provider.dart';
 import '../../utils/category_visuals.dart';
 import '../../utils/date_util.dart';
 import '../../widgets/person_avatar.dart';
+import '../common/custom_photo_picker_screen.dart';
 
 class ExpenseFormSheet extends ConsumerStatefulWidget {
   const ExpenseFormSheet({super.key, this.expenseId});
@@ -507,19 +508,23 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
       _showMessage('写真は最大5枚まで添付できます');
       return;
     }
-    final files = await _picker.pickMultiImage();
-    if (files.isEmpty) {
+    final available = 5 - _photoPaths.length;
+    final files = await Navigator.of(context).push<List<XFile>>(
+      MaterialPageRoute<List<XFile>>(
+        builder: (_) => CustomPhotoPickerScreen(
+          allowMultiple: true,
+          maxSelection: available,
+        ),
+        fullscreenDialog: true,
+      ),
+    );
+    if (files == null || files.isEmpty) {
       return;
     }
-    final available = 5 - _photoPaths.length;
-    final limited = files.take(available);
-    final paths = await Future.wait(limited.map(_saveFile));
+    final paths = await Future.wait(files.map(_saveFile));
     setState(() {
       _photoPaths.addAll(paths.whereType<String>());
     });
-    if (files.length > available) {
-      _showMessage('写真は最大5枚まで添付できます');
-    }
   }
 
   Future<void> _captureImage() async {
