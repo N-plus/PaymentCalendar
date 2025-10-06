@@ -12,6 +12,7 @@ import '../../providers/people_provider.dart';
 import '../../providers/settings_provider.dart';
 import '../../widgets/person_avatar.dart';
 import '../../utils/category_visuals.dart';
+import '../common/custom_photo_picker_screen.dart';
 import 'theme_color_screen.dart';
 
 String _resolveThemeColorName(Color color) {
@@ -931,9 +932,36 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
     });
   }
 
-  Future<void> _pickPhoto(ImageSource source) async {
+  Future<void> _pickPhotoFromGallery() async {
     try {
-      final picked = await _picker.pickImage(source: source);
+      final files = await Navigator.of(context).push<List<XFile>>(
+        MaterialPageRoute<List<XFile>>(
+          builder: (_) => const CustomPhotoPickerScreen(),
+          fullscreenDialog: true,
+        ),
+      );
+      if (files == null || files.isEmpty) {
+        return;
+      }
+      setState(() {
+        _selectedPhoto = files.first;
+        _existingPhotoPath = null;
+        _usePhoto = true;
+        _showPhotoError = false;
+      });
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('写真の取得に失敗しました')),
+      );
+    }
+  }
+
+  Future<void> _capturePhoto() async {
+    try {
+      final picked = await _picker.pickImage(source: ImageSource.camera);
       if (picked == null) {
         return;
       }
@@ -1178,9 +1206,8 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
                               alignment: WrapAlignment.center,
                               children: [
                                 OutlinedButton.icon(
-                                  onPressed: _submitting
-                                      ? null
-                                      : () => _pickPhoto(ImageSource.gallery),
+                                  onPressed:
+                                      _submitting ? null : _pickPhotoFromGallery,
                                   style: OutlinedButton.styleFrom(
                                     foregroundColor: Colors.black,
                                   ),
@@ -1188,9 +1215,7 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
                                   label: const Text('アルバムから選択'),
                                 ),
                                 OutlinedButton.icon(
-                                  onPressed: _submitting
-                                      ? null
-                                      : () => _pickPhoto(ImageSource.camera),
+                                  onPressed: _submitting ? null : _capturePhoto,
                                   style: OutlinedButton.styleFrom(
                                     foregroundColor: Colors.black,
                                   ),
