@@ -15,7 +15,9 @@ mixin PhotoPermissionMixin<T extends StatefulWidget> on State<T> {
       return true;
     }
 
-    final bool permanentlyDenied = result == PermissionState.deniedForever;
+    // Treat any non-authorized result as a permanently denied state so that
+    // we instruct the user to enable the permission from settings.
+    final bool permanentlyDenied = !result.isAuth;
 
     if (!mounted) {
       return false;
