@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:photo_manager/photo_manager.dart';
 
 mixin PhotoPermissionMixin<T extends StatefulWidget> on State<T> {
   Future<bool> ensurePhotoAccessPermission() async {
@@ -9,32 +9,13 @@ mixin PhotoPermissionMixin<T extends StatefulWidget> on State<T> {
       return true;
     }
 
-    final List<Permission> permissions = <Permission>[
-      if (Platform.isAndroid) Permission.photos,
-      if (Platform.isAndroid) Permission.storage,
-      if (Platform.isIOS) Permission.photos,
-    ];
+    final PermissionState result = await PhotoManager.requestPermissionExtend();
 
-    final List<PermissionStatus> currentStatuses = <PermissionStatus>[];
-    for (final Permission permission in permissions) {
-      currentStatuses.add(await permission.status);
-    }
-
-    if (_hasSufficientPermission(currentStatuses)) {
+    if (result.isAuth) {
       return true;
     }
 
-    final Map<Permission, PermissionStatus> requestedStatuses =
-        await permissions.request();
-    final Iterable<PermissionStatus> results = requestedStatuses.values;
-
-    if (_hasSufficientPermission(results)) {
-      return true;
-    }
-
-    final bool permanentlyDenied = results.any(
-      (PermissionStatus status) => status.isPermanentlyDenied,
-    );
+    final bool permanentlyDenied = result == PermissionState.deniedForever;
 
     if (!mounted) {
       return false;
@@ -42,13 +23,6 @@ mixin PhotoPermissionMixin<T extends StatefulWidget> on State<T> {
 
     await _showPermissionDialog(permanentlyDenied: permanentlyDenied);
     return false;
-  }
-
-  bool _hasSufficientPermission(Iterable<PermissionStatus> statuses) {
-    return statuses.any(
-      (PermissionStatus status) =>
-          status.isGranted || status == PermissionStatus.limited,
-    );
   }
 
   Future<void> _showPermissionDialog({required bool permanentlyDenied}) async {
@@ -70,7 +44,7 @@ mixin PhotoPermissionMixin<T extends StatefulWidget> on State<T> {
             TextButton(
               onPressed: () async {
                 Navigator.of(dialogContext).pop();
-                await openAppSettings();
+                await PhotoManager.openSetting();
               },
               child: const Text('設定を開く'),
             ),
