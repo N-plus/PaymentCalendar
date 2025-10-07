@@ -15,6 +15,7 @@ import '../../utils/category_visuals.dart';
 import '../../utils/date_util.dart';
 import '../../widgets/person_avatar.dart';
 import '../common/custom_photo_picker_screen.dart';
+import '../../utils/photo_permission_mixin.dart';
 
 class ExpenseFormSheet extends ConsumerStatefulWidget {
   const ExpenseFormSheet({super.key, this.expenseId});
@@ -25,7 +26,8 @@ class ExpenseFormSheet extends ConsumerStatefulWidget {
   ConsumerState<ExpenseFormSheet> createState() => _ExpenseFormSheetState();
 }
 
-class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
+class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet>
+    with PhotoPermissionMixin<ExpenseFormSheet> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
   final _memoController = TextEditingController();
@@ -504,6 +506,11 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
   }
 
   Future<void> _pickImages() async {
+    final hasPermission = await ensurePhotoAccessPermission();
+    if (!hasPermission) {
+      return;
+    }
+
     if (_photoPaths.length >= 5) {
       _showMessage('写真は最大5枚まで添付できます');
       return;
