@@ -12,6 +12,7 @@ import '../../providers/people_provider.dart';
 import '../../providers/settings_provider.dart';
 import '../../widgets/person_avatar.dart';
 import '../../utils/category_visuals.dart';
+import '../../utils/photo_permission_mixin.dart';
 import '../common/custom_photo_picker_screen.dart';
 import 'theme_color_screen.dart';
 
@@ -868,7 +869,8 @@ class _PersonEditDialog extends StatefulWidget {
   State<_PersonEditDialog> createState() => _PersonEditDialogState();
 }
 
-class _PersonEditDialogState extends State<_PersonEditDialog> {
+class _PersonEditDialogState extends State<_PersonEditDialog>
+    with PhotoPermissionMixin<_PersonEditDialog> {
   late final TextEditingController _nameController;
   late final TextEditingController _emojiController;
   final _formKey = GlobalKey<FormState>();
@@ -933,6 +935,11 @@ class _PersonEditDialogState extends State<_PersonEditDialog> {
   }
 
   Future<void> _pickPhotoFromGallery() async {
+    final hasPermission = await ensurePhotoAccessPermission();
+    if (!hasPermission) {
+      return;
+    }
+
     try {
       final files = await Navigator.of(context).push<List<XFile>>(
         MaterialPageRoute<List<XFile>>(
