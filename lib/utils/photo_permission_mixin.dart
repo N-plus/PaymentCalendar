@@ -1,11 +1,38 @@
 import 'dart:io';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 mixin PhotoPermissionMixin<T extends StatefulWidget> on State<T> {
   Future<bool> ensurePhotoAccessPermission() async {
-    if (!Platform.isAndroid && !Platform.isIOS) {
+    if (Platform.isAndroid) {
+      final int? sdkInt = await _getAndroidSdkInt();
+      if (sdkInt != null && sdkInt >= 33) {
+        // Android 13 以降ではフォトピッカーを使用するため権限は不要。
+        return true;
+      }
+
+      final PermissionStatus status = await Permission.storage.request();
+      if (status.isGranted) {
+        return true;
+      }
+
+      if (!mounted) {
+        return false;
+      }
+
+      await _showPermissionDialog(
+        permanentlyDenied: status.isPermanentlyDenied,
+        onOpenSettings: () async {
+          await openAppSettings();
+        },
+      );
+      return false;
+    }
+
+    if (!Platform.isIOS) {
       return true;
     }
 
@@ -23,11 +50,34 @@ mixin PhotoPermissionMixin<T extends StatefulWidget> on State<T> {
       return false;
     }
 
-    await _showPermissionDialog(permanentlyDenied: permanentlyDenied);
+    await _showPermissionDialog(
+      permanentlyDenied: permanentlyDenied,
+      onOpenSettings: PhotoManager.openSetting,
+    );
     return false;
   }
 
-  Future<void> _showPermissionDialog({required bool permanentlyDenied}) async {
+  Future<bool> shouldUseAndroidPhotoPicker() async {
+    if (!Platform.isAndroid) {
+      return false;
+    }
+    final int? sdkInt = await _getAndroidSdkInt();
+    return sdkInt != null && sdkInt >= 33;
+  }
+
+  Future<int?> _getAndroidSdkInt() async {
+    try {
+      final androidInfo = await DeviceInfoPlugin().androidInfo;
+      return androidInfo.version.sdkInt;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> _showPermissionDialog({
+    required bool permanentlyDenied,
+    required Future<void> Function() onOpenSettings,
+  }) async {
     await showDialog<void>(
       context: context,
       builder: (BuildContext dialogContext) {
@@ -46,7 +96,7 @@ mixin PhotoPermissionMixin<T extends StatefulWidget> on State<T> {
             TextButton(
               onPressed: () async {
                 Navigator.of(dialogContext).pop();
-                await PhotoManager.openSetting();
+                await onOpenSettings();
               },
               child: const Text('設定を開く'),
             ),

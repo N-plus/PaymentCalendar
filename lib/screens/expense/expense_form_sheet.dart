@@ -506,15 +506,21 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet>
   }
 
   Future<void> _pickImages() async {
+    if (_photoPaths.length >= 5) {
+      _showMessage('写真は最大5枚まで添付できます');
+      return;
+    }
+
+    if (await shouldUseAndroidPhotoPicker()) {
+      await _pickImagesWithAndroidPhotoPicker();
+      return;
+    }
+
     final hasPermission = await ensurePhotoAccessPermission();
     if (!hasPermission) {
       return;
     }
 
-    if (_photoPaths.length >= 5) {
-      _showMessage('写真は最大5枚まで添付できます');
-      return;
-    }
     final available = 5 - _photoPaths.length;
     final files = await Navigator.of(context).push<List<XFile>>(
       MaterialPageRoute<List<XFile>>(
@@ -532,6 +538,29 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet>
     setState(() {
       _photoPaths.addAll(paths.whereType<String>());
     });
+  }
+
+  Future<void> _pickImagesWithAndroidPhotoPicker() async {
+    final available = 5 - _photoPaths.length;
+    final files = await _picker.pickMultiImage();
+    if (files == null || files.isEmpty) {
+      return;
+    }
+
+    final limitedFiles = files.take(available).toList(growable: false);
+    final paths = await Future.wait(limitedFiles.map(_saveFile));
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _photoPaths.addAll(paths.whereType<String>());
+    });
+
+    if (files.length > available) {
+      _showMessage('写真は最大5枚まで添付できます');
+    }
   }
 
   Future<void> _captureImage() async {
