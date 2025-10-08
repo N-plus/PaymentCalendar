@@ -12,6 +12,7 @@ import '../../providers/categories_provider.dart';
 import '../../providers/expenses_provider.dart';
 import '../../providers/people_provider.dart';
 import '../../utils/category_visuals.dart';
+import '../../utils/date_picker_theme.dart';
 import '../../utils/date_util.dart';
 import '../../widgets/person_avatar.dart';
 import '../common/custom_photo_picker_screen.dart';
@@ -499,6 +500,7 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet>
       initialDate: _selectedDate,
       firstDate: DateTime.now().subtract(const Duration(days: 365)),
       lastDate: DateTime.now().add(const Duration(days: 365)),
+      builder: whiteDatePickerBuilder,
     );
     if (picked != null) {
       setState(() => _selectedDate = picked);
