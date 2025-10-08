@@ -67,7 +67,8 @@ mixin PhotoPermissionMixin<T extends StatefulWidget> on State<T> {
 
   Future<int?> _getAndroidSdkInt() async {
     try {
-      final androidInfo = await DeviceInfoPlugin().androidInfo;
+      final deviceInfo = DeviceInfoPlugin();
+      final androidInfo = await deviceInfo.androidInfo;
       return androidInfo.version.sdkInt;
     } catch (_) {
       return null;
