@@ -935,6 +935,11 @@ class _PersonEditDialogState extends State<_PersonEditDialog>
   }
 
   Future<void> _pickPhotoFromGallery() async {
+    if (await shouldUseAndroidPhotoPicker()) {
+      await _pickPhotoWithAndroidPhotoPicker();
+      return;
+    }
+
     final hasPermission = await ensurePhotoAccessPermission();
     if (!hasPermission) {
       return;
@@ -952,6 +957,31 @@ class _PersonEditDialogState extends State<_PersonEditDialog>
       }
       setState(() {
         _selectedPhoto = files.first;
+        _existingPhotoPath = null;
+        _usePhoto = true;
+        _showPhotoError = false;
+      });
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('写真の取得に失敗しました')),
+      );
+    }
+  }
+
+  Future<void> _pickPhotoWithAndroidPhotoPicker() async {
+    try {
+      final picked = await _picker.pickImage(source: ImageSource.gallery);
+      if (picked == null) {
+        return;
+      }
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _selectedPhoto = picked;
         _existingPhotoPath = null;
         _usePhoto = true;
         _showPhotoError = false;
