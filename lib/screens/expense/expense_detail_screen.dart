@@ -8,6 +8,7 @@ import '../../models/person.dart';
 import '../../providers/expenses_provider.dart';
 import '../../providers/people_provider.dart';
 import '../../utils/color_utils.dart';
+import '../../utils/date_picker_theme.dart';
 import '../../utils/date_util.dart';
 import '../../widgets/person_avatar.dart';
 import 'expense_form_sheet.dart';
@@ -344,6 +345,7 @@ class ExpenseDetailScreen extends ConsumerWidget {
       initialDate: expense.date,
       firstDate: DateTime.now().subtract(const Duration(days: 365)),
       lastDate: DateTime.now().add(const Duration(days: 365)),
+      builder: whiteDatePickerBuilder,
     );
 
     if (picked != null && picked != expense.date) {
