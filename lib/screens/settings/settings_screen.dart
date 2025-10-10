@@ -694,8 +694,12 @@ class _PersonManagementScreenState
 
     final notifier = ref.read(peopleProvider.notifier);
     if (person == null) {
-      final created = notifier.addPerson(result.name,
-          emoji: result.emoji, photoPath: result.photoPath);
+      final created = notifier.addPerson(
+        result.name,
+        emoji: result.emoji,
+        photoPath: result.photoPath,
+        iconAsset: result.iconAsset,
+      );
       if (created != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('${created.name}を追加しました')),
@@ -707,6 +711,7 @@ class _PersonManagementScreenState
           name: result.name,
           emoji: result.emoji,
           photoPath: result.photoPath,
+          iconAsset: result.iconAsset,
         ),
       );
       ScaffoldMessenger.of(context).showSnackBar(
@@ -786,9 +791,12 @@ class _PersonManagementScreenState
                     subtitle: Text(
                       (person.photoPath != null && person.photoPath!.isNotEmpty)
                           ? '写真を使用'
-                          : person.emoji == null || person.emoji!.isEmpty
-                              ? '絵文字アイコン未設定'
-                              : '絵文字アイコンを使用',
+                          : (person.iconAsset != null &&
+                                  person.iconAsset!.isNotEmpty)
+                              ? 'アイコン画像を使用'
+                              : person.emoji == null || person.emoji!.isEmpty
+                                  ? 'アイコン未設定'
+                                  : '絵文字アイコンを使用',
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey.shade600,
@@ -853,11 +861,13 @@ class _PersonFormResult {
     required this.name,
     this.emoji,
     this.photoPath,
+    this.iconAsset,
   });
 
   final String name;
   final String? emoji;
   final String? photoPath;
+  final String? iconAsset;
 }
 
 class _PersonEditDialog extends StatefulWidget {
@@ -876,20 +886,20 @@ class _PersonEditDialogState extends State<_PersonEditDialog>
   final _formKey = GlobalKey<FormState>();
   final ImagePicker _picker = ImagePicker();
 
-  final List<String> _suggestedEmojis = const [
-    '😀',
-    '👩',
-    '👨',
-    '🧒',
-    '👵',
-    '🐶',
-    '🐱',
-    '👨‍🏫',
-    '👴',
+  final List<String> _suggestedIconAssets = const [
+    'assets/icons/person_icon_01.png',
+    'assets/icons/person_icon_02.png',
+    'assets/icons/person_icon_03.png',
+    'assets/icons/person_icon_04.png',
+    'assets/icons/person_icon_05.png',
+    'assets/icons/person_icon_06.png',
+    'assets/icons/person_icon_07.png',
+    'assets/icons/person_icon_08.png',
   ];
 
   XFile? _selectedPhoto;
   String? _existingPhotoPath;
+  String? _selectedIconAsset;
   bool _usePhoto = false;
   bool _submitting = false;
   bool _showPhotoError = false;
@@ -902,21 +912,38 @@ class _PersonEditDialogState extends State<_PersonEditDialog>
     _nameController = TextEditingController(text: widget.person?.name ?? '');
     _emojiController =
         TextEditingController(text: widget.person?.emoji ?? '');
+    _emojiController.addListener(_handleEmojiChanged);
     _existingPhotoPath = widget.person?.photoPath;
+    _selectedIconAsset = widget.person?.iconAsset;
     _usePhoto = (_existingPhotoPath != null && _existingPhotoPath!.isNotEmpty);
   }
 
   @override
   void dispose() {
     _nameController.dispose();
-    _emojiController.dispose();
+    _emojiController
+      ..removeListener(_handleEmojiChanged)
+      ..dispose();
     super.dispose();
   }
 
-  void _selectEmoji(String emoji) {
+  void _handleEmojiChanged() {
+    if (_emojiController.text.trim().isEmpty) {
+      return;
+    }
+    if (_selectedIconAsset == null) {
+      return;
+    }
+    setState(() {
+      _selectedIconAsset = null;
+    });
+  }
+
+  void _selectIcon(String assetPath) {
     _setUsePhoto(false);
     setState(() {
-      _emojiController.text = emoji;
+      _selectedIconAsset = assetPath;
+      _emojiController.text = '';
     });
   }
 
@@ -1066,6 +1093,7 @@ class _PersonEditDialogState extends State<_PersonEditDialog>
     final name = _nameController.text.trim();
     String? emoji;
     String? photoPath;
+    String? iconAsset;
 
     if (_usePhoto) {
       if (_selectedPhoto != null) {
@@ -1092,9 +1120,14 @@ class _PersonEditDialogState extends State<_PersonEditDialog>
         return;
       }
     } else {
-      emoji = _emojiController.text.trim().isEmpty
-          ? null
-          : _emojiController.text.trim();
+      final trimmedEmoji = _emojiController.text.trim();
+      if (trimmedEmoji.isNotEmpty) {
+        emoji = trimmedEmoji;
+        iconAsset = null;
+      } else {
+        emoji = null;
+        iconAsset = _selectedIconAsset;
+      }
       photoPath = null;
     }
 
@@ -1107,6 +1140,7 @@ class _PersonEditDialogState extends State<_PersonEditDialog>
         name: name,
         emoji: emoji,
         photoPath: photoPath,
+        iconAsset: iconAsset,
       ),
     );
   }
@@ -1275,7 +1309,7 @@ class _PersonEditDialogState extends State<_PersonEditDialog>
                             TextFormField(
                               controller: _emojiController,
                               decoration: const InputDecoration(
-                                labelText: 'アイコン（絵文字）',
+                                labelText: 'カスタムアイコン（絵文字）',
                                 hintText: '例: 😀',
                                 border: OutlineInputBorder(),
                                 labelStyle: TextStyle(color: Colors.black),
@@ -1285,7 +1319,7 @@ class _PersonEditDialogState extends State<_PersonEditDialog>
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              '候補から選択する',
+                              '候補のアイコンから選択する',
                               style: Theme.of(context)
                                   .textTheme
                                   .bodyMedium
@@ -1293,35 +1327,57 @@ class _PersonEditDialogState extends State<_PersonEditDialog>
                             ),
                             const SizedBox(height: 8),
                             Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: _suggestedEmojis
+                              spacing: 12,
+                              runSpacing: 12,
+                              children: _suggestedIconAssets
                                   .map(
-                                    (emoji) {
+                                    (asset) {
                                       final isSelected =
-                                          _emojiController.text == emoji;
-                                      return ChoiceChip(
-                                        label: Text(
-                                          emoji,
-                                          style: const TextStyle(fontSize: 20),
-                                        ),
-                                        selected: isSelected,
-                                        selectedColor: Colors.white,
-                                        labelStyle:
-                                            const TextStyle(color: Colors.black),
-                                        shape: StadiumBorder(
-                                          side: BorderSide(
-                                            color: isSelected
-                                                ? Colors.black26
-                                                : Colors.transparent,
+                                          _selectedIconAsset == asset;
+                                      return Material(
+                                        color: Colors.transparent,
+                                        child: InkWell(
+                                          onTap: () => _selectIcon(asset),
+                                          borderRadius: BorderRadius.circular(40),
+                                          child: AnimatedContainer(
+                                            duration:
+                                                const Duration(milliseconds: 150),
+                                            width: 56,
+                                            height: 56,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                color: isSelected
+                                                  ? Colors.black87
+                                                  : Colors.transparent,
+                                              width: 2,
+                                            ),
+                                            boxShadow: [
+                                              if (isSelected)
+                                                BoxShadow(
+                                                  color: Colors.black
+                                                      .withOpacity(0.08),
+                                                  blurRadius: 8,
+                                                  offset: const Offset(0, 4),
+                                                ),
+                                            ],
+                                          ),
+                                          child: ClipOval(
+                                            child: Container(
+                                              color: const Color(0xFFF7F7FA),
+                                              child: Image.asset(
+                                                asset,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
                                           ),
                                         ),
-                                        onSelected: (_) => _selectEmoji(emoji),
-                                      );
-                                    },
-                                  )
-                                  .toList(),
-                            ),
+                                      ),
+                                    );
+                                  },
+                                )
+                                .toList(),
+                          ),
                           ],
                           const SizedBox(height: 24),
                         ],
