@@ -15,7 +15,7 @@ import '../../utils/category_visuals.dart';
 import '../../utils/date_picker_theme.dart';
 import '../../utils/date_util.dart';
 import '../../widgets/person_avatar.dart';
-import '../common/custom_photo_picker_screen.dart';
+import '../custom_photo_picker_screen.dart';
 import '../../utils/photo_permission_mixin.dart';
 
 class ExpenseFormSheet extends ConsumerStatefulWidget {

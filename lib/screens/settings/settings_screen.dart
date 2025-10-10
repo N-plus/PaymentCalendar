@@ -13,7 +13,7 @@ import '../../providers/settings_provider.dart';
 import '../../widgets/person_avatar.dart';
 import '../../utils/category_visuals.dart';
 import '../../utils/photo_permission_mixin.dart';
-import '../common/custom_photo_picker_screen.dart';
+import '../custom_photo_picker_screen.dart';
 import 'theme_color_screen.dart';
 
 String _resolveThemeColorName(Color color) {
