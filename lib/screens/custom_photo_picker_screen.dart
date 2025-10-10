@@ -27,14 +27,13 @@ class _CustomPhotoPickerScreenState extends State<CustomPhotoPickerScreen> {
   final LinkedHashMap<String, AssetEntity> _selectedAssets =
       LinkedHashMap<String, AssetEntity>();
 
-  List<AssetEntity> _allAssets = <AssetEntity>[];
-  List<AssetEntity> _filteredAssets = <AssetEntity>[];
   List<AssetPathEntity> _albums = <AssetPathEntity>[];
   List<AssetPathEntity> _filteredAlbums = <AssetPathEntity>[];
   final Map<String, List<AssetEntity>> _albumAssetCache =
       <String, List<AssetEntity>>{};
 
   List<AssetEntity> _currentAlbumAssets = <AssetEntity>[];
+  List<AssetEntity> _displayedAssets = <AssetEntity>[];
   AssetPathEntity? _selectedAlbum;
 
   bool _loading = true;
@@ -109,13 +108,12 @@ class _CustomPhotoPickerScreenState extends State<CustomPhotoPickerScreen> {
     }
 
     setState(() {
-      _allAssets = recentAssets;
-      _filteredAssets = List<AssetEntity>.from(recentAssets);
       _albums = albums;
       _filteredAlbums = List<AssetPathEntity>.from(albums);
       _albumAssetCache.clear();
       _selectedAlbum = albums.isNotEmpty ? albums.first : null;
       _currentAlbumAssets = <AssetEntity>[];
+      _displayedAssets = <AssetEntity>[];
       _loading = false;
     });
 
@@ -130,9 +128,6 @@ class _CustomPhotoPickerScreenState extends State<CustomPhotoPickerScreen> {
 
   void _applySearchFilter(String query) {
     final String lowerQuery = query.trim().toLowerCase();
-
-    final List<AssetEntity> filteredAssets =
-        List<AssetEntity>.from(_allAssets);
 
     final List<AssetPathEntity> filteredAlbums = lowerQuery.isEmpty
         ? List<AssetPathEntity>.from(_albums)
@@ -150,8 +145,11 @@ class _CustomPhotoPickerScreenState extends State<CustomPhotoPickerScreen> {
     }
 
     setState(() {
-      _filteredAssets = filteredAssets;
       _filteredAlbums = filteredAlbums;
+      _displayedAssets = _filterAssetsForDisplay(
+        _currentAlbumAssets,
+        lowerQuery,
+      );
     });
 
     if (targetAlbum?.id != _selectedAlbum?.id) {
@@ -159,6 +157,7 @@ class _CustomPhotoPickerScreenState extends State<CustomPhotoPickerScreen> {
     } else if (targetAlbum == null) {
       setState(() {
         _currentAlbumAssets = <AssetEntity>[];
+        _displayedAssets = <AssetEntity>[];
       });
     } else {
       _ensureAlbumAssetsLoaded(targetAlbum);
@@ -168,9 +167,7 @@ class _CustomPhotoPickerScreenState extends State<CustomPhotoPickerScreen> {
   void _ensureAlbumAssetsLoaded(AssetPathEntity album) {
     final List<AssetEntity>? cached = _albumAssetCache[album.id];
     if (cached != null) {
-      setState(() {
-        _currentAlbumAssets = cached;
-      });
+      _setAlbumAssets(album, cached);
       return;
     }
     _loadAlbumAssets(album);
@@ -190,11 +187,7 @@ class _CustomPhotoPickerScreenState extends State<CustomPhotoPickerScreen> {
       return;
     }
 
-    setState(() {
-      _albumAssetCache[album.id] = assets;
-      _currentAlbumAssets = assets;
-      _albumLoading = false;
-    });
+    _setAlbumAssets(album, assets);
   }
 
   void _setSelectedAlbum(AssetPathEntity? album) {
@@ -202,6 +195,7 @@ class _CustomPhotoPickerScreenState extends State<CustomPhotoPickerScreen> {
       setState(() {
         _selectedAlbum = null;
         _currentAlbumAssets = <AssetEntity>[];
+        _displayedAssets = <AssetEntity>[];
         _albumLoading = false;
       });
       return;
@@ -216,6 +210,29 @@ class _CustomPhotoPickerScreenState extends State<CustomPhotoPickerScreen> {
     });
 
     _ensureAlbumAssetsLoaded(album);
+  }
+
+  void _setAlbumAssets(AssetPathEntity album, List<AssetEntity> assets) {
+    final String lowerQuery = _searchController.text.trim().toLowerCase();
+    setState(() {
+      _albumAssetCache[album.id] = assets;
+      _currentAlbumAssets = assets;
+      _displayedAssets = _filterAssetsForDisplay(assets, lowerQuery);
+      _albumLoading = false;
+    });
+  }
+
+  List<AssetEntity> _filterAssetsForDisplay(
+    List<AssetEntity> assets,
+    String lowerQuery,
+  ) {
+    if (lowerQuery.isEmpty) {
+      return List<AssetEntity>.from(assets);
+    }
+    return assets
+        .where((AssetEntity asset) =>
+            (asset.title ?? '').toLowerCase().contains(lowerQuery))
+        .toList(growable: false);
   }
 
   void _toggleSelection(AssetEntity asset) {
@@ -371,7 +388,7 @@ class _CustomPhotoPickerScreenState extends State<CustomPhotoPickerScreen> {
         Expanded(
           child: TabBarView(
             children: [
-              _buildPhotoGrid(_filteredAssets),
+              _buildPhotoGrid(_displayedAssets),
               _buildCollectionsTab(),
             ],
           ),
@@ -384,7 +401,19 @@ class _CustomPhotoPickerScreenState extends State<CustomPhotoPickerScreen> {
     return TextField(
       controller: _searchController,
       decoration: InputDecoration(
-        prefixIcon: const Icon(Icons.search, color: Color(0xFF999999)),
+        prefixIcon: Padding(
+          padding: const EdgeInsets.all(8),
+          child: DecoratedBox(
+            decoration: const BoxDecoration(
+              color: Color(0xFF999999),
+              shape: BoxShape.circle,
+            ),
+            child: const Center(
+              child: Icon(Icons.search, color: Colors.white, size: 20),
+            ),
+          ),
+        ),
+        prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 40),
         hintText: '検索',
         filled: true,
         fillColor: Colors.white,
