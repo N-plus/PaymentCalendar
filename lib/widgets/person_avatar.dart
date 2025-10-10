@@ -67,6 +67,11 @@ class PersonAvatar extends StatelessWidget {
       }
     }
 
+    final iconAsset = person.iconAsset;
+    if (iconAsset != null && iconAsset.isNotEmpty) {
+      return _buildIconAsset(iconAsset);
+    }
+
     final presetAvatar = _buildPresetAvatar();
     if (presetAvatar != null) {
       return presetAvatar;
@@ -96,6 +101,27 @@ class PersonAvatar extends StatelessWidget {
           color: resolvedBackground,
           alignment: Alignment.center,
           child: Text(placeholder, style: resolvedStyle),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildIconAsset(String assetName) {
+    final Color resolvedBackground =
+        backgroundColor ?? kPersonAvatarBackgroundColor;
+
+    return SizedBox(
+      width: size,
+      height: size,
+      child: ClipOval(
+        child: Container(
+          color: resolvedBackground,
+          child: Image.asset(
+            assetName,
+            width: size,
+            height: size,
+            fit: BoxFit.cover,
+          ),
         ),
       ),
     );

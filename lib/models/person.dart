@@ -4,17 +4,20 @@ class Person {
     required this.name,
     this.photoPath,
     this.emoji,
+    this.iconAsset,
   });
 
   final String id;
   final String name;
   final String? photoPath;
   final String? emoji;
+  final String? iconAsset;
 
   Person copyWith({
     String? name,
     Object? photoPath = _noValue,
     Object? emoji = _noValue,
+    Object? iconAsset = _noValue,
   }) {
     return Person(
       id: id,
@@ -23,6 +26,9 @@ class Person {
           ? this.photoPath
           : photoPath as String?,
       emoji: identical(emoji, _noValue) ? this.emoji : emoji as String?,
+      iconAsset: identical(iconAsset, _noValue)
+          ? this.iconAsset
+          : iconAsset as String?,
     );
   }
 
@@ -37,9 +43,10 @@ class Person {
         other.id == id &&
         other.name == name &&
         other.photoPath == photoPath &&
-        other.emoji == emoji;
+        other.emoji == emoji &&
+        other.iconAsset == iconAsset;
   }
 
   @override
-  int get hashCode => Object.hash(id, name, photoPath, emoji);
+  int get hashCode => Object.hash(id, name, photoPath, emoji, iconAsset);
 }

@@ -17,7 +17,12 @@ class PeopleNotifier extends StateNotifier<List<Person>> {
 
   final _uuid = const Uuid();
 
-  Person? addPerson(String name, {String? emoji, String? photoPath}) {
+  Person? addPerson(
+    String name, {
+    String? emoji,
+    String? photoPath,
+    String? iconAsset,
+  }) {
     final trimmed = name.trim();
     if (trimmed.isEmpty) {
       return null;
@@ -27,6 +32,7 @@ class PeopleNotifier extends StateNotifier<List<Person>> {
       name: trimmed,
       emoji: emoji,
       photoPath: photoPath,
+      iconAsset: iconAsset,
     );
     state = [...state, newPerson];
     return newPerson;
