@@ -378,18 +378,18 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
                   ElevatedButton.icon(
                     onPressed: canAddMore
                         ? () async {
-                            final PermissionState ps =
+                            final PermissionState permissionState =
                                 await PhotoManager.requestPermissionExtend();
-                            if (!ps.isAuth) {
-                              if (!mounted) {
-                                return;
-                              }
+                            if (!mounted) {
+                              return;
+                            }
+
+                            if (!permissionState.isAuth) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('写真へのアクセス権限を有効にしてください'),
+                                  content: Text('写真へのアクセス権限を許可してください'),
                                 ),
                               );
-                              await PhotoManager.openSetting();
                               return;
                             }
 
