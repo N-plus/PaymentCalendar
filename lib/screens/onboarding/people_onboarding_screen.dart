@@ -109,13 +109,25 @@ class _PeopleOnboardingScreenState
     }
   }
 
+  void _closeIfPossible() {
+    if (!mounted) {
+      return;
+    }
+    final navigator = Navigator.of(context);
+    if (navigator.canPop()) {
+      navigator.pop();
+    }
+  }
+
   Future<void> _defaultComplete() async {
     await ref.read(peopleOnboardingProvider.notifier).complete();
+    _closeIfPossible();
   }
 
   Future<void> _handleCompleted() async {
     if (widget.onCompleted != null) {
       await widget.onCompleted!();
+      _closeIfPossible();
       return;
     }
     await _defaultComplete();
@@ -124,6 +136,7 @@ class _PeopleOnboardingScreenState
   Future<void> _handleLater() async {
     if (widget.onLater != null) {
       await widget.onLater!();
+      _closeIfPossible();
       return;
     }
     await _defaultComplete();
