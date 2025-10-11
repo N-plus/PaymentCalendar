@@ -21,4 +21,9 @@ class PeopleOnboardingNotifier extends StateNotifier<bool> {
     state = true;
     await _preferences.setBool(_onboardingKey, true);
   }
+
+  Future<void> reset() async {
+    state = false;
+    await _preferences.remove(_onboardingKey);
+  }
 }

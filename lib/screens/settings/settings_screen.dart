@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -6,6 +7,7 @@ import '../../models/expense_category.dart';
 import '../../providers/categories_provider.dart';
 import '../../providers/people_provider.dart';
 import '../../providers/settings_provider.dart';
+import '../../providers/onboarding_provider.dart';
 import '../../widgets/person_avatar.dart';
 import '../../utils/category_visuals.dart';
 import '../person/person_edit_dialog.dart';
@@ -158,6 +160,26 @@ class SettingsScreen extends ConsumerWidget {
                 accentColor: colorScheme.primary,
                 onTap: () => _showAppInfo(context),
               ),
+              if (kDebugMode) ...[
+                const Divider(height: 1),
+                _SettingsListTile(
+                  title: 'デバッグ: 人のオンボーディングをリセット',
+                  subtitle: 'onboarding_people_done フラグを false に戻します',
+                  leadingIcon: Icons.refresh,
+                  accentColor: colorScheme.error,
+                  onTap: () async {
+                    await ref.read(peopleOnboardingProvider.notifier).reset();
+                    if (!context.mounted) {
+                      return;
+                    }
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('人のオンボーディングをリセットしました'),
+                      ),
+                    );
+                  },
+                ),
+              ],
             ],
           ),
           const SizedBox(height: 32),

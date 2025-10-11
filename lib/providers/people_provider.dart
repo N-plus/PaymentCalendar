@@ -8,9 +8,20 @@ final peopleProvider = StateNotifierProvider<PeopleNotifier, List<Person>>((ref)
 });
 
 class PeopleNotifier extends StateNotifier<List<Person>> {
-  PeopleNotifier() : super(const []);
+  PeopleNotifier() : super(const []) {
+    _initialization = _restoreInitialPeople();
+  }
 
   final _uuid = const Uuid();
+  late final Future<void> _initialization;
+
+  Future<void> _restoreInitialPeople() async {
+    // ここで永続化された人の情報を読み込む場合は処理を追加します。
+  }
+
+  Future<void> ensureInitialized() => _initialization;
+
+  int get count => state.length;
 
   Person? addPerson(
     String name, {

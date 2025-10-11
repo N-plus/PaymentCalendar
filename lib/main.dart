@@ -4,11 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'providers/onboarding_provider.dart';
+import 'providers/people_provider.dart';
 import 'providers/settings_provider.dart';
 import 'screens/home/home_screen.dart';
+import 'screens/onboarding/people_onboarding_screen.dart';
 import 'screens/settings/settings_screen.dart';
 import 'screens/unpaid/unpaid_screen.dart';
-import 'screens/onboarding/people_onboarding_screen.dart';
 import 'services/reminder_service.dart';
 
 Future<void> main() async {
@@ -83,28 +84,65 @@ class PaymentCalendarApp extends ConsumerWidget {
             'J'
             'P',
       ),
-      home: const RootPage(),
+      home: const RootGate(),
     );
   }
 }
 
-class RootPage extends ConsumerStatefulWidget {
+class RootGate extends ConsumerWidget {
+  const RootGate({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final shouldShowOnboardingAsync = ref.watch(_rootGateProvider);
+    return shouldShowOnboardingAsync.when(
+      data: (shouldShowOnboarding) {
+        if (shouldShowOnboarding) {
+          return PeopleOnboardingScreen(
+            onLater: () async {
+              await ref.read(peopleOnboardingProvider.notifier).complete();
+            },
+            onCompleted: () async {
+              await ref.read(peopleOnboardingProvider.notifier).complete();
+            },
+          );
+        }
+        return const RootPage();
+      },
+      loading: () => const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, stackTrace) {
+        return Scaffold(
+          body: Center(
+            child: Text('読み込みに失敗しました\n$error'),
+          ),
+        );
+      },
+    );
+  }
+}
+
+final _rootGateProvider = FutureProvider<bool>((ref) async {
+  final people = ref.watch(peopleProvider);
+  final onboardingCompleted = ref.watch(peopleOnboardingProvider);
+  final peopleNotifier = ref.watch(peopleProvider.notifier);
+  await peopleNotifier.ensureInitialized();
+  return people.isEmpty && !onboardingCompleted;
+});
+
+class RootPage extends StatefulWidget {
   const RootPage({super.key});
 
   @override
-  ConsumerState<RootPage> createState() => _RootPageState();
+  State<RootPage> createState() => _RootPageState();
 }
 
-class _RootPageState extends ConsumerState<RootPage> {
+class _RootPageState extends State<RootPage> {
   int _index = 0;
 
   @override
   Widget build(BuildContext context) {
-    final onboardingComplete = ref.watch(peopleOnboardingProvider);
-    if (!onboardingComplete) {
-      return const PeopleOnboardingScreen();
-    }
-
     final screens = [
       const HomeScreen(),
       const UnpaidScreen(),

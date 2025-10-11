@@ -8,7 +8,14 @@ import '../../widgets/person_avatar.dart';
 import '../person/person_edit_dialog.dart';
 
 class PeopleOnboardingScreen extends ConsumerStatefulWidget {
-  const PeopleOnboardingScreen({super.key});
+  const PeopleOnboardingScreen({
+    super.key,
+    this.onCompleted,
+    this.onLater,
+  });
+
+  final Future<void> Function()? onCompleted;
+  final Future<void> Function()? onLater;
 
   @override
   ConsumerState<PeopleOnboardingScreen> createState() =>
@@ -102,8 +109,24 @@ class _PeopleOnboardingScreenState
     }
   }
 
-  Future<void> _completeOnboarding() async {
+  Future<void> _defaultComplete() async {
     await ref.read(peopleOnboardingProvider.notifier).complete();
+  }
+
+  Future<void> _handleCompleted() async {
+    if (widget.onCompleted != null) {
+      await widget.onCompleted!();
+      return;
+    }
+    await _defaultComplete();
+  }
+
+  Future<void> _handleLater() async {
+    if (widget.onLater != null) {
+      await widget.onLater!();
+      return;
+    }
+    await _defaultComplete();
   }
 
   Widget _buildPeopleList(List<Person> people) {
@@ -276,7 +299,7 @@ class _PeopleOnboardingScreenState
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: _completeOnboarding,
+                      onPressed: _handleLater,
                       style: OutlinedButton.styleFrom(
                         foregroundColor: colorScheme.onSurface,
                         side: BorderSide(color: colorScheme.outline),
@@ -289,7 +312,7 @@ class _PeopleOnboardingScreenState
                   Expanded(
                     child: ElevatedButton(
                       onPressed:
-                          people.isEmpty ? null : () => _completeOnboarding(),
+                          people.isEmpty ? null : () => _handleCompleted(),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: colorScheme.primary,
                         foregroundColor: Colors.white,
