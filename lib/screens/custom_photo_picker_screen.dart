@@ -59,7 +59,11 @@ class _CustomPhotoPickerScreenState extends State<CustomPhotoPickerScreen> {
       _permissionDenied = false;
     });
 
-    final PermissionState permission = await PhotoManager.requestPermissionExtend();
+    PermissionState permission = await PhotoManager.getPermissionStatus();
+    if (!permission.isAuth) {
+      permission = await PhotoManager.requestPermissionExtend();
+    }
+
     if (!permission.isAuth) {
       if (!mounted) {
         return;

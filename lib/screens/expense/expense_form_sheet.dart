@@ -1,10 +1,12 @@
 import 'dart:io';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:payment_calendar/screens/custom_photo_picker_screen.dart';
 import '../../models/person.dart';
 import '../../models/expense_category.dart';
@@ -376,48 +378,8 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton.icon(
-                    onPressed: canAddMore
-                        ? () async {
-                            final PermissionState permissionState =
-                                await PhotoManager.requestPermissionExtend();
-                            if (!mounted) {
-                              return;
-                            }
-
-                            if (!permissionState.isAuth) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('写真へのアクセス権限を許可してください'),
-                                ),
-                              );
-                              return;
-                            }
-
-                            final int available = 5 - _photoPaths.length;
-                            final List<XFile>? picked =
-                                await Navigator.of(context).push<List<XFile>>(
-                              MaterialPageRoute<List<XFile>>(
-                                builder: (_) => CustomPhotoPickerScreen(
-                                  allowMultiple: true,
-                                  maxSelection: available,
-                                  title: '写真を選択',
-                                ),
-                              ),
-                            );
-
-                            if (picked == null || picked.isEmpty) {
-                              return;
-                            }
-
-                            if (!mounted) {
-                              return;
-                            }
-
-                            setState(() {
-                              _photoPaths.addAll(picked.map((XFile x) => x.path));
-                            });
-                          }
-                        : null,
+                    onPressed:
+                        canAddMore ? () => _onGalleryPressed(context) : null,
                     icon: const Icon(Icons.photo_library, size: 18),
                     label: const Text('ギャラリー'),
                     style: ElevatedButton.styleFrom(
@@ -454,6 +416,118 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
           ),
         ),
       ],
+    );
+  }
+
+  Future<void> _onGalleryPressed(BuildContext context) async {
+    final bool granted = await _ensurePhotoAccessPermission();
+    if (!granted || !mounted) {
+      return;
+    }
+
+    final int available = 5 - _photoPaths.length;
+    final List<XFile>? picked = await Navigator.of(context).push<List<XFile>>(
+      MaterialPageRoute<List<XFile>>(
+        builder: (_) => CustomPhotoPickerScreen(
+          allowMultiple: true,
+          maxSelection: available,
+          title: '写真を選択',
+        ),
+      ),
+    );
+
+    if (picked == null || picked.isEmpty || !mounted) {
+      return;
+    }
+
+    setState(() {
+      _photoPaths.addAll(picked.map((XFile x) => x.path));
+    });
+  }
+
+  Future<bool> _ensurePhotoAccessPermission() async {
+    PermissionState status = await PhotoManager.getPermissionStatus();
+    if (status.isAuth) {
+      return true;
+    }
+
+    if (Platform.isAndroid) {
+      final int? sdkInt = await _getAndroidSdkInt();
+      if (sdkInt != null && sdkInt >= 33) {
+        final PermissionStatus imageStatus = await Permission.photos.status;
+        final PermissionStatus videoStatus = await Permission.videos.status;
+
+        bool granted =
+            _isPermissionGranted(imageStatus) && _isPermissionGranted(videoStatus);
+        if (!granted) {
+          final PermissionStatus requestedImages = _isPermissionGranted(imageStatus)
+              ? imageStatus
+              : await Permission.photos.request();
+          final PermissionStatus requestedVideos = _isPermissionGranted(videoStatus)
+              ? videoStatus
+              : await Permission.videos.request();
+          granted = _isPermissionGranted(requestedImages) &&
+              _isPermissionGranted(requestedVideos);
+        }
+
+        if (!granted) {
+          if (mounted) {
+            _showPermissionDeniedMessage();
+          }
+          return false;
+        }
+
+        status = await PhotoManager.requestPermissionExtend();
+      } else {
+        final PermissionStatus storageStatus = await Permission.storage.status;
+        bool granted = _isPermissionGranted(storageStatus);
+        if (!granted) {
+          final PermissionStatus requested = await Permission.storage.request();
+          granted = _isPermissionGranted(requested);
+        }
+
+        if (!granted) {
+          if (mounted) {
+            _showPermissionDeniedMessage();
+          }
+          return false;
+        }
+
+        status = await PhotoManager.requestPermissionExtend();
+      }
+    } else {
+      status = await PhotoManager.requestPermissionExtend();
+    }
+
+    if (!status.isAuth) {
+      if (mounted) {
+        _showPermissionDeniedMessage();
+      }
+      return false;
+    }
+
+    return true;
+  }
+
+  Future<int?> _getAndroidSdkInt() async {
+    try {
+      final deviceInfo = DeviceInfoPlugin();
+      final androidInfo = await deviceInfo.androidInfo;
+      return androidInfo.version.sdkInt;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  bool _isPermissionGranted(PermissionStatus status) {
+    return status.isGranted || status.isLimited;
+  }
+
+  void _showPermissionDeniedMessage() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('写真へのアクセス権限を許可してください'),
+      ),
     );
   }
 
