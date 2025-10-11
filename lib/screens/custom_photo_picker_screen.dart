@@ -45,14 +45,11 @@ class _CustomPhotoPickerScreenState extends State<CustomPhotoPickerScreen> {
   void initState() {
     super.initState();
     _loadAssets();
-    _searchController.addListener(_onSearchControllerChanged);
   }
 
   @override
   void dispose() {
-    _searchController
-      ..removeListener(_onSearchControllerChanged)
-      ..dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -120,10 +117,6 @@ class _CustomPhotoPickerScreenState extends State<CustomPhotoPickerScreen> {
     if (_selectedAlbum != null) {
       await _loadAlbumAssets(_selectedAlbum!);
     }
-  }
-
-  void _onSearchControllerChanged() {
-    _applySearchFilter(_searchController.text);
   }
 
   void _applySearchFilter(String query) {
@@ -400,6 +393,7 @@ class _CustomPhotoPickerScreenState extends State<CustomPhotoPickerScreen> {
   Widget _buildSearchField() {
     return TextField(
       controller: _searchController,
+      onChanged: _applySearchFilter,
       decoration: InputDecoration(
         prefixIcon: Padding(
           padding: const EdgeInsets.all(8),
