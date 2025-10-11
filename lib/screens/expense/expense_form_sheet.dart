@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:payment_calendar/utils/color_utils.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:payment_calendar/screens/custom_photo_picker_screen.dart';
 import '../../models/person.dart';
 import '../../models/expense_category.dart';
@@ -15,8 +15,6 @@ import '../../utils/category_visuals.dart';
 import '../../utils/date_picker_theme.dart';
 import '../../utils/date_util.dart';
 import '../../widgets/person_avatar.dart';
-import '../custom_photo_picker_screen.dart';
-import '../../utils/photo_permission_mixin.dart';
 
 class ExpenseFormSheet extends ConsumerStatefulWidget {
   const ExpenseFormSheet({super.key, this.expenseId});
@@ -27,8 +25,7 @@ class ExpenseFormSheet extends ConsumerStatefulWidget {
   ConsumerState<ExpenseFormSheet> createState() => _ExpenseFormSheetState();
 }
 
-class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet>
-    with PhotoPermissionMixin<ExpenseFormSheet> {
+class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
   final _memoController = TextEditingController();
@@ -379,26 +376,48 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet>
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton.icon(
-                    onPressed: canAddMore ? () async {
-                      // カスタム白背景ギャラリーを開く
-                      final List<XFile>? picked = await Navigator.of(context).push<List<XFile>>(
-                        MaterialPageRoute(
-                          builder: (_) => const CustomPhotoPickerScreen(
-                            allowMultiple: true,   // 複数選択したい場合
-                            maxSelection: 8,       // 上限（必要に応じて調整OK）
-                            title: '写真を選択',     // 画面タイトル
-                          ),
-                        ),
-                      );
+                    onPressed: canAddMore
+                        ? () async {
+                            final PermissionState ps =
+                                await PhotoManager.requestPermissionExtend();
+                            if (!ps.isAuth) {
+                              if (!mounted) {
+                                return;
+                              }
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('写真へのアクセス権限を有効にしてください'),
+                                ),
+                              );
+                              await PhotoManager.openSetting();
+                              return;
+                            }
 
-                      // 何も選択されなかったら何もしない
-                      if (picked == null || picked.isEmpty) return;
+                            final int available = 5 - _photoPaths.length;
+                            final List<XFile>? picked =
+                                await Navigator.of(context).push<List<XFile>>(
+                              MaterialPageRoute<List<XFile>>(
+                                builder: (_) => CustomPhotoPickerScreen(
+                                  allowMultiple: true,
+                                  maxSelection: available,
+                                  title: '写真を選択',
+                                ),
+                              ),
+                            );
 
-                      setState(() {
-                        // 既存の保存形式に合わせてパスを追加
-                        _photoPaths.addAll(picked.map((x) => x.path));
-                      });
-                    } : null,
+                            if (picked == null || picked.isEmpty) {
+                              return;
+                            }
+
+                            if (!mounted) {
+                              return;
+                            }
+
+                            setState(() {
+                              _photoPaths.addAll(picked.map((XFile x) => x.path));
+                            });
+                          }
+                        : null,
                     icon: const Icon(Icons.photo_library, size: 18),
                     label: const Text('ギャラリー'),
                     style: ElevatedButton.styleFrom(
@@ -523,64 +542,6 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet>
     );
     if (picked != null) {
       setState(() => _selectedDate = picked);
-    }
-  }
-
-  Future<void> _pickImages() async {
-    if (_photoPaths.length >= 5) {
-      _showMessage('写真は最大5枚まで添付できます');
-      return;
-    }
-
-    if (await shouldUseAndroidPhotoPicker()) {
-      await _pickImagesWithAndroidPhotoPicker();
-      return;
-    }
-
-    final hasPermission = await ensurePhotoAccessPermission();
-    if (!hasPermission) {
-      return;
-    }
-
-    final available = 5 - _photoPaths.length;
-    final files = await Navigator.of(context).push<List<XFile>>(
-      MaterialPageRoute<List<XFile>>(
-        builder: (_) => CustomPhotoPickerScreen(
-          allowMultiple: true,
-          maxSelection: available,
-        ),
-        fullscreenDialog: true,
-      ),
-    );
-    if (files == null || files.isEmpty) {
-      return;
-    }
-    final paths = await Future.wait(files.map(_saveFile));
-    setState(() {
-      _photoPaths.addAll(paths.whereType<String>());
-    });
-  }
-
-  Future<void> _pickImagesWithAndroidPhotoPicker() async {
-    final available = 5 - _photoPaths.length;
-    final files = await _picker.pickMultiImage();
-    if (files == null || files.isEmpty) {
-      return;
-    }
-
-    final limitedFiles = files.take(available).toList(growable: false);
-    final paths = await Future.wait(limitedFiles.map(_saveFile));
-
-    if (!mounted) {
-      return;
-    }
-
-    setState(() {
-      _photoPaths.addAll(paths.whereType<String>());
-    });
-
-    if (files.length > available) {
-      _showMessage('写真は最大5枚まで添付できます');
     }
   }
 
