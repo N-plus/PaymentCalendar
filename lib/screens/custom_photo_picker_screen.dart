@@ -59,15 +59,12 @@ class _CustomPhotoPickerScreenState extends State<CustomPhotoPickerScreen> {
       _permissionDenied = false;
     });
 
-    PermissionState permission = await PhotoManager.getPermissionStatus();
-    if (!permission.isAuth) {
-      permission = await PhotoManager.requestPermissionExtend();
+    final PermissionState permission =
+        await PhotoManager.requestPermissionExtend();
+    if (!mounted) {
+      return;
     }
-
     if (!permission.isAuth) {
-      if (!mounted) {
-        return;
-      }
       setState(() {
         _permissionDenied = true;
         _loading = false;
@@ -88,21 +85,7 @@ class _CustomPhotoPickerScreenState extends State<CustomPhotoPickerScreen> {
       return;
     }
 
-    AssetPathEntity? allPath;
-    final List<AssetPathEntity> albums = <AssetPathEntity>[];
-    for (final AssetPathEntity path in paths) {
-      if (path.isAll) {
-        allPath = path;
-      }
-      albums.add(path);
-    }
-
-    final List<AssetEntity> recentAssets = allPath == null
-        ? <AssetEntity>[]
-        : await allPath.getAssetListPaged(
-            page: 0,
-            size: 200,
-          );
+    final List<AssetPathEntity> albums = List<AssetPathEntity>.from(paths);
 
     if (!mounted) {
       return;
