@@ -3,10 +3,13 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'providers/onboarding_provider.dart';
+import 'providers/people_provider.dart';
 import 'providers/settings_provider.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/settings/settings_screen.dart';
 import 'screens/unpaid/unpaid_screen.dart';
+import 'screens/onboarding/people_onboarding_screen.dart';
 import 'services/reminder_service.dart';
 
 Future<void> main() async {
@@ -98,6 +101,12 @@ class _RootPageState extends ConsumerState<RootPage> {
 
   @override
   Widget build(BuildContext context) {
+    final people = ref.watch(peopleProvider);
+    final onboardingComplete = ref.watch(peopleOnboardingProvider);
+    if (!onboardingComplete && people.isEmpty) {
+      return const PeopleOnboardingScreen();
+    }
+
     final screens = [
       const HomeScreen(),
       const UnpaidScreen(),

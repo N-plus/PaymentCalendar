@@ -8,12 +8,7 @@ final peopleProvider = StateNotifierProvider<PeopleNotifier, List<Person>>((ref)
 });
 
 class PeopleNotifier extends StateNotifier<List<Person>> {
-  PeopleNotifier()
-      : super(const [
-          Person(id: 'mother', name: '母', emoji: '👩'),
-          Person(id: 'father', name: '父', emoji: '👨'),
-          Person(id: 'child', name: '子ども', emoji: '🧒'),
-        ]);
+  PeopleNotifier() : super(const []);
 
   final _uuid = const Uuid();
 
