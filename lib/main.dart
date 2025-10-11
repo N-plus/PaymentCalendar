@@ -123,12 +123,16 @@ class RootGate extends ConsumerWidget {
   }
 }
 
-final _rootGateProvider = FutureProvider<bool>((ref) async {
+final _rootInitializationProvider = FutureProvider<void>((ref) async {
   // Ensure that SharedPreferences has been provided before evaluating.
   ref.watch(sharedPreferencesProvider);
 
   final peopleNotifier = ref.watch(peopleProvider.notifier);
   await peopleNotifier.ensureInitialized();
+});
+
+final _rootGateProvider = FutureProvider<bool>((ref) async {
+  await ref.watch(_rootInitializationProvider.future);
 
   final onboardingCompleted = ref.watch(peopleOnboardingProvider);
   final people = ref.watch(peopleProvider);
