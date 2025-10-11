@@ -235,23 +235,19 @@ class _PeopleOnboardingScreenState
                   ],
                 ),
               ),
-              const SizedBox(width: 12),
-              TextButton(
+              const SizedBox(width: 8),
+              IconButton(
                 onPressed: () => _editPerson(person),
-                style: TextButton.styleFrom(
-                  foregroundColor: colorScheme.primary,
-                  textStyle: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                child: const Text('編集'),
+                tooltip: '編集',
+                color: colorScheme.primary,
+                icon: const Icon(Icons.edit_outlined),
               ),
               const SizedBox(width: 4),
-              TextButton(
+              IconButton(
                 onPressed: () => _deletePerson(person),
-                style: TextButton.styleFrom(
-                  foregroundColor: colorScheme.error,
-                  textStyle: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                child: const Text('削除'),
+                tooltip: '削除',
+                color: colorScheme.error,
+                icon: const Icon(Icons.delete_outline),
               ),
             ],
           ),
@@ -296,6 +292,17 @@ class _PeopleOnboardingScreenState
                 ),
               ),
               const SizedBox(height: 16),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  '登録済みの人',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
               Expanded(
                 child: _buildPeopleList(people),
               ),
