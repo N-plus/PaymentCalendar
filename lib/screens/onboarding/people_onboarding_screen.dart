@@ -107,9 +107,10 @@ class _PeopleOnboardingScreenState
   }
 
   Widget _buildPeopleList(List<Person> people) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     if (people.isEmpty) {
-      final theme = Theme.of(context);
-      final colorScheme = theme.colorScheme;
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -144,71 +145,79 @@ class _PeopleOnboardingScreenState
       separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final person = people[index];
-        return Card(
-          margin: EdgeInsets.zero,
-          color: Colors.white,
-          child: ListTile(
-            leading: PersonAvatar(
-              person: person,
-              size: 40,
-              backgroundColor: kPersonAvatarBackgroundColor,
-              textStyle: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
-            ),
-            title: Text(
-              person.name,
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
-            subtitle: Text(
-              (person.photoPath != null && person.photoPath!.isNotEmpty)
-                  ? '写真を使用'
-                  : (person.iconAsset != null && person.iconAsset!.isNotEmpty)
-                      ? 'アイコン画像を使用'
-                      : person.emoji == null || person.emoji!.isEmpty
-                          ? 'アイコン未設定'
-                          : '絵文字アイコンを使用',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
-              ),
-            ),
-            trailing: PopupMenuButton<String>(
-              color: const Color(0xFFF2F2F2),
-              onSelected: (value) {
-                switch (value) {
-                  case 'edit':
-                    _editPerson(person);
-                    break;
-                  case 'delete':
-                    _deletePerson(person);
-                    break;
-                }
-              },
-              itemBuilder: (context) => const [
-                PopupMenuItem(
-                  value: 'edit',
-                  child: ListTile(
-                    leading: Icon(Icons.edit),
-                    title: Text('編集'),
-                    contentPadding: EdgeInsets.zero,
-                  ),
+            ],
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              PersonAvatar(
+                person: person,
+                size: 44,
+                backgroundColor: kPersonAvatarBackgroundColor,
+                textStyle: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
                 ),
-                PopupMenuItem(
-                  value: 'delete',
-                  child: ListTile(
-                    leading: Icon(Icons.delete, color: Colors.red),
-                    title: Text(
-                      '削除',
-                      style: TextStyle(color: Colors.red),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      person.name,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.onSurface,
+                      ),
                     ),
-                    contentPadding: EdgeInsets.zero,
-                  ),
+                    const SizedBox(height: 4),
+                    Text(
+                      (person.photoPath != null && person.photoPath!.isNotEmpty)
+                          ? '写真を使用'
+                          : (person.iconAsset != null &&
+                                  person.iconAsset!.isNotEmpty)
+                              ? 'アイコン画像を使用'
+                              : person.emoji == null || person.emoji!.isEmpty
+                                  ? 'アイコン未設定'
+                                  : '絵文字アイコンを使用',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            onTap: () => _editPerson(person),
+              ),
+              const SizedBox(width: 12),
+              TextButton(
+                onPressed: () => _editPerson(person),
+                style: TextButton.styleFrom(
+                  foregroundColor: colorScheme.primary,
+                  textStyle: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                child: const Text('編集'),
+              ),
+              const SizedBox(width: 4),
+              TextButton(
+                onPressed: () => _deletePerson(person),
+                style: TextButton.styleFrom(
+                  foregroundColor: colorScheme.error,
+                  textStyle: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                child: const Text('削除'),
+              ),
+            ],
           ),
         );
       },
