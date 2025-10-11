@@ -1,12 +1,9 @@
 import 'dart:io';
 
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:photo_manager/photo_manager.dart';
-import 'package:permission_handler/permission_handler.dart';
 import '../../models/person.dart';
 import '../../models/expense_category.dart';
 import '../../providers/categories_provider.dart';
@@ -31,6 +28,7 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
   final _amountController = TextEditingController();
   final _memoController = TextEditingController();
   final _picker = ImagePicker();
+  static const int _maxPhotoCount = 8;
 
   DateTime _selectedDate = DateTime.now();
   String? _personId;
@@ -345,7 +343,7 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
 
   Widget _buildPhotoSection(BuildContext context) {
     final theme = Theme.of(context);
-    final canAddMore = _photoPaths.length < 5;
+    final canAddMore = _photoPaths.length < _maxPhotoCount;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -377,8 +375,7 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton.icon(
-                    onPressed:
-                        canAddMore ? () => _onAlbumPressed(context) : null,
+                    onPressed: canAddMore ? _onAlbumPressed : null,
                     icon: const Icon(Icons.photo_library, size: 18),
                     label: const Text('アルバム'),
                     style: ElevatedButton.styleFrom(
@@ -405,7 +402,7 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(
-                    '写真は最大5枚まで添付できます',
+                    '写真は最大$_maxPhotoCount枚まで添付できます',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.secondary,
                     ),
@@ -418,29 +415,28 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
     );
   }
 
-  Future<void> _onAlbumPressed(BuildContext context) async {
-    final bool granted = await _ensurePhotoAccessPermission();
-    if (!granted || !mounted) {
-      return;
-    }
-
-    final int available = 5 - _photoPaths.length;
+  Future<void> _onAlbumPressed() async {
+    final int available = _maxPhotoCount - _photoPaths.length;
     if (available <= 0) {
-      _showMessage('写真は最大5枚まで添付できます');
+      _showMessage('写真は最大$_maxPhotoCount枚まで添付できます');
       return;
     }
 
     try {
-      final List<XFile> picked =
-          await _picker.pickMultiImage(limit: available);
+      final List<XFile> picked = await _picker.pickMultiImage();
 
-      if (picked.isEmpty || !mounted) {
+      if (!mounted || picked.isEmpty) {
+        return;
+      }
+
+      final takeCount = available > picked.length ? picked.length : available;
+      if (takeCount <= 0) {
         return;
       }
 
       setState(() {
         _photoPaths.addAll(
-          picked.take(available).map((XFile x) => x.path),
+          picked.take(takeCount).map((XFile x) => x.path),
         );
       });
     } catch (_) {
@@ -449,92 +445,6 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
       }
       _showMessage('写真の取得に失敗しました');
     }
-  }
-
-  Future<bool> _ensurePhotoAccessPermission() async {
-    PermissionState status = await PhotoManager.getPermissionStatus();
-    if (status.isAuth) {
-      return true;
-    }
-
-    if (Platform.isAndroid) {
-      final int? sdkInt = await _getAndroidSdkInt();
-      if (sdkInt != null && sdkInt >= 33) {
-        final PermissionStatus imageStatus = await Permission.photos.status;
-        final PermissionStatus videoStatus = await Permission.videos.status;
-
-        bool granted =
-            _isPermissionGranted(imageStatus) && _isPermissionGranted(videoStatus);
-        if (!granted) {
-          final PermissionStatus requestedImages = _isPermissionGranted(imageStatus)
-              ? imageStatus
-              : await Permission.photos.request();
-          final PermissionStatus requestedVideos = _isPermissionGranted(videoStatus)
-              ? videoStatus
-              : await Permission.videos.request();
-          granted = _isPermissionGranted(requestedImages) &&
-              _isPermissionGranted(requestedVideos);
-        }
-
-        if (!granted) {
-          if (mounted) {
-            _showPermissionDeniedMessage();
-          }
-          return false;
-        }
-
-        status = await PhotoManager.requestPermissionExtend();
-      } else {
-        final PermissionStatus storageStatus = await Permission.storage.status;
-        bool granted = _isPermissionGranted(storageStatus);
-        if (!granted) {
-          final PermissionStatus requested = await Permission.storage.request();
-          granted = _isPermissionGranted(requested);
-        }
-
-        if (!granted) {
-          if (mounted) {
-            _showPermissionDeniedMessage();
-          }
-          return false;
-        }
-
-        status = await PhotoManager.requestPermissionExtend();
-      }
-    } else {
-      status = await PhotoManager.requestPermissionExtend();
-    }
-
-    if (!status.isAuth) {
-      if (mounted) {
-        _showPermissionDeniedMessage();
-      }
-      return false;
-    }
-
-    return true;
-  }
-
-  Future<int?> _getAndroidSdkInt() async {
-    try {
-      final deviceInfo = DeviceInfoPlugin();
-      final androidInfo = await deviceInfo.androidInfo;
-      return androidInfo.version.sdkInt;
-    } catch (_) {
-      return null;
-    }
-  }
-
-  bool _isPermissionGranted(PermissionStatus status) {
-    return status.isGranted || status.isLimited;
-  }
-
-  void _showPermissionDeniedMessage() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('写真へのアクセス権限を許可してください'),
-      ),
-    );
   }
 
   Widget _buildPhotoThumbnail(String path) {
@@ -626,8 +536,8 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
   }
 
   Future<void> _captureImage() async {
-    if (_photoPaths.length >= 5) {
-      _showMessage('写真は最大5枚まで添付できます');
+    if (_photoPaths.length >= _maxPhotoCount) {
+      _showMessage('写真は最大$_maxPhotoCount枚まで添付できます');
       return;
     }
     final file = await _picker.pickImage(source: ImageSource.camera);
