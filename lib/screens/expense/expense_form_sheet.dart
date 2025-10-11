@@ -7,7 +7,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:payment_calendar/screens/custom_photo_picker_screen.dart';
 import '../../models/person.dart';
 import '../../models/expense_category.dart';
 import '../../providers/categories_provider.dart';
@@ -379,9 +378,9 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
                   const SizedBox(width: 8),
                   ElevatedButton.icon(
                     onPressed:
-                        canAddMore ? () => _onGalleryPressed(context) : null,
+                        canAddMore ? () => _onAlbumPressed(context) : null,
                     icon: const Icon(Icons.photo_library, size: 18),
-                    label: const Text('ギャラリー'),
+                    label: const Text('アルバム'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white, // 背景色（任意）
                       foregroundColor: Colors.black, // 文字とアイコン色
@@ -419,30 +418,37 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
     );
   }
 
-  Future<void> _onGalleryPressed(BuildContext context) async {
+  Future<void> _onAlbumPressed(BuildContext context) async {
     final bool granted = await _ensurePhotoAccessPermission();
     if (!granted || !mounted) {
       return;
     }
 
     final int available = 5 - _photoPaths.length;
-    final List<XFile>? picked = await Navigator.of(context).push<List<XFile>>(
-      MaterialPageRoute<List<XFile>>(
-        builder: (_) => CustomPhotoPickerScreen(
-          allowMultiple: true,
-          maxSelection: available,
-          title: '写真を選択',
-        ),
-      ),
-    );
-
-    if (picked == null || picked.isEmpty || !mounted) {
+    if (available <= 0) {
+      _showMessage('写真は最大5枚まで添付できます');
       return;
     }
 
-    setState(() {
-      _photoPaths.addAll(picked.map((XFile x) => x.path));
-    });
+    try {
+      final List<XFile> picked =
+          await _picker.pickMultiImage(limit: available);
+
+      if (picked.isEmpty || !mounted) {
+        return;
+      }
+
+      setState(() {
+        _photoPaths.addAll(
+          picked.take(available).map((XFile x) => x.path),
+        );
+      });
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      _showMessage('写真の取得に失敗しました');
+    }
   }
 
   Future<bool> _ensurePhotoAccessPermission() async {
