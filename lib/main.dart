@@ -89,14 +89,30 @@ class PaymentCalendarApp extends ConsumerWidget {
   }
 }
 
+final _rootInitializationProvider = FutureProvider<void>((ref) async {
+  // Ensure that SharedPreferences has been provided before evaluating.
+  ref.watch(sharedPreferencesProvider);
+
+  final peopleNotifier = ref.watch(peopleProvider.notifier);
+  await peopleNotifier.ensureInitialized();
+});
+
+final _shouldShowPeopleOnboardingProvider = Provider<bool>((ref) {
+  final onboardingCompleted = ref.watch(peopleOnboardingProvider);
+  final people = ref.watch(peopleProvider);
+  return people.isEmpty && !onboardingCompleted;
+});
+
 class RootGate extends ConsumerWidget {
   const RootGate({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final shouldShowOnboardingAsync = ref.watch(_rootGateProvider);
-    return shouldShowOnboardingAsync.when(
-      data: (shouldShowOnboarding) {
+    final initialization = ref.watch(_rootInitializationProvider);
+    return initialization.when(
+      data: (_) {
+        final shouldShowOnboarding =
+            ref.watch(_shouldShowPeopleOnboardingProvider);
         if (shouldShowOnboarding) {
           return PeopleOnboardingScreen(
             onLater: () async {
@@ -122,22 +138,6 @@ class RootGate extends ConsumerWidget {
     );
   }
 }
-
-final _rootInitializationProvider = FutureProvider<void>((ref) async {
-  // Ensure that SharedPreferences has been provided before evaluating.
-  ref.watch(sharedPreferencesProvider);
-
-  final peopleNotifier = ref.watch(peopleProvider.notifier);
-  await peopleNotifier.ensureInitialized();
-});
-
-final _rootGateProvider = FutureProvider<bool>((ref) async {
-  await ref.watch(_rootInitializationProvider.future);
-
-  final onboardingCompleted = ref.watch(peopleOnboardingProvider);
-  final people = ref.watch(peopleProvider);
-  return people.isEmpty && !onboardingCompleted;
-});
 
 class RootPage extends StatefulWidget {
   const RootPage({super.key});
