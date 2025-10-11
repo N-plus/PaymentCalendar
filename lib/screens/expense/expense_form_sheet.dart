@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:payment_calendar/utils/color_utils.dart';
-
+import 'package:payment_calendar/screens/custom_photo_picker_screen.dart';
 import '../../models/person.dart';
 import '../../models/expense_category.dart';
 import '../../providers/categories_provider.dart';
@@ -379,13 +379,32 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet>
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton.icon(
-                    onPressed: canAddMore ? _pickImages : null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
-                    ),
+                    onPressed: canAddMore ? () async {
+                      // カスタム白背景ギャラリーを開く
+                      final List<XFile>? picked = await Navigator.of(context).push<List<XFile>>(
+                        MaterialPageRoute(
+                          builder: (_) => const CustomPhotoPickerScreen(
+                            allowMultiple: true,   // 複数選択したい場合
+                            maxSelection: 8,       // 上限（必要に応じて調整OK）
+                            title: '写真を選択',     // 画面タイトル
+                          ),
+                        ),
+                      );
+
+                      // 何も選択されなかったら何もしない
+                      if (picked == null || picked.isEmpty) return;
+
+                      setState(() {
+                        // 既存の保存形式に合わせてパスを追加
+                        _photoPaths.addAll(picked.map((x) => x.path));
+                      });
+                    } : null,
                     icon: const Icon(Icons.photo_library, size: 18),
                     label: const Text('ギャラリー'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white, // 背景色（任意）
+                      foregroundColor: Colors.black, // 文字とアイコン色
+                    ),
                   ),
                 ],
               ),
