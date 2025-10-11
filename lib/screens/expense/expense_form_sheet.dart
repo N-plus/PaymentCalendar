@@ -472,8 +472,8 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
             child: Container(
               width: 24,
               height: 24,
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacityValue(0.6),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.6),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.close, size: 16, color: Colors.white),
