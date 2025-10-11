@@ -99,8 +99,7 @@ final _rootInitializationProvider = FutureProvider<void>((ref) async {
 
 final _shouldShowPeopleOnboardingProvider = Provider<bool>((ref) {
   final onboardingCompleted = ref.watch(peopleOnboardingProvider);
-  final people = ref.watch(peopleProvider);
-  return people.isEmpty && !onboardingCompleted;
+  return !onboardingCompleted;
 });
 
 class RootGate extends ConsumerWidget {
