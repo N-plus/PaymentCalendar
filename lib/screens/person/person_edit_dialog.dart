@@ -511,13 +511,13 @@ class _PersonEditDialogState extends State<PersonEditDialog>
                                                   ),
                                               ],
                                             ),
-                                          ),
-                                          child: ClipOval(
-                                            child: Container(
-                                              color: const Color(0xFFF7F7FA),
-                                              child: Image.asset(
-                                                asset,
-                                                fit: BoxFit.cover,
+                                            child: ClipOval(
+                                              child: Container(
+                                                color: const Color(0xFFF7F7FA),
+                                                child: Image.asset(
+                                                  asset,
+                                                  fit: BoxFit.cover,
+                                                ),
                                               ),
                                             ),
                                           ),
