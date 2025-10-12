@@ -119,18 +119,18 @@ class RootGate extends ConsumerStatefulWidget {
 }
 
 class _RootGateState extends ConsumerState<RootGate> {
-  ProviderSubscription<AsyncValue<bool>>? _initializationSubscription;
   bool _hasPresentedOnboarding = false;
 
   @override
   void initState() {
     super.initState();
-    _initializationSubscription = ref.listen<AsyncValue<bool>>(
+    ref.listen<AsyncValue<bool>>(
       _rootInitializationProvider,
       (previous, next) {
-        next.whenData(_handleOnboardingVisibility);
+        next.whenData((shouldShowOnboarding) {
+          _handleOnboardingVisibility(shouldShowOnboarding);
+        });
       },
-      fireImmediately: true,
     );
   }
 
@@ -158,12 +158,6 @@ class _RootGateState extends ConsumerState<RootGate> {
         ),
       );
     });
-  }
-
-  @override
-  void dispose() {
-    _initializationSubscription?.close();
-    super.dispose();
   }
 
   @override
