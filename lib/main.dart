@@ -115,18 +115,6 @@ class RootGate extends ConsumerWidget {
     final initialization = ref.watch(_rootInitializationProvider);
     return initialization.when(
       data: (_) {
-        final shouldShowOnboarding =
-            ref.watch(_shouldShowPeopleOnboardingProvider);
-        if (shouldShowOnboarding) {
-          return PeopleOnboardingScreen(
-            onLater: () async {
-              await ref.read(peopleOnboardingProvider.notifier).complete();
-            },
-            onCompleted: () async {
-              await ref.read(peopleOnboardingProvider.notifier).complete();
-            },
-          );
-        }
         return const RootPage();
       },
       loading: () => const Scaffold(
@@ -143,15 +131,70 @@ class RootGate extends ConsumerWidget {
   }
 }
 
-class RootPage extends StatefulWidget {
+class RootPage extends ConsumerStatefulWidget {
   const RootPage({super.key});
 
   @override
-  State<RootPage> createState() => _RootPageState();
+  ConsumerState<RootPage> createState() => _RootPageState();
 }
 
-class _RootPageState extends State<RootPage> {
+class _RootPageState extends ConsumerState<RootPage> {
   int _index = 0;
+  bool _isShowingOnboarding = false;
+  bool _onboardingListenerRegistered = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _listenOnboarding();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      if (ref.read(_shouldShowPeopleOnboardingProvider)) {
+        _showOnboardingScreen();
+      }
+    });
+  }
+
+  void _listenOnboarding() {
+    if (_onboardingListenerRegistered) {
+      return;
+    }
+    _onboardingListenerRegistered = true;
+    ref.listen<bool>(
+      _shouldShowPeopleOnboardingProvider,
+      (previous, next) {
+        if (next) {
+          _showOnboardingScreen();
+        }
+      },
+      fireImmediately: false,
+    );
+  }
+
+  Future<void> _showOnboardingScreen() async {
+    if (_isShowingOnboarding || !mounted) {
+      return;
+    }
+    _isShowingOnboarding = true;
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => const PeopleOnboardingScreen(),
+        fullscreenDialog: true,
+      ),
+    );
+    if (!mounted) {
+      return;
+    }
+    _isShowingOnboarding = false;
+
+    if (ref.read(_shouldShowPeopleOnboardingProvider)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showOnboardingScreen();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
