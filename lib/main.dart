@@ -3,6 +3,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'providers/expenses_provider.dart';
 import 'providers/onboarding_provider.dart';
 import 'providers/people_provider.dart';
 import 'providers/settings_provider.dart';
@@ -95,6 +96,7 @@ final _rootInitializationProvider = FutureProvider<void>((ref) async {
 
   final peopleNotifier = ref.watch(peopleProvider.notifier);
   await peopleNotifier.ensureInitialized();
+  ref.read(expensesProvider.notifier).removePlaceholderUnpaidExpenses();
 });
 
 final _shouldShowPeopleOnboardingProvider = Provider<bool>((ref) {
