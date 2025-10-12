@@ -120,11 +120,13 @@ class RootGate extends ConsumerStatefulWidget {
 
 class _RootGateState extends ConsumerState<RootGate> {
   bool _hasPresentedOnboarding = false;
+  late final ProviderSubscription<AsyncValue<bool>>
+      _rootInitializationSubscription;
 
   @override
   void initState() {
     super.initState();
-    ref.listen<AsyncValue<bool>>(
+    _rootInitializationSubscription = ref.listenManual<AsyncValue<bool>>(
       _rootInitializationProvider,
       (previous, next) {
         next.whenData((shouldShowOnboarding) {
@@ -132,6 +134,12 @@ class _RootGateState extends ConsumerState<RootGate> {
         });
       },
     );
+  }
+
+  @override
+  void dispose() {
+    _rootInitializationSubscription.close();
+    super.dispose();
   }
 
   void _handleOnboardingVisibility(bool shouldShowOnboarding) {
