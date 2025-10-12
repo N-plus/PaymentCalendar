@@ -141,7 +141,7 @@ class RootPage extends ConsumerStatefulWidget {
 class _RootPageState extends ConsumerState<RootPage> {
   int _index = 0;
   bool _isShowingOnboarding = false;
-  bool _onboardingListenerRegistered = false;
+  ProviderSubscription<bool>? _onboardingSubscription;
 
   @override
   void initState() {
@@ -158,11 +158,10 @@ class _RootPageState extends ConsumerState<RootPage> {
   }
 
   void _listenOnboarding() {
-    if (_onboardingListenerRegistered) {
+    if (_onboardingSubscription != null) {
       return;
     }
-    _onboardingListenerRegistered = true;
-    ref.listen<bool>(
+    _onboardingSubscription = ref.listenManual<bool>(
       _shouldShowPeopleOnboardingProvider,
       (previous, next) {
         if (next) {
@@ -227,5 +226,11 @@ class _RootPageState extends ConsumerState<RootPage> {
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _onboardingSubscription?.close();
+    super.dispose();
   }
 }
