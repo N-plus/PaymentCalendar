@@ -270,17 +270,6 @@ class _PeopleOnboardingScreenState
           title: const Text('人を登録'),
           backgroundColor: colorScheme.primary,
           foregroundColor: Colors.white,
-          actions: [
-            TextButton.icon(
-              onPressed: _addPerson,
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
-              ),
-              icon: const Icon(Icons.person_add),
-              label: const Text('人を追加'),
-            ),
-            const SizedBox(width: 8),
-          ],
         ),
         body: SafeArea(
           child: Padding(
@@ -289,6 +278,20 @@ class _PeopleOnboardingScreenState
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  onPressed: _addPerson,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    textStyle: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  icon: const Icon(Icons.person_add_alt_1),
+                  label: const Text('人を追加'),
+                ),
+                const SizedBox(height: 24),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
