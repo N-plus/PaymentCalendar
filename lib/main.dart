@@ -169,7 +169,6 @@ class _RootPageState extends ConsumerState<RootPage> {
           _showOnboardingScreen();
         }
       },
-      fireImmediately: false,
     );
   }
 
