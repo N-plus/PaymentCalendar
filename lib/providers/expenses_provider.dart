@@ -13,6 +13,29 @@ final expensesProvider =
 class ExpensesNotifier extends StateNotifier<List<Expense>> {
   ExpensesNotifier() : super(_seedExpenses());
 
+  static const _placeholderExpenses = [
+    _PlaceholderExpenseSignature(
+      personId: 'mother',
+      amount: 1560,
+      memo: 'スーパーでの買い物',
+    ),
+    _PlaceholderExpenseSignature(
+      personId: 'father',
+      amount: 780,
+      memo: '電車代',
+    ),
+    _PlaceholderExpenseSignature(
+      personId: 'child',
+      amount: 2400,
+      memo: '子どもの服',
+    ),
+    _PlaceholderExpenseSignature(
+      personId: 'mother',
+      amount: 4200,
+      memo: '美容院（予約）',
+    ),
+  ];
+
   static List<Expense> _seedExpenses() {
     const uuid = Uuid();
     final now = DateUtils.dateOnly(DateTime.now());
@@ -64,6 +87,26 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
   }
 
   final _uuid = const Uuid();
+
+  void removePlaceholderUnpaidExpenses() {
+    if (state.isEmpty) {
+      return;
+    }
+    final filtered = state.where((expense) {
+      if (expense.isPaid) {
+        return true;
+      }
+      for (final signature in _placeholderExpenses) {
+        if (signature.matches(expense)) {
+          return false;
+        }
+      }
+      return true;
+    }).toList();
+    if (filtered.length != state.length) {
+      state = filtered;
+    }
+  }
 
   void addExpense({
     required String personId,
@@ -176,5 +219,23 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
       }
     }
     state = updated;
+  }
+}
+
+class _PlaceholderExpenseSignature {
+  const _PlaceholderExpenseSignature({
+    required this.personId,
+    required this.amount,
+    required this.memo,
+  });
+
+  final String personId;
+  final int amount;
+  final String memo;
+
+  bool matches(Expense expense) {
+    return expense.personId == personId &&
+        expense.amount == amount &&
+        expense.memo == memo;
   }
 }
