@@ -123,6 +123,16 @@ class RootGate extends ConsumerWidget {
     final initialization = ref.watch(_rootInitializationProvider);
     return initialization.when(
       data: (_) {
+        final shouldShowOnboarding = ref.watch(_shouldShowPeopleOnboardingProvider);
+        if (shouldShowOnboarding) {
+          return PeopleOnboardingScreen(
+            onCompleted: () =>
+                ref.read(peopleOnboardingProvider.notifier).complete(),
+            onLater: () =>
+                ref.read(peopleOnboardingProvider.notifier).complete(),
+          );
+        }
+
         return const RootPage();
       },
       loading: () => const Scaffold(
@@ -148,59 +158,6 @@ class RootPage extends ConsumerStatefulWidget {
 
 class _RootPageState extends ConsumerState<RootPage> {
   int _index = 0;
-  bool _isShowingOnboarding = false;
-  ProviderSubscription<bool>? _onboardingSubscription;
-
-  @override
-  void initState() {
-    super.initState();
-    _listenOnboarding();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) {
-        return;
-      }
-      if (ref.read(_shouldShowPeopleOnboardingProvider)) {
-        _showOnboardingScreen();
-      }
-    });
-  }
-
-  void _listenOnboarding() {
-    if (_onboardingSubscription != null) {
-      return;
-    }
-    _onboardingSubscription = ref.listenManual<bool>(
-      _shouldShowPeopleOnboardingProvider,
-      (previous, next) {
-        if (next) {
-          _showOnboardingScreen();
-        }
-      },
-    );
-  }
-
-  Future<void> _showOnboardingScreen() async {
-    if (_isShowingOnboarding || !mounted) {
-      return;
-    }
-    _isShowingOnboarding = true;
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => const PeopleOnboardingScreen(),
-        fullscreenDialog: true,
-      ),
-    );
-    if (!mounted) {
-      return;
-    }
-    _isShowingOnboarding = false;
-
-    if (ref.read(_shouldShowPeopleOnboardingProvider)) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _showOnboardingScreen();
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -234,11 +191,5 @@ class _RootPageState extends ConsumerState<RootPage> {
         ],
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _onboardingSubscription?.close();
-    super.dispose();
   }
 }
