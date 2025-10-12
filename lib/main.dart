@@ -96,6 +96,9 @@ final _rootInitializationProvider = FutureProvider<void>((ref) async {
 
   final peopleNotifier = ref.watch(peopleProvider.notifier);
   await peopleNotifier.ensureInitialized();
+  if (peopleNotifier.count > 0 && !ref.read(peopleOnboardingProvider)) {
+    await ref.read(peopleOnboardingProvider.notifier).complete();
+  }
   ref.read(expensesProvider.notifier).removePlaceholderUnpaidExpenses();
 });
 
