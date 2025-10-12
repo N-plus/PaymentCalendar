@@ -281,14 +281,17 @@ class _PeopleOnboardingScreenState
                 ElevatedButton.icon(
                   onPressed: _addPerson,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: colorScheme.primary,
-                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.white,
+                    foregroundColor: colorScheme.primary,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     textStyle: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  icon: const Icon(Icons.person_add_alt_1),
+                  icon: Icon(
+                    Icons.person_add_alt_1,
+                    color: colorScheme.primary,
+                  ),
                   label: const Text('人を追加'),
                 ),
                 const SizedBox(height: 24),
