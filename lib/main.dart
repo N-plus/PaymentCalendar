@@ -111,25 +111,66 @@ final _rootInitializationProvider = FutureProvider<bool>((ref) async {
   return shouldShowOnboarding;
 });
 
-class RootGate extends ConsumerWidget {
+class RootGate extends ConsumerStatefulWidget {
   const RootGate({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final initialization = ref.watch(_rootInitializationProvider);
-    return initialization.when(
-      data: (shouldShowOnboarding) {
-        final onboardingCompleted = ref.watch(peopleOnboardingProvider);
-        if (shouldShowOnboarding && !onboardingCompleted) {
-          final onboardingNotifier = ref.read(peopleOnboardingProvider.notifier);
-          return PeopleOnboardingScreen(
+  ConsumerState<RootGate> createState() => _RootGateState();
+}
+
+class _RootGateState extends ConsumerState<RootGate> {
+  ProviderSubscription<AsyncValue<bool>>? _initializationSubscription;
+  bool _hasPresentedOnboarding = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializationSubscription = ref.listen<AsyncValue<bool>>(
+      _rootInitializationProvider,
+      (previous, next) {
+        next.whenData(_handleOnboardingVisibility);
+      },
+      fireImmediately: true,
+    );
+  }
+
+  void _handleOnboardingVisibility(bool shouldShowOnboarding) {
+    if (!shouldShowOnboarding) {
+      _hasPresentedOnboarding = false;
+      return;
+    }
+    if (_hasPresentedOnboarding || !mounted) {
+      return;
+    }
+    _hasPresentedOnboarding = true;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      final onboardingNotifier = ref.read(peopleOnboardingProvider.notifier);
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => PeopleOnboardingScreen(
             onCompleted: () => onboardingNotifier.complete(),
             onLater: () => onboardingNotifier.complete(),
-          );
-        }
+          ),
+        ),
+      );
+    });
+  }
 
-        return const RootPage();
-      },
+  @override
+  void dispose() {
+    _initializationSubscription?.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final initialization = ref.watch(_rootInitializationProvider);
+    return initialization.when(
+      data: (_) => const RootPage(),
       loading: () => const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       ),
