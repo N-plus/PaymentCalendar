@@ -96,15 +96,23 @@ final _rootInitializationProvider = FutureProvider<void>((ref) async {
 
   final peopleNotifier = ref.watch(peopleProvider.notifier);
   await peopleNotifier.ensureInitialized();
-  if (peopleNotifier.count > 0 && !ref.read(peopleOnboardingProvider)) {
+
+  final onboardingCompleted = ref.read(peopleOnboardingProvider);
+  if (peopleNotifier.count > 0 && !onboardingCompleted) {
     await ref.read(peopleOnboardingProvider.notifier).complete();
   }
+
   ref.read(expensesProvider.notifier).removePlaceholderUnpaidExpenses();
 });
 
 final _shouldShowPeopleOnboardingProvider = Provider<bool>((ref) {
   final onboardingCompleted = ref.watch(peopleOnboardingProvider);
-  return !onboardingCompleted;
+  if (onboardingCompleted) {
+    return false;
+  }
+
+  final peopleCount = ref.watch(peopleProvider).length;
+  return peopleCount == 0;
 });
 
 class RootGate extends ConsumerWidget {
