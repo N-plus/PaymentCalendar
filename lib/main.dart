@@ -90,29 +90,25 @@ class PaymentCalendarApp extends ConsumerWidget {
   }
 }
 
-final _rootInitializationProvider = FutureProvider<void>((ref) async {
+final _rootInitializationProvider = FutureProvider<bool>((ref) async {
   // Ensure that SharedPreferences has been provided before evaluating.
   ref.watch(sharedPreferencesProvider);
 
   final peopleNotifier = ref.watch(peopleProvider.notifier);
   await peopleNotifier.ensureInitialized();
 
+  final onboardingNotifier = ref.read(peopleOnboardingProvider.notifier);
   final onboardingCompleted = ref.read(peopleOnboardingProvider);
-  if (peopleNotifier.count > 0 && !onboardingCompleted) {
-    await ref.read(peopleOnboardingProvider.notifier).complete();
+
+  bool shouldShowOnboarding = false;
+  if (peopleNotifier.count == 0 && !onboardingCompleted) {
+    shouldShowOnboarding = true;
+  } else if (!onboardingCompleted) {
+    await onboardingNotifier.complete();
   }
 
   ref.read(expensesProvider.notifier).removePlaceholderUnpaidExpenses();
-});
-
-final _shouldShowPeopleOnboardingProvider = Provider<bool>((ref) {
-  final onboardingCompleted = ref.watch(peopleOnboardingProvider);
-  if (onboardingCompleted) {
-    return false;
-  }
-
-  final peopleCount = ref.watch(peopleProvider).length;
-  return peopleCount == 0;
+  return shouldShowOnboarding;
 });
 
 class RootGate extends ConsumerWidget {
@@ -122,14 +118,13 @@ class RootGate extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final initialization = ref.watch(_rootInitializationProvider);
     return initialization.when(
-      data: (_) {
-        final shouldShowOnboarding = ref.watch(_shouldShowPeopleOnboardingProvider);
-        if (shouldShowOnboarding) {
+      data: (shouldShowOnboarding) {
+        final onboardingCompleted = ref.watch(peopleOnboardingProvider);
+        if (shouldShowOnboarding && !onboardingCompleted) {
+          final onboardingNotifier = ref.read(peopleOnboardingProvider.notifier);
           return PeopleOnboardingScreen(
-            onCompleted: () =>
-                ref.read(peopleOnboardingProvider.notifier).complete(),
-            onLater: () =>
-                ref.read(peopleOnboardingProvider.notifier).complete(),
+            onCompleted: () => onboardingNotifier.complete(),
+            onLater: () => onboardingNotifier.complete(),
           );
         }
 
