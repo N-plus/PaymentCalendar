@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -160,26 +159,6 @@ class SettingsScreen extends ConsumerWidget {
                 accentColor: colorScheme.primary,
                 onTap: () => _showAppInfo(context),
               ),
-              if (kDebugMode) ...[
-                const Divider(height: 1),
-                _SettingsListTile(
-                  title: 'デバッグ: 人のオンボーディングをリセット',
-                  subtitle: 'onboarding_people_done フラグを false に戻します',
-                  leadingIcon: Icons.refresh,
-                  accentColor: colorScheme.error,
-                  onTap: () async {
-                    await ref.read(peopleOnboardingProvider.notifier).reset();
-                    if (!context.mounted) {
-                      return;
-                    }
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('人のオンボーディングをリセットしました'),
-                      ),
-                    );
-                  },
-                ),
-              ],
             ],
           ),
           const SizedBox(height: 32),
