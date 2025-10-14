@@ -115,21 +115,20 @@ class _EmptySummaryView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.people_alt_outlined,
+            Icons.receipt_long,
             size: 64,
-              color: colorScheme.onSurface.withOpacityValue(0.3),
+            color: Colors.grey[400],
           ),
           const SizedBox(height: 16),
           Text(
-            '人が登録されていません',
+            '未払いの記録がありません',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
         ],
