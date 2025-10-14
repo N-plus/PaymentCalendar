@@ -64,8 +64,6 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
         .toList()
       ..sort(_sortComparator);
 
-    final total =
-        filteredExpenses.fold<int>(0, (sum, expense) => sum + expense.amount);
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
@@ -147,21 +145,6 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
                   ),
           ),
         ],
-      ),
-      bottomNavigationBar: Container(
-        color: const Color(0xFFFFFAF0),
-        padding: const EdgeInsets.all(16),
-        child: SafeArea(
-          child: Text(
-            '未払い合計: ${formatCurrency(total)}',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFFF44336),
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
       ),
     );
   }
