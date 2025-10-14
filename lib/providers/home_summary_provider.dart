@@ -11,9 +11,13 @@ final includePlannedInSummaryProvider = StateProvider<bool>((ref) => false);
 final homeSummariesProvider = Provider<List<PersonSummary>>((ref) {
   final people = ref.watch(peopleProvider);
   final expenses = ref.watch(expensesProvider);
-  return [
+  final summaries = [
     for (final person in people)
       _buildSummary(person: person, expenses: expenses),
+  ];
+  return [
+    for (final summary in summaries)
+      if (summary.unpaidAmount > 0) summary,
   ];
 });
 
