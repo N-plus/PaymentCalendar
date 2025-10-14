@@ -220,7 +220,7 @@ class _RootPageState extends ConsumerState<RootPage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.receipt_long),
-            label: '未払い',
+            label: '詳細',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
