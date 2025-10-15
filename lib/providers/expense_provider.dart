@@ -48,7 +48,7 @@ class ExpenseProvider extends ChangeNotifier {
     for (final expense in _expenses) {
       if (expense.date.year == month.year &&
           expense.date.month == month.month) {
-        final memberName = _memberNameFor(expense.personId) ?? expense.personId;
+        final memberName = _memberNameFor(expense.payeeId) ?? expense.payeeId;
         summary.update(
           memberName,
           (value) => value + expense.amount,

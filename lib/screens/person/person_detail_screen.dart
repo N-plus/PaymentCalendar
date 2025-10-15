@@ -47,8 +47,10 @@ class _PersonDetailScreenState
   @override
   Widget build(BuildContext context) {
     final expenses = ref.watch(expensesProvider);
+    final people = ref.watch(peopleProvider);
+    final peopleMap = {for (final person in people) person.id: person};
     final personExpenses = expenses
-        .where((expense) => expense.personId == widget.person.id)
+        .where((expense) => expense.payeeId == widget.person.id)
         .toList();
     final currentStatus = _statusForIndex(_tabController.index);
     final filteredExpenses =
@@ -150,7 +152,8 @@ class _PersonDetailScreenState
                     itemCount: filteredExpenses.length,
                     itemBuilder: (context, index) {
                       final expense = filteredExpenses[index];
-                      return _buildExpenseCard(expense);
+                      final payer = peopleMap[expense.payerId];
+                      return _buildExpenseCard(expense, payer);
                     },
                   ),
           ),
@@ -374,12 +377,14 @@ class _PersonDetailScreenState
     );
   }
 
-  Widget _buildExpenseCard(Expense expense) {
+  Widget _buildExpenseCard(Expense expense, Person? payer) {
     final isPaid = expense.status == ExpenseStatus.paid;
     final isPlanned = expense.status == ExpenseStatus.planned;
     final memo = expense.memo.isEmpty ? '記録' : expense.memo;
     final amountColor = isPaid ? Colors.grey[600] : Colors.black87;
     final photos = expense.photoPaths.length;
+    final payerName = payer?.name ?? '不明';
+    final relationshipText = '$payerName → ${widget.person.name}';
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -441,32 +446,46 @@ class _PersonDetailScreenState
               ),
           ],
         ),
-        subtitle: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (photos > 0)
-              Row(
-                children: [
-                  Icon(Icons.camera_alt, size: 14, color: Colors.grey[500]),
-                  const SizedBox(width: 4),
-                  Text(
-                    '$photos枚',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[500],
-                    ),
-                  ),
-                ],
-              )
-            else
-              const SizedBox.shrink(),
             Text(
-              formatCurrency(expense.amount),
+              relationshipText,
               style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: amountColor,
+                fontSize: 13,
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w600,
               ),
+            ),
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (photos > 0)
+                  Row(
+                    children: [
+                      Icon(Icons.camera_alt, size: 14, color: Colors.grey[500]),
+                      const SizedBox(width: 4),
+                      Text(
+                        '$photos枚',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[500],
+                        ),
+                      ),
+                    ],
+                  )
+                else
+                  const SizedBox.shrink(),
+                Text(
+                  formatCurrency(expense.amount),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: amountColor,
+                  ),
+                ),
+              ],
             ),
           ],
         ),

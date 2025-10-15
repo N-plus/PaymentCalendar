@@ -15,22 +15,26 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
 
   static const _placeholderExpenses = [
     _PlaceholderExpenseSignature(
-      personId: 'mother',
+      payerId: 'mother',
+      payeeId: 'father',
       amount: 1560,
       memo: 'スーパーでの買い物',
     ),
     _PlaceholderExpenseSignature(
-      personId: 'father',
+      payerId: 'father',
+      payeeId: 'mother',
       amount: 780,
       memo: '電車代',
     ),
     _PlaceholderExpenseSignature(
-      personId: 'child',
+      payerId: 'mother',
+      payeeId: 'child',
       amount: 2400,
       memo: '子どもの服',
     ),
     _PlaceholderExpenseSignature(
-      personId: 'mother',
+      payerId: 'mother',
+      payeeId: 'mother',
       amount: 4200,
       memo: '美容院（予約）',
     ),
@@ -42,7 +46,8 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
     return [
       Expense.newRecord(
         id: uuid.v4(),
-        personId: 'mother',
+        payerId: 'mother',
+        payeeId: 'father',
         date: now.subtract(const Duration(days: 2)),
         amount: 1560,
         memo: 'スーパーでの買い物',
@@ -50,7 +55,8 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
       ),
       Expense.newRecord(
         id: uuid.v4(),
-        personId: 'father',
+        payerId: 'father',
+        payeeId: 'mother',
         date: now.subtract(const Duration(days: 1)),
         amount: 780,
         memo: '電車代',
@@ -58,7 +64,8 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
       ),
       Expense.newRecord(
         id: uuid.v4(),
-        personId: 'child',
+        payerId: 'mother',
+        payeeId: 'child',
         date: now,
         amount: 2400,
         memo: '子どもの服',
@@ -66,7 +73,8 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
       ),
       Expense.newRecord(
         id: uuid.v4(),
-        personId: 'mother',
+        payerId: 'mother',
+        payeeId: 'mother',
         date: now.add(const Duration(days: 3)),
         amount: 4200,
         memo: '美容院（予約）',
@@ -74,7 +82,8 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
       ),
       Expense(
         id: uuid.v4(),
-        personId: 'father',
+        payerId: 'father',
+        payeeId: 'mother',
         date: now.subtract(const Duration(days: 7)),
         amount: 3200,
         memo: 'ガソリン代',
@@ -109,7 +118,8 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
   }
 
   void addExpense({
-    required String personId,
+    required String payerId,
+    required String payeeId,
     required DateTime date,
     required int amount,
     String memo = '',
@@ -118,7 +128,8 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
   }) {
     final expense = Expense.newRecord(
       id: _uuid.v4(),
-      personId: personId,
+      payerId: payerId,
+      payeeId: payeeId,
       date: date,
       amount: amount,
       memo: memo,
@@ -182,15 +193,17 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
     ];
   }
 
-  List<Expense> markPaidForPerson(
-    String personId, {
+  List<Expense> markPaidForPair(
+    String payerId,
+    String payeeId, {
     required bool includePlanned,
   }) {
     final now = DateTime.now();
     final updated = <Expense>[];
     state = [
       for (final e in state)
-        if (e.personId == personId &&
+        if (e.payerId == payerId &&
+            e.payeeId == payeeId &&
             (e.status == ExpenseStatus.unpaid ||
                 (includePlanned && e.status == ExpenseStatus.planned)))
           () {
@@ -224,17 +237,20 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
 
 class _PlaceholderExpenseSignature {
   const _PlaceholderExpenseSignature({
-    required this.personId,
+    required this.payerId,
+    required this.payeeId,
     required this.amount,
     required this.memo,
   });
 
-  final String personId;
+  final String payerId;
+  final String payeeId;
   final int amount;
   final String memo;
 
   bool matches(Expense expense) {
-    return expense.personId == personId &&
+    return expense.payerId == payerId &&
+        expense.payeeId == payeeId &&
         expense.amount == amount &&
         expense.memo == memo;
   }

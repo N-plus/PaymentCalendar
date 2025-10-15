@@ -30,13 +30,14 @@ class ExpenseDetailScreen extends ConsumerWidget {
     final expense = matchingExpenses.first;
 
     final people = ref.watch(peopleProvider);
-    final matchingPeople = people.where((person) => person.id == expense.personId);
-    if (matchingPeople.isEmpty) {
+    final peopleMap = {for (final person in people) person.id: person};
+    final payer = peopleMap[expense.payerId];
+    final payee = peopleMap[expense.payeeId];
+    if (payer == null || payee == null) {
       return const Scaffold(
         body: Center(child: Text('人の情報が見つかりませんでした')),
       );
     }
-    final person = matchingPeople.first;
 
     return Scaffold(
       appBar: AppBar(
@@ -49,9 +50,9 @@ class ExpenseDetailScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _buildPersonInfo(context, person, expense),
+            _buildPersonInfo(context, payer, payee, expense),
             _StatusChip(status: expense.status),
-            _buildDetailInfo(context, expense),
+            _buildDetailInfo(context, expense, payer, payee),
             _buildPhotoSection(context, expense),
             _buildActionButtons(context, ref, expense),
             const SizedBox(height: 32),
@@ -61,34 +62,41 @@ class ExpenseDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildPersonInfo(BuildContext context, Person person, Expense expense) {
+  Widget _buildPersonInfo(
+      BuildContext context, Person payer, Person payee, Expense expense) {
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildAvatar(person),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  person.name,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.copyWith(fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  formatCurrency(expense.amount),
-                  style: Theme.of(context)
-                      .textTheme
-                      .headlineSmall
-                      ?.copyWith(fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
+          Row(
+            children: [
+              _buildAvatar(payer),
+              const SizedBox(width: 12),
+              Icon(
+                Icons.arrow_forward_alt,
+                size: 28,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: 12),
+              _buildAvatar(payee),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            '${payer.name} → ${payee.name}',
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium
+                ?.copyWith(fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            formatCurrency(expense.amount),
+            style: Theme.of(context)
+                .textTheme
+                .headlineSmall
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -108,13 +116,18 @@ class ExpenseDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildDetailInfo(BuildContext context, Expense expense) {
+  Widget _buildDetailInfo(
+      BuildContext context, Expense expense, Person payer, Person payee) {
     final rows = <Widget>[
       _InfoRow(label: '日付', value: formatDate(expense.date)),
       const SizedBox(height: 12),
       _InfoRow(label: 'カテゴリー', value: expense.category),
       const SizedBox(height: 12),
       _InfoRow(label: '金額', value: formatCurrency(expense.amount)),
+      const SizedBox(height: 12),
+      _InfoRow(label: '立て替えた人', value: payer.name),
+      const SizedBox(height: 12),
+      _InfoRow(label: '支払う人', value: payee.name),
     ];
 
     if (expense.memo.isNotEmpty) {

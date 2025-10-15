@@ -8,7 +8,8 @@ enum ExpenseStatus { unpaid, planned, paid }
 class Expense {
   const Expense({
     required this.id,
-    required this.personId,
+    required this.payerId,
+    required this.payeeId,
     required this.date,
     required this.amount,
     required this.memo,
@@ -21,7 +22,8 @@ class Expense {
 
   factory Expense.newRecord({
     required String id,
-    required String personId,
+    required String payerId,
+    required String payeeId,
     required DateTime date,
     required int amount,
     String memo = '',
@@ -32,7 +34,8 @@ class Expense {
     final status = _statusFor(date, false, now: now);
     return Expense(
       id: id,
-      personId: personId,
+      payerId: payerId,
+      payeeId: payeeId,
       date: date,
       amount: amount,
       memo: memo,
@@ -46,7 +49,8 @@ class Expense {
   }
 
   final String id;
-  final String personId;
+  final String payerId;
+  final String payeeId;
   final DateTime date;
   final int amount;
   final String memo;
@@ -62,7 +66,8 @@ class Expense {
 
   Expense copyWith({
     String? id,
-    String? personId,
+    String? payerId,
+    String? payeeId,
     DateTime? date,
     int? amount,
     String? memo,
@@ -74,7 +79,8 @@ class Expense {
   }) {
     return Expense(
       id: id ?? this.id,
-      personId: personId ?? this.personId,
+      payerId: payerId ?? this.payerId,
+      payeeId: payeeId ?? this.payeeId,
       date: date ?? this.date,
       amount: amount ?? this.amount,
       memo: memo ?? this.memo,
@@ -119,7 +125,8 @@ class Expense {
     }
     return other is Expense &&
         other.id == id &&
-        other.personId == personId &&
+        other.payerId == payerId &&
+        other.payeeId == payeeId &&
         other.date == date &&
         other.amount == amount &&
         other.memo == memo &&
@@ -133,7 +140,8 @@ class Expense {
   @override
   int get hashCode => Object.hash(
         id,
-        personId,
+        payerId,
+        payeeId,
         date,
         amount,
         memo,

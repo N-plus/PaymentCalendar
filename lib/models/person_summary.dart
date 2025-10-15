@@ -2,14 +2,16 @@ import 'person.dart';
 
 class PersonSummary {
   const PersonSummary({
-    required this.person,
+    required this.payer,
+    required this.payee,
     required this.unpaidAmount,
     required this.unpaidCount,
     required this.plannedAmount,
     required this.plannedCount,
   });
 
-  final Person person;
+  final Person payer;
+  final Person payee;
   final int unpaidAmount;
   final int unpaidCount;
   final int plannedAmount;
@@ -27,7 +29,8 @@ class PersonSummary {
       return true;
     }
     return other is PersonSummary &&
-        other.person == person &&
+        other.payer == payer &&
+        other.payee == payee &&
         other.unpaidAmount == unpaidAmount &&
         other.unpaidCount == unpaidCount &&
         other.plannedAmount == plannedAmount &&
@@ -36,7 +39,8 @@ class PersonSummary {
 
   @override
   int get hashCode => Object.hash(
-        person,
+        payer,
+        payee,
         unpaidAmount,
         unpaidCount,
         plannedAmount,

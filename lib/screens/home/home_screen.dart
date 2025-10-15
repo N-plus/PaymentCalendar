@@ -167,7 +167,7 @@ class _PersonSummaryTile extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        summary.person.name,
+                        '${summary.payer.name} → ${summary.payee.name}',
                         style: textTheme
                             .titleMedium
                             ?.copyWith(fontWeight: FontWeight.bold),
@@ -223,7 +223,7 @@ class _PersonSummaryTile extends ConsumerWidget {
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (_) => PersonDetailScreen(
-                            person: summary.person,
+                            person: summary.payee,
                           ),
                         ),
                       );
@@ -263,7 +263,8 @@ class _PersonSummaryTile extends ConsumerWidget {
         includePlanned && quickPayIncludesPlanned;
     final expenses = ref.read(expensesProvider);
     final targets = expenses.where((expense) {
-      if (expense.personId != summary.person.id) {
+      if (expense.payerId != summary.payer.id ||
+          expense.payeeId != summary.payee.id) {
         return false;
       }
       if (expense.status == ExpenseStatus.unpaid) {
@@ -292,7 +293,7 @@ class _PersonSummaryTile extends ConsumerWidget {
         return AlertDialog(
           title: const Text('全件支払い'),
           content: Text(
-            '${summary.person.name}の$label${targets.length}件（合計${formatCurrency(totalAmount)}）を支払い済みにしますか？',
+            '${summary.payer.name}が立て替えた${summary.payee.name}の$label${targets.length}件（合計${formatCurrency(totalAmount)}）を支払い済みにしますか？',
           ),
           actions: [
             TextButton(
@@ -318,8 +319,9 @@ class _PersonSummaryTile extends ConsumerWidget {
 
     final originals = ref
         .read(expensesProvider.notifier)
-        .markPaidForPerson(
-          summary.person.id,
+        .markPaidForPair(
+          summary.payer.id,
+          summary.payee.id,
           includePlanned: includePlannedForPayment,
         );
 
@@ -345,17 +347,40 @@ class _Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const double size = 56;
-    return PersonAvatar(
-      person: summary.person,
-      size: size,
-      showShadow: true,
-      backgroundColor: kPersonAvatarBackgroundColor,
-      textStyle: TextStyle(
-        fontSize: 24,
-        fontWeight: FontWeight.bold,
-        color: Theme.of(context).colorScheme.onSurface,
-      ),
+    const double size = 48;
+    final colorScheme = Theme.of(context).colorScheme;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            PersonAvatar(
+              person: summary.payer,
+              size: size,
+              showShadow: true,
+              backgroundColor: kPersonAvatarBackgroundColor,
+              textStyle: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Icon(Icons.arrow_forward_alt, color: colorScheme.primary),
+            const SizedBox(width: 6),
+            PersonAvatar(
+              person: summary.payee,
+              size: size,
+              showShadow: true,
+              backgroundColor: kPersonAvatarBackgroundColor,
+              textStyle: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

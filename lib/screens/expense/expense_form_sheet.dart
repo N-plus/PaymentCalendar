@@ -31,7 +31,8 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
   static const int _maxPhotoCount = 8;
 
   DateTime _selectedDate = DateTime.now();
-  String? _personId;
+  String? _payerId;
+  String? _payeeId;
   String? _selectedCategory;
   List<String> _photoPaths = [];
   bool _saving = false;
@@ -47,7 +48,8 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
             .firstWhere((element) => element.id == widget.expenseId);
     if (expense != null) {
       _selectedDate = expense.date;
-      _personId = expense.personId;
+      _payerId = expense.payerId;
+      _payeeId = expense.payeeId;
       _amountController.text = expense.amount.toString();
       _memoController.text = expense.memo;
       _selectedCategory = expense.category;
@@ -72,8 +74,14 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
   Widget build(BuildContext context) {
     final people = ref.watch(peopleProvider);
     final categories = ref.watch(categoriesProvider);
-    if (_personId == null && people.isNotEmpty) {
-      _personId = people.first.id;
+    if (_payerId == null && people.isNotEmpty) {
+      _payerId = people.first.id;
+    }
+    if (_payeeId == null && people.isNotEmpty) {
+      _payeeId = people.firstWhere(
+        (person) => person.id != _payerId,
+        orElse: () => people.first,
+      ).id;
     }
 
     return Container(
@@ -94,7 +102,7 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
                   const SizedBox(height: 24),
                   _buildDateSection(context),
                   const SizedBox(height: 24),
-                  _buildPersonSection(context, people),
+                  _buildParticipantsSection(context, people),
                   const SizedBox(height: 24),
                   _buildAmountSection(context),
                   const SizedBox(height: 24),
@@ -183,32 +191,103 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
     );
   }
 
-  Widget _buildPersonSection(BuildContext context, List<Person> people) {
+  Widget _buildParticipantsSection(BuildContext context, List<Person> people) {
+    final theme = Theme.of(context);
+    final hasConflict =
+        _payerId != null && _payeeId != null && _payerId == _payeeId;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '立て替えた人 → 支払う人',
+          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: _buildPersonChoices(
+                context,
+                label: '立て替えた人',
+                people: people,
+                selectedId: _payerId,
+                onSelected: _selectPayer,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+              child: Icon(
+                Icons.arrow_forward_alt,
+                color: theme.colorScheme.primary,
+              ),
+            ),
+            Expanded(
+              child: _buildPersonChoices(
+                context,
+                label: '支払う人',
+                people: people,
+                selectedId: _payeeId,
+                onSelected: _selectPayee,
+              ),
+            ),
+          ],
+        ),
+        if (hasConflict)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              '同じ人を選ぶことはできません',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.error,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildPersonChoices(
+    BuildContext context, {
+    required String label,
+    required List<Person> people,
+    required String? selectedId,
+    required ValueChanged<String> onSelected,
+  }) {
     final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '人',
-          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          label,
+          style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 12,
           runSpacing: 12,
           children: [
-            for (final person in people) _buildPersonOption(person),
+            for (final person in people)
+              _buildPersonOption(
+                person,
+                isSelected: selectedId == person.id,
+                onTap: () => onSelected(person.id),
+              ),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildPersonOption(Person person) {
-    final isSelected = _personId == person.id;
+  Widget _buildPersonOption(
+    Person person, {
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
     final theme = Theme.of(context);
     return GestureDetector(
-      onTap: () => _selectPerson(person.id),
+      onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
@@ -516,9 +595,15 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
     );
   }
 
-  void _selectPerson(String personId) {
+  void _selectPayer(String personId) {
     setState(() {
-      _personId = personId;
+      _payerId = personId;
+    });
+  }
+
+  void _selectPayee(String personId) {
+    setState(() {
+      _payeeId = personId;
     });
   }
 
@@ -572,9 +657,14 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    final personId = _personId;
-    if (personId == null) {
-      _showMessage('人を選択してください');
+    final payerId = _payerId;
+    final payeeId = _payeeId;
+    if (payerId == null || payeeId == null) {
+      _showMessage('立て替えた人と支払う人を選択してください');
+      return;
+    }
+    if (payerId == payeeId) {
+      _showMessage('立て替えた人と支払う人は別の人を選んでください');
       return;
     }
 
@@ -588,7 +678,8 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
 
     if (widget.expenseId == null) {
       ref.read(expensesProvider.notifier).addExpense(
-            personId: personId,
+            payerId: payerId,
+            payeeId: payeeId,
             date: _selectedDate,
             amount: amount,
             memo: memo,
@@ -600,7 +691,8 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
           .read(expensesProvider)
           .firstWhere((expense) => expense.id == widget.expenseId);
       final updated = original.copyWith(
-        personId: personId,
+        payerId: payerId,
+        payeeId: payeeId,
         date: _selectedDate,
         amount: amount,
         memo: memo,
