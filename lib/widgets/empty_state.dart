@@ -60,9 +60,9 @@ class _EmptyStateState extends State<EmptyState> {
 
     final textColor = Colors.grey[600];
     final iconColor = Colors.grey[400];
-    final additionalOffset = widget.action != null
+    final double additionalOffset = widget.action != null
         ? ((_actionHeight ?? 0) + _spacingToAction) / 2
-        : 0;
+        : 0.0;
 
     return Center(
       child: Transform.translate(
