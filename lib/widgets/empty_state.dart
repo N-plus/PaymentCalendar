@@ -6,11 +6,13 @@ class EmptyState extends StatefulWidget {
     required this.icon,
     required this.message,
     this.action,
+    this.verticalOffset = 0,
   });
 
   final IconData icon;
   final String message;
   final Widget? action;
+  final double verticalOffset;
 
   @override
   State<EmptyState> createState() => _EmptyStateState();
@@ -63,10 +65,11 @@ class _EmptyStateState extends State<EmptyState> {
     final double additionalOffset = widget.action != null
         ? ((_actionHeight ?? 0) + _spacingToAction) / 2
         : 0.0;
+    final double totalOffset = additionalOffset + widget.verticalOffset;
 
     return Center(
       child: Transform.translate(
-        offset: Offset(0, additionalOffset),
+        offset: Offset(0, totalOffset),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,

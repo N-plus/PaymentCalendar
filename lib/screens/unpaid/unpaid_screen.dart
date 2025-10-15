@@ -30,6 +30,10 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
   static const _defaultDateFilter = DateFilter.thisMonth;
   static const _defaultCategoryFilter = CategoryFilter.normal;
   static const _defaultSortBy = SortBy.dateDesc;
+  static const double _homeHeaderVerticalPadding = 12.0;
+  static const double _homeDividerHeight = 1.0;
+  static const double _homeHeaderHeight =
+      _homeHeaderVerticalPadding * 2 + kMinInteractiveDimension + _homeDividerHeight;
 
   String? selectedPersonId;
   DateFilter dateFilter = _defaultDateFilter;
@@ -38,12 +42,15 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
   DateTimeRange? customDateRange;
   late final TextEditingController _searchController;
   String searchQuery = '';
+  final GlobalKey _headerKey = GlobalKey();
+  double? _headerHeight;
 
   @override
   void initState() {
     super.initState();
     selectedPersonId = widget.initialPersonId;
     _searchController = TextEditingController();
+    _scheduleHeaderMeasurement();
   }
 
   @override
@@ -66,6 +73,7 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
       ..sort(_sortComparator);
 
     final colorScheme = Theme.of(context).colorScheme;
+    _scheduleHeaderMeasurement();
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFFAF0),
@@ -78,6 +86,7 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
       body: Column(
         children: [
           Container(
+            key: _headerKey,
             color: const Color(0xFFFFFAF0),
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -574,6 +583,14 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
     final message = _hasActiveFilters()
         ? 'フィルタ条件に一致する記録がありません'
         : '未払いの記録がありません';
+    final headerHeight = _headerHeight;
+    double verticalOffset = 0;
+    if (headerHeight != null) {
+      final diff = headerHeight - _homeHeaderHeight;
+      if (diff.abs() >= 0.5) {
+        verticalOffset = -diff / 2;
+      }
+    }
 
     return EmptyState(
       icon: Icons.receipt_long,
@@ -584,7 +601,24 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
               child: const Text('フィルタをクリア'),
             )
           : null,
+      verticalOffset: verticalOffset,
     );
+  }
+
+  void _scheduleHeaderMeasurement() {
+    WidgetsBinding.instance.addPostFrameCallback((_) => _measureHeaderHeight());
+  }
+
+  void _measureHeaderHeight() {
+    if (!mounted) return;
+    final context = _headerKey.currentContext;
+    if (context == null) return;
+    final size = context.size;
+    if (size == null) return;
+    final height = size.height;
+    if (_headerHeight == null || (height - _headerHeight!).abs() >= 0.5) {
+      setState(() => _headerHeight = height);
+    }
   }
 
   void _clearFilters() {
