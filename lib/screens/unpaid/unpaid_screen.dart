@@ -72,6 +72,21 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
         .toList()
       ..sort(_sortComparator);
 
+    final groupedByPayee = <String, List<Expense>>{};
+    for (final expense in filteredExpenses) {
+      groupedByPayee
+          .putIfAbsent(expense.payeeId, () => <Expense>[])
+          .add(expense);
+    }
+    final payeeSections = groupedByPayee.entries.toList()
+      ..sort((a, b) {
+        final payeeA = peopleMap[a.key];
+        final payeeB = peopleMap[b.key];
+        final nameA = payeeA?.name ?? '';
+        final nameB = payeeB?.name ?? '';
+        return nameA.compareTo(nameB);
+      });
+
     final colorScheme = Theme.of(context).colorScheme;
     _scheduleHeaderMeasurement();
 
@@ -146,11 +161,15 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
                 ? _buildEmptyState()
                 : ListView.builder(
                     padding: const EdgeInsets.all(16),
-                    itemCount: filteredExpenses.length,
+                    itemCount: payeeSections.length,
                     itemBuilder: (context, index) {
-                      final expense = filteredExpenses[index];
-                      final person = peopleMap[expense.personId];
-                      return _buildExpenseListItem(expense, person);
+                      final entry = payeeSections[index];
+                      final payee = peopleMap[entry.key];
+                      return _buildPayeeSection(
+                        payee: payee,
+                        expenses: entry.value,
+                        peopleMap: peopleMap,
+                      );
                     },
                   ),
           ),
@@ -160,7 +179,7 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
   }
 
   bool _matchesFilters(Expense expense, Map<String, Person> peopleMap) {
-    if (selectedPersonId != null && expense.personId != selectedPersonId) {
+    if (selectedPersonId != null && expense.payeeId != selectedPersonId) {
       return false;
     }
 
@@ -177,10 +196,13 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
     if (query.isNotEmpty) {
       final memo = expense.memo.toLowerCase();
       final category = expense.category.toLowerCase();
-      final personName =
-          peopleMap[expense.personId]?.name.toLowerCase() ?? '';
+      final payeeName =
+          peopleMap[expense.payeeId]?.name.toLowerCase() ?? '';
+      final payerName =
+          peopleMap[expense.payerId]?.name.toLowerCase() ?? '';
       if (!memo.contains(query) &&
-          !personName.contains(query) &&
+          !payeeName.contains(query) &&
+          !payerName.contains(query) &&
           !category.contains(query)) {
         return false;
       }
@@ -633,7 +655,36 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
     });
   }
 
-  Widget _buildExpenseListItem(Expense expense, Person? person) {
+  Widget _buildPayeeSection({
+    required Person? payee,
+    required List<Expense> expenses,
+    required Map<String, Person> peopleMap,
+  }) {
+    final theme = Theme.of(context);
+    final name = payee?.name ?? '不明な人';
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '支払う人: $name',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          for (final expense in expenses)
+            _buildExpenseListItem(
+              expense,
+              peopleMap[expense.payerId],
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExpenseListItem(Expense expense, Person? payer) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 1,
@@ -678,7 +729,7 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
               ),
             ),
             const SizedBox(width: 12),
-            _buildSmallAvatar(person),
+            _buildSmallAvatar(payer),
             if (expense.status == ExpenseStatus.planned) ...[
               const SizedBox(width: 8),
               Container(
