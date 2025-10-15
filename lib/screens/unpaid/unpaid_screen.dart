@@ -8,6 +8,7 @@ import '../../providers/expenses_provider.dart';
 import '../../providers/people_provider.dart';
 import '../../utils/date_util.dart';
 import '../expense/expense_detail_screen.dart';
+import '../../widgets/empty_state.dart';
 import '../../widgets/person_avatar.dart';
 
 class UnpaidScreen extends ConsumerStatefulWidget {
@@ -574,32 +575,15 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
         ? 'フィルタ条件に一致する記録がありません'
         : '未払いの記録がありません';
 
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.receipt_long,
-            size: 64,
-            color: Colors.grey[400],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            message,
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 16,
-            ),
-          ),
-          if (_hasActiveFilters()) ...[
-            const SizedBox(height: 16),
-            ElevatedButton(
+    return EmptyState(
+      icon: Icons.receipt_long,
+      message: message,
+      action: _hasActiveFilters()
+          ? ElevatedButton(
               onPressed: _clearFilters,
               child: const Text('フィルタをクリア'),
-            ),
-          ],
-        ],
-      ),
+            )
+          : null,
     );
   }
 
