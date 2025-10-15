@@ -12,6 +12,7 @@ import '../../screens/unpaid/unpaid_screen.dart';
 import '../../utils/date_util.dart';
 import '../expense/expense_form_sheet.dart';
 import '../settings/settings_screen.dart';
+import '../../widgets/empty_state_view.dart';
 import '../../widgets/person_avatar.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -74,7 +75,10 @@ class HomeScreen extends ConsumerWidget {
           Divider(height: 1, thickness: 1, color: Theme.of(context).dividerColor),
           Expanded(
             child: summaries.isEmpty
-                ? const _EmptySummaryView()
+                ? const EmptyStateView(
+                    icon: Icons.receipt_long,
+                    message: '未払いの記録がありません',
+                  )
                 : ListView.separated(
                     padding: const EdgeInsets.all(16),
                     itemBuilder: (context, index) {
@@ -107,36 +111,6 @@ class HomeScreen extends ConsumerWidget {
       ),
     );
   }
-}
-
-class _EmptySummaryView extends StatelessWidget {
-  const _EmptySummaryView();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.receipt_long,
-            size: 64,
-            color: Colors.grey[400],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            '未払いの記録がありません',
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 16,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class _PersonSummaryTile extends ConsumerWidget {
   const _PersonSummaryTile({
