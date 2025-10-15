@@ -127,8 +127,9 @@ class _EmptySummaryView extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             '未払いの記録がありません',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 16,
             ),
           ),
         ],
