@@ -49,23 +49,30 @@ class _PersonDetailScreenState
     final expenses = ref.watch(expensesProvider);
     final people = ref.watch(peopleProvider);
     final peopleMap = {for (final person in people) person.id: person};
-    final personExpenses = expenses
-        .where((expense) => expense.payeeId == widget.person.id)
-        .toList();
+    final String? personId = widget.person.id;
+    final List<Expense> personExpenses =
+        personId == null || personId.isEmpty
+            ? <Expense>[]
+            : expenses
+                .where((expense) => expense.payeeId == personId)
+                .toList();
     final currentStatus = _statusForIndex(_tabController.index);
-    final filteredExpenses =
-        _filteredExpenses(personExpenses, currentStatus);
-    final currentTotal = filteredExpenses.fold<int>(
-      0,
-      (sum, expense) => sum + expense.amount,
+    final List<Expense> filteredExpenses = personExpenses.isEmpty
+        ? <Expense>[]
+        : _filteredExpenses(personExpenses, currentStatus);
+    final double currentTotal = filteredExpenses.fold<double>(
+      0.0,
+      (sum, expense) => sum + expense.amount.toDouble(),
     );
-    final unpaidTotal = personExpenses
+    final double unpaidTotal = personExpenses
         .where((expense) => expense.status == ExpenseStatus.unpaid)
-        .fold<int>(0, (sum, expense) => sum + expense.amount);
+        .fold<double>(0.0, (sum, expense) => sum + expense.amount.toDouble());
+    final int currentTotalForDisplay = currentTotal.round();
+    final int unpaidTotalForDisplay = unpaidTotal.round();
     final totalLabel = _statusLabel(currentStatus);
     final highlightColor = currentStatus == ExpenseStatus.paid
         ? Colors.grey[700]
-        : (currentTotal > 0 ? Colors.red[600] : Colors.grey[600]);
+        : (currentTotalForDisplay > 0 ? Colors.red[600] : Colors.grey[600]);
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFFAF0),
@@ -109,7 +116,7 @@ class _PersonDetailScreenState
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  formatCurrency(currentTotal),
+                  formatCurrency(currentTotalForDisplay),
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -165,7 +172,7 @@ class _PersonDetailScreenState
         child: SafeArea(
           top: false,
           child: Text(
-            '${widget.person.name}の未払い合計: ${formatCurrency(unpaidTotal)}',
+            '${widget.person.name}の未払い合計: ${formatCurrency(unpaidTotalForDisplay)}',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
