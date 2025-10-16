@@ -11,7 +11,6 @@ import '../../screens/person/person_detail_screen.dart';
 import '../../screens/unpaid/unpaid_screen.dart';
 import '../../utils/date_util.dart';
 import '../expense/expense_form_sheet.dart';
-import '../settings/settings_screen.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/person_avatar.dart';
 
@@ -33,16 +32,6 @@ class HomeScreen extends ConsumerWidget {
         backgroundColor: colorScheme.primary,
         foregroundColor: Colors.white,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const SettingsScreen()),
-              );
-            },
-          ),
-        ],
       ),
       body: Column(
         children: [
