@@ -5,6 +5,7 @@ import 'package:payment_calendar/widgets/radio_option_tile.dart';
 import '../../models/expense.dart';
 import '../../models/person.dart';
 import '../../providers/expenses_provider.dart';
+import '../../providers/people_provider.dart';
 import '../../utils/date_util.dart';
 import '../expense/expense_detail_screen.dart';
 import '../../widgets/person_avatar.dart';
@@ -46,27 +47,34 @@ class _PersonDetailScreenState
 
   @override
   Widget build(BuildContext context) {
-    final expenses = ref.watch(expensesProvider);
-    final people = ref.watch(peopleProvider);
-    final peopleMap = {for (final person in people) person.id: person};
+    final List<Expense> expenses = ref.watch(expensesProvider);
+    final List<Person> people = ref.watch(peopleProvider);
+    final Map<String, Person> peopleMap = {
+      for (final person in people) person.id: person
+    };
     final String? personId = widget.person.id;
-    final List<Expense> personExpenses =
-        personId == null || personId.isEmpty
-            ? <Expense>[]
-            : expenses
-                .where((expense) => expense.payeeId == personId)
-                .toList();
+    final List<Expense> personExpenses = (personId == null || personId.isEmpty)
+        ? <Expense>[]
+        : expenses
+            .where((expense) => expense.payeeId == personId)
+            .toList();
     final currentStatus = _statusForIndex(_tabController.index);
     final List<Expense> filteredExpenses = personExpenses.isEmpty
         ? <Expense>[]
         : _filteredExpenses(personExpenses, currentStatus);
     final double currentTotal = filteredExpenses.fold<double>(
       0.0,
-      (sum, expense) => sum + expense.amount.toDouble(),
+      (sum, expense) {
+        final num? amount = expense.amount;
+        return sum + (amount ?? 0).toDouble();
+      },
     );
     final double unpaidTotal = personExpenses
         .where((expense) => expense.status == ExpenseStatus.unpaid)
-        .fold<double>(0.0, (sum, expense) => sum + expense.amount.toDouble());
+        .fold<double>(0.0, (sum, expense) {
+      final num? amount = expense.amount;
+      return sum + (amount ?? 0).toDouble();
+    });
     final int currentTotalForDisplay = currentTotal.round();
     final int unpaidTotalForDisplay = unpaidTotal.round();
     final totalLabel = _statusLabel(currentStatus);
