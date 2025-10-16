@@ -74,7 +74,7 @@ class ExpenseDetailScreen extends ConsumerWidget {
               _buildAvatar(payer),
               const SizedBox(width: 12),
               Icon(
-                Icons.arrow_forward_alt,
+                Icons.arrow_right_alt,
                 size: 28,
                 color: Theme.of(context).colorScheme.primary,
               ),
