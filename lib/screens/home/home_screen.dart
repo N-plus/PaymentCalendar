@@ -366,7 +366,11 @@ class _Avatar extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 6),
-            Icon(Icons.arrow_forward_alt, color: colorScheme.primary),
+            Icon(
+              Icons.arrow_right_alt,
+              color: colorScheme.primary,
+              size: 24,
+            ),
             const SizedBox(width: 6),
             PersonAvatar(
               person: summary.payee,
