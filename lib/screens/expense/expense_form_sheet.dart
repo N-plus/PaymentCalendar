@@ -195,6 +195,8 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
     final theme = Theme.of(context);
     final hasConflict =
         _payerId != null && _payeeId != null && _payerId == _payeeId;
+    final payer = _findPersonById(people, _payerId);
+    final payee = _findPersonById(people, _payeeId);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -203,6 +205,12 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
           style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
+        _buildParticipantPreviewRow(
+          context,
+          payer: payer,
+          payee: payee,
+        ),
+        const SizedBox(height: 12),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -215,13 +223,7 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
                 onSelected: _selectPayer,
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: Icon(
-                Icons.arrow_forward_alt,
-                color: theme.colorScheme.primary,
-              ),
-            ),
+            const SizedBox(width: 16),
             Expanded(
               child: _buildPersonChoices(
                 context,
@@ -367,6 +369,44 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildParticipantPreviewRow(
+    BuildContext context, {
+    Person? payer,
+    Person? payee,
+  }) {
+    final theme = Theme.of(context);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        _buildParticipantAvatar(context, payer),
+        const SizedBox(width: 12),
+        Icon(
+          Icons.arrow_right_alt,
+          size: 24,
+          color: theme.colorScheme.primary,
+          semanticLabel: 'payer to payee',
+        ),
+        const SizedBox(width: 12),
+        _buildParticipantAvatar(context, payee),
+      ],
+    );
+  }
+
+  Widget _buildParticipantAvatar(BuildContext context, Person? person) {
+    if (person != null) {
+      return _buildPersonAvatar(person, size: 48);
+    }
+    final theme = Theme.of(context);
+    return CircleAvatar(
+      radius: 24,
+      backgroundColor: theme.colorScheme.surfaceVariant,
+      child: Icon(
+        Icons.person_outline,
+        color: theme.colorScheme.onSurfaceVariant,
+      ),
     );
   }
 
@@ -579,6 +619,18 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
         ),
       ],
     );
+  }
+
+  Person? _findPersonById(List<Person> people, String? id) {
+    if (id == null) {
+      return null;
+    }
+    for (final person in people) {
+      if (person.id == id) {
+        return person;
+      }
+    }
+    return null;
   }
 
   Widget _buildPersonAvatar(Person person, {double size = 56}) {
