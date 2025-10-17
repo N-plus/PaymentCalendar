@@ -369,12 +369,12 @@ class _PersonSummaryTile extends ConsumerWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _Avatar(summary: summary),
-                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      _Avatar(summary: summary),
+                      const SizedBox(height: 12),
                       Text(
                         '${summary.payer.name} → ${summary.payee.name}',
                         style: textTheme
