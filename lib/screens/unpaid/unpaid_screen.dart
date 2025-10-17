@@ -5,6 +5,7 @@ import 'package:payment_calendar/widgets/radio_option_tile.dart';
 import '../../models/expense.dart';
 import '../../models/person.dart';
 import '../../providers/expenses_provider.dart';
+import '../../providers/home_summary_provider.dart';
 import '../../providers/people_provider.dart';
 import '../../utils/date_util.dart';
 import '../expense/expense_detail_screen.dart';
@@ -64,9 +65,17 @@ class _UnpaidScreenState extends ConsumerState<UnpaidScreen> {
     final people = ref.watch(peopleProvider);
     final peopleMap = {for (final person in people) person.id: person};
     final expenses = ref.watch(expensesProvider);
+    final includePlanned = ref.watch(includePlannedInSummaryProvider);
 
-    final candidates =
-        expenses.where((e) => e.status != ExpenseStatus.paid).toList();
+    final candidates = expenses.where((expense) {
+      if (expense.status == ExpenseStatus.paid) {
+        return false;
+      }
+      if (!includePlanned && isFutureDate(expense.date)) {
+        return false;
+      }
+      return true;
+    }).toList();
     final filteredExpenses = candidates
         .where((expense) => _matchesFilters(expense, peopleMap))
         .toList()
