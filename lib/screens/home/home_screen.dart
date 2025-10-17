@@ -261,37 +261,70 @@ class _SampleAvatars extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     const double size = 48;
+
+    final captionStyle = textTheme.bodySmall?.copyWith(
+      color: colorScheme.onSurfaceVariant,
+      fontWeight: FontWeight.w600,
+    );
 
     return Row(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        const PersonAvatar(
-          person: _sampleChildPerson,
-          size: size,
-          showShadow: true,
-          backgroundColor: kPersonAvatarBackgroundColor,
-          textStyle: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-          ),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '立て替えた人',
+              style: captionStyle,
+            ),
+            const SizedBox(height: 4),
+            const PersonAvatar(
+              person: _sampleChildPerson,
+              size: size,
+              showShadow: true,
+              backgroundColor: kPersonAvatarBackgroundColor,
+              textStyle: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
         const SizedBox(width: 6),
-        Icon(
-          Icons.arrow_right_alt,
-          color: colorScheme.primary,
-          size: 24,
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 20),
+            Icon(
+              Icons.arrow_right_alt,
+              color: colorScheme.primary,
+              size: 24,
+            ),
+          ],
         ),
         const SizedBox(width: 6),
-        const PersonAvatar(
-          person: _sampleMotherPerson,
-          size: size,
-          showShadow: true,
-          backgroundColor: kPersonAvatarBackgroundColor,
-          textStyle: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-          ),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '支払う人',
+              style: captionStyle,
+            ),
+            const SizedBox(height: 4),
+            const PersonAvatar(
+              person: _sampleMotherPerson,
+              size: size,
+              showShadow: true,
+              backgroundColor: kPersonAvatarBackgroundColor,
+              textStyle: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -525,38 +558,70 @@ class _Avatar extends StatelessWidget {
   Widget build(BuildContext context) {
     const double size = 48;
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final captionStyle = textTheme.bodySmall?.copyWith(
+      color: colorScheme.onSurfaceVariant,
+      fontWeight: FontWeight.w600,
+    );
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Row(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            PersonAvatar(
-              person: summary.payer,
-              size: size,
-              showShadow: true,
-              backgroundColor: kPersonAvatarBackgroundColor,
-              textStyle: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '立て替えた人',
+                  style: captionStyle,
+                ),
+                const SizedBox(height: 4),
+                PersonAvatar(
+                  person: summary.payer,
+                  size: size,
+                  showShadow: true,
+                  backgroundColor: kPersonAvatarBackgroundColor,
+                  textStyle: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(width: 6),
-            Icon(
-              Icons.arrow_right_alt,
-              color: colorScheme.primary,
-              size: 24,
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 20),
+                Icon(
+                  Icons.arrow_right_alt,
+                  color: colorScheme.primary,
+                  size: 24,
+                ),
+              ],
             ),
             const SizedBox(width: 6),
-            PersonAvatar(
-              person: summary.payee,
-              size: size,
-              showShadow: true,
-              backgroundColor: kPersonAvatarBackgroundColor,
-              textStyle: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '支払う人',
+                  style: captionStyle,
+                ),
+                const SizedBox(height: 4),
+                PersonAvatar(
+                  person: summary.payee,
+                  size: size,
+                  showShadow: true,
+                  backgroundColor: kPersonAvatarBackgroundColor,
+                  textStyle: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
