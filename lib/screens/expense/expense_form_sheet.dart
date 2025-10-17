@@ -9,6 +9,7 @@ import '../../models/expense_category.dart';
 import '../../providers/categories_provider.dart';
 import '../../providers/expenses_provider.dart';
 import '../../providers/people_provider.dart';
+import '../../providers/sample_experience_provider.dart';
 import '../../utils/category_visuals.dart';
 import '../../utils/date_picker_theme.dart';
 import '../../utils/date_util.dart';
@@ -738,6 +739,9 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
             category: category,
             photoPaths: _photoPaths,
           );
+      await ref
+          .read(sampleExperienceProvider.notifier)
+          .markCompleted();
     } else {
       final original = ref
           .read(expensesProvider)

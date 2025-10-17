@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:payment_calendar/utils/color_utils.dart';
 
 import '../../models/expense.dart';
+import '../../models/person.dart';
 import '../../models/person_summary.dart';
 import '../../providers/expenses_provider.dart';
 import '../../providers/home_summary_provider.dart';
 import '../../providers/settings_provider.dart';
+import '../../providers/sample_experience_provider.dart';
 import '../../screens/person/person_detail_screen.dart';
 import '../../screens/unpaid/unpaid_screen.dart';
 import '../../utils/date_util.dart';
@@ -23,6 +25,8 @@ class HomeScreen extends ConsumerWidget {
     final summaries = ref.watch(homeSummariesProvider);
     final quickPayIncludesPlanned = ref.watch(settingsProvider
         .select((settings) => settings.quickPayIncludesPlanned));
+    final hasAddedRealExpense = ref.watch(sampleExperienceProvider);
+    final showSampleExperience = !hasAddedRealExpense && summaries.isEmpty;
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
@@ -63,21 +67,24 @@ class HomeScreen extends ConsumerWidget {
           ),
           Divider(height: 1, thickness: 1, color: Theme.of(context).dividerColor),
           Expanded(
-            child: summaries.isEmpty
-                ? const _HomeEmptyState()
-                : ListView.separated(
-                    padding: const EdgeInsets.all(16),
-                    itemBuilder: (context, index) {
-                      final summary = summaries[index];
-                      return _PersonSummaryTile(
-                        summary: summary,
-                        includePlanned: includePlanned,
-                        quickPayIncludesPlanned: quickPayIncludesPlanned,
-                      );
-                    },
-                    separatorBuilder: (context, index) => const SizedBox(height: 12),
-                    itemCount: summaries.length,
-                  ),
+            child: showSampleExperience
+                ? const _SampleExperience()
+                : summaries.isEmpty
+                    ? const _HomeEmptyState()
+                    : ListView.separated(
+                        padding: const EdgeInsets.all(16),
+                        itemBuilder: (context, index) {
+                          final summary = summaries[index];
+                          return _PersonSummaryTile(
+                            summary: summary,
+                            includePlanned: includePlanned,
+                            quickPayIncludesPlanned: quickPayIncludesPlanned,
+                          );
+                        },
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 12),
+                        itemCount: summaries.length,
+                      ),
           ),
         ],
       ),
@@ -107,6 +114,186 @@ class _HomeEmptyState extends StatelessWidget {
     return const EmptyState(
       icon: Icons.receipt_long,
       message: '未払いの記録がありません',
+    );
+  }
+}
+
+const Person _sampleChildPerson = Person(id: 'child', name: '子ども');
+const Person _sampleMotherPerson = Person(id: 'mother', name: '母');
+
+class _SampleExperience extends StatelessWidget {
+  const _SampleExperience();
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Text(
+          '未払いの記録を追加するとここに表示されます',
+          style:
+              textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          '右下の＋ボタンから記録を作成して、家族やパートナーとのお金のやり取りを管理しましょう。',
+          style: textTheme.bodyMedium?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 24),
+        const _SampleSummaryCard(),
+        const SizedBox(height: 12),
+        Text(
+          '※この表示はおためし用です。実際の記録は保存されていません。',
+          style: textTheme.bodySmall?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SampleSummaryCard extends StatelessWidget {
+  const _SampleSummaryCard();
+
+  static const int _sampleAmount = 1200;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Card(
+      elevation: 4,
+      shadowColor: const Color.fromRGBO(0, 0, 0, 0.05),
+      color: const Color(0xFFFFFFFF),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const _SampleAvatars(),
+                const Spacer(),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary.withOpacityValue(0.12),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    'おためし表示',
+                    style: TextStyle(
+                      color: colorScheme.primary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              '${_sampleChildPerson.name} → ${_sampleMotherPerson.name}',
+              style:
+                  textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              formatCurrency(_sampleAmount),
+              style: textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFFF44336),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              '未払い合計 1 件',
+              style: textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: null,
+                    icon: const Icon(Icons.person, size: 18),
+                    label: const Text('個人詳細'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: null,
+                    icon: const Icon(Icons.payment, size: 18),
+                    label: const Text('全件支払い'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SampleAvatars extends StatelessWidget {
+  const _SampleAvatars();
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    const double size = 48;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const PersonAvatar(
+          person: _sampleChildPerson,
+          size: size,
+          showShadow: true,
+          backgroundColor: kPersonAvatarBackgroundColor,
+          textStyle: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(width: 6),
+        Icon(
+          Icons.arrow_right_alt,
+          color: colorScheme.primary,
+          size: 24,
+        ),
+        const SizedBox(width: 6),
+        const PersonAvatar(
+          person: _sampleMotherPerson,
+          size: size,
+          showShadow: true,
+          backgroundColor: kPersonAvatarBackgroundColor,
+          textStyle: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
     );
   }
 }
