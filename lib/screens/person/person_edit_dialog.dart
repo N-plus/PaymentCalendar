@@ -36,6 +36,7 @@ class _PersonEditDialogState extends State<PersonEditDialog>
   late final TextEditingController _nameController;
   late final TextEditingController _emojiController;
   late final ScrollController _scrollController;
+  bool _hasScrollableContent = false;
   final _formKey = GlobalKey<FormState>();
   final ImagePicker _picker = ImagePicker();
 
@@ -66,7 +67,8 @@ class _PersonEditDialogState extends State<PersonEditDialog>
     _emojiController =
         TextEditingController(text: widget.person?.emoji ?? '');
     _emojiController.addListener(_handleEmojiChanged);
-    _scrollController = ScrollController();
+    _scrollController = ScrollController()
+      ..addListener(_handleScrollMetricsChanged);
     _existingPhotoPath = widget.person?.photoPath;
     _selectedIconAsset = widget.person?.iconAsset;
     _usePhoto = (_existingPhotoPath != null && _existingPhotoPath!.isNotEmpty);
@@ -78,7 +80,9 @@ class _PersonEditDialogState extends State<PersonEditDialog>
     _emojiController
       ..removeListener(_handleEmojiChanged)
       ..dispose();
-    _scrollController.dispose();
+    _scrollController
+      ..removeListener(_handleScrollMetricsChanged)
+      ..dispose();
     super.dispose();
   }
 
@@ -204,6 +208,25 @@ class _PersonEditDialogState extends State<PersonEditDialog>
     });
   }
 
+  void _handleScrollMetricsChanged() {
+    _scheduleScrollableExtentCheck();
+  }
+
+  void _scheduleScrollableExtentCheck() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      final hasScrollable = _scrollController.hasClients &&
+          _scrollController.position.maxScrollExtent > 0;
+      if (_hasScrollableContent != hasScrollable) {
+        setState(() {
+          _hasScrollableContent = hasScrollable;
+        });
+      }
+    });
+  }
+
   Future<String?> _saveFile(XFile file) async {
     try {
       final directory = await getApplicationDocumentsDirectory();
@@ -302,6 +325,8 @@ class _PersonEditDialogState extends State<PersonEditDialog>
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final keyboardOpen = bottomInset > 0;
     final controller = _scrollController;
+    _scheduleScrollableExtentCheck();
+    final showScrollbar = keyboardOpen && _hasScrollableContent;
 
     final formContent = Form(
       key: _formKey,
@@ -525,88 +550,79 @@ class _PersonEditDialogState extends State<PersonEditDialog>
             ),
           ),
           const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.black,
-                ),
-                child: const Text(
-                  'キャンセル',
-                  style: TextStyle(color: Colors.black),
-                ),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: _submitting ? null : _submit,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black,
-                ),
-                child: _submitting
-                    ? const SizedBox(
-                        height: 16,
-                        width: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text('保存'),
-              ),
-            ],
+        ],
+      ),
+    );
+
+    final actions = Padding(
+      padding: EdgeInsets.fromLTRB(
+        24,
+        0,
+        24,
+        80 + (keyboardOpen ? bottomInset : 0),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.black,
+            ),
+            child: const Text(
+              'キャンセル',
+              style: TextStyle(color: Colors.black),
+            ),
+          ),
+          const SizedBox(width: 8),
+          ElevatedButton(
+            onPressed: _submitting ? null : _submit,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.black,
+            ),
+            child: _submitting
+                ? const SizedBox(
+                    height: 16,
+                    width: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('保存'),
           ),
         ],
       ),
     );
 
-    final scrollableContent = SingleChildScrollView(
+    final scrollableContent = Scrollbar(
       controller: controller,
-      padding: EdgeInsets.zero,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Container(
-            color: const Color(0xFFFFFAF0),
-            padding: EdgeInsets.fromLTRB(
-              16,
-              16,
-              16,
-              80 + (keyboardOpen ? bottomInset : 0),
+      thumbVisibility: showScrollbar,
+      trackVisibility: showScrollbar,
+      interactive: showScrollbar,
+      child: SingleChildScrollView(
+        controller: controller,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 16),
+                formContent,
+                actions,
+              ],
             ),
-            child: formContent,
           ),
-        ],
+        ),
       ),
     );
 
     return Dialog(
+      backgroundColor: const Color(0xFFFFFAF0),
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       child: SafeArea(
-        child: Stack(
-          children: [
-            scrollableContent,
-            Align(
-              alignment: Alignment.centerRight,
-              child: IgnorePointer(
-                ignoring: !keyboardOpen,
-                child: SizedBox(
-                  width: 20,
-                  child: AnimatedOpacity(
-                    duration: const Duration(milliseconds: 150),
-                    opacity: keyboardOpen ? 1.0 : 0.0,
-                    child: Scrollbar(
-                      controller: controller,
-                      thumbVisibility: keyboardOpen,
-                      trackVisibility: keyboardOpen,
-                      scrollbarOrientation: ScrollbarOrientation.right,
-                      child: const SizedBox.expand(),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+        child: scrollableContent,
       ),
     );
   }
