@@ -559,29 +559,23 @@ class _PersonEditDialogState extends State<PersonEditDialog>
       ),
     );
 
-    final scrollableContent = Scrollbar(
+    final scrollableContent = SingleChildScrollView(
       controller: controller,
-      thumbVisibility: false,
-      trackVisibility: false,
-      scrollbarOrientation: ScrollbarOrientation.right,
-      child: SingleChildScrollView(
-        controller: controller,
-        padding: EdgeInsets.zero,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              color: const Color(0xFFFFFAF0),
-              padding: EdgeInsets.fromLTRB(
-                16,
-                16,
-                16,
-                bottomInset + 80,
-              ),
-              child: formContent,
+      padding: EdgeInsets.zero,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            color: const Color(0xFFFFFAF0),
+            padding: EdgeInsets.fromLTRB(
+              16,
+              16,
+              16,
+              80 + (keyboardOpen ? bottomInset : 0),
             ),
-          ],
-        ),
+            child: formContent,
+          ),
+        ],
       ),
     );
 
@@ -593,23 +587,19 @@ class _PersonEditDialogState extends State<PersonEditDialog>
             scrollableContent,
             Align(
               alignment: Alignment.centerRight,
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 150),
-                opacity: keyboardOpen ? 1.0 : 0.0,
-                child: IgnorePointer(
-                  ignoring: !keyboardOpen,
-                  child: SizedBox(
-                    width: 20,
+              child: IgnorePointer(
+                ignoring: !keyboardOpen,
+                child: SizedBox(
+                  width: 20,
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 150),
+                    opacity: keyboardOpen ? 1.0 : 0.0,
                     child: Scrollbar(
                       controller: controller,
                       thumbVisibility: keyboardOpen,
                       trackVisibility: keyboardOpen,
                       scrollbarOrientation: ScrollbarOrientation.right,
-                      child: AnimatedOpacity(
-                        duration: const Duration(milliseconds: 150),
-                        opacity: keyboardOpen ? 1.0 : 0.0,
-                        child: const SizedBox.expand(),
-                      ),
+                      child: const SizedBox.expand(),
                     ),
                   ),
                 ),
