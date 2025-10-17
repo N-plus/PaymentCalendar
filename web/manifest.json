@@ -1,6 +1,6 @@
 {
-    "name": "payment_calendar",
-    "short_name": "payment_calendar",
+    "name": "pay_check",
+    "short_name": "pay_check",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

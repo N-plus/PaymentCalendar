@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:payment_calendar/widgets/radio_option_tile.dart';
+import 'package:pay_check/widgets/radio_option_tile.dart';
 
 import '../../models/expense.dart';
 import '../../models/person.dart';

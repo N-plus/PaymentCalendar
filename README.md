@@ -1,4 +1,4 @@
-# PaymentCalendar
+# Pay Check
 
 Flutter app that lets families or groups manage shared expenses in a calendar format.
 
