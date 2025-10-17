@@ -3,20 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/expense.dart';
 import '../models/person.dart';
 import '../models/person_summary.dart';
+import '../utils/date_util.dart';
 import 'expenses_provider.dart';
 import 'people_provider.dart';
-
-DateTime _startOfTodayLocal() {
-  final now = DateTime.now();
-  return DateTime(now.year, now.month, now.day);
-}
-
-DateTime _endOfTodayLocal() =>
-    _startOfTodayLocal().add(const Duration(days: 1)).subtract(
-          const Duration(milliseconds: 1),
-        );
-
-bool _isFuture(DateTime date) => date.toLocal().isAfter(_endOfTodayLocal());
 
 List<Expense> visibleExpenses(
   List<Expense> all, {
@@ -26,7 +15,7 @@ List<Expense> visibleExpenses(
     return List<Expense>.unmodifiable(all);
   }
   return List<Expense>.unmodifiable(
-    all.where((expense) => !_isFuture(expense.date)).toList(),
+    all.where((expense) => !isFutureDate(expense.date)).toList(),
   );
 }
 
