@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:payment_calendar/main.dart';
-import 'package:payment_calendar/providers/settings_provider.dart';
-import 'package:payment_calendar/services/reminder_service.dart';
+import 'package:pay_check/main.dart';
+import 'package:pay_check/providers/settings_provider.dart';
+import 'package:pay_check/services/reminder_service.dart';
 
 class _FakeReminderService implements ReminderService {
   @override
@@ -26,13 +26,13 @@ class _FakeReminderService implements ReminderService {
 }
 
 void main() {
-  testWidgets('PaymentCalendarApp can be pumped', (tester) async {
+  testWidgets('PayCheckApp can be pumped', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           reminderServiceProvider.overrideWithValue(_FakeReminderService()),
         ],
-        child: const PaymentCalendarApp(),
+        child: const PayCheckApp(),
       ),
     );
 

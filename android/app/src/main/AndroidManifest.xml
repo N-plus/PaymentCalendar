@@ -8,7 +8,7 @@
         android:maxSdkVersion="32" />
 
     <application
-        android:label="payment_calendar"
+        android:label="pay_check"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

@@ -24,13 +24,13 @@ Future<void> main() async {
         reminderServiceProvider.overrideWithValue(reminderService),
         sharedPreferencesProvider.overrideWithValue(preferences),
       ],
-      child: const PaymentCalendarApp(),
+      child: const PayCheckApp(),
     ),
   );
 }
 
-class PaymentCalendarApp extends ConsumerWidget {
-  const PaymentCalendarApp({super.key});
+class PayCheckApp extends ConsumerWidget {
+  const PayCheckApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -43,7 +43,7 @@ class PaymentCalendarApp extends ConsumerWidget {
       primary: themeColor,
     );
     return MaterialApp(
-      title: 'Payment Calendar',
+      title: 'Pay Check',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: colorScheme,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:payment_calendar/utils/color_utils.dart';
+import 'package:pay_check/utils/color_utils.dart';
 
 import '../../models/expense.dart';
 import '../../models/person.dart';
