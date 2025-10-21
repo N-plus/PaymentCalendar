@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -14,7 +15,8 @@ import 'screens/unpaid/unpaid_screen.dart';
 import 'services/reminder_service.dart';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   final reminderService = ReminderService(FlutterLocalNotificationsPlugin());
   await reminderService.initialize();
   final preferences = await SharedPreferences.getInstance();
@@ -27,6 +29,8 @@ Future<void> main() async {
       child: const PayCheckApp(),
     ),
   );
+  await Future<void>.delayed(const Duration(seconds: 1));
+  FlutterNativeSplash.remove(withFade: true);
 }
 
 class PayCheckApp extends ConsumerWidget {
