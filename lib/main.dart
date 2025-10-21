@@ -30,7 +30,7 @@ Future<void> main() async {
     ),
   );
   await Future<void>.delayed(const Duration(seconds: 1));
-  FlutterNativeSplash.remove(withFade: true);
+  FlutterNativeSplash.remove();
 }
 
 class PayCheckApp extends ConsumerWidget {
