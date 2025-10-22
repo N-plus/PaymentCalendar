@@ -14,22 +14,55 @@ import 'screens/settings/settings_screen.dart';
 import 'screens/unpaid/unpaid_screen.dart';
 import 'services/reminder_service.dart';
 
-Future<void> main() async {
+void main() {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   final reminderService = ReminderService(FlutterLocalNotificationsPlugin());
-  await reminderService.initialize();
-  final preferences = await SharedPreferences.getInstance();
-  runApp(
-    ProviderScope(
+  runApp(_AppBootstrap(reminderService: reminderService));
+}
+
+class _AppBootstrap extends StatefulWidget {
+  const _AppBootstrap({required this.reminderService});
+
+  final ReminderService reminderService;
+
+  @override
+  State<_AppBootstrap> createState() => _AppBootstrapState();
+}
+
+class _AppBootstrapState extends State<_AppBootstrap> {
+  SharedPreferences? _preferences;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await widget.reminderService.initialize();
+      final preferences = await SharedPreferences.getInstance();
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _preferences = preferences;
+      });
+      FlutterNativeSplash.remove();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final preferences = _preferences;
+    if (preferences == null) {
+      return const SizedBox.shrink();
+    }
+    return ProviderScope(
       overrides: [
-        reminderServiceProvider.overrideWithValue(reminderService),
+        reminderServiceProvider.overrideWithValue(widget.reminderService),
         sharedPreferencesProvider.overrideWithValue(preferences),
       ],
       child: const PayCheckApp(),
-    ),
-  );
-  FlutterNativeSplash.remove();
+    );
+  }
 }
 
 class PayCheckApp extends ConsumerWidget {
