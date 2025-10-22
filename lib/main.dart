@@ -29,7 +29,6 @@ Future<void> main() async {
       child: const PayCheckApp(),
     ),
   );
-  await Future<void>.delayed(const Duration(seconds: 1));
   FlutterNativeSplash.remove();
 }
 
