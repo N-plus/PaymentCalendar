@@ -34,7 +34,6 @@ class PersonEditDialog extends StatefulWidget {
 class _PersonEditDialogState extends State<PersonEditDialog>
     with PhotoPermissionMixin<PersonEditDialog> {
   late final TextEditingController _nameController;
-  late final TextEditingController _emojiController;
   late final ScrollController _scrollController;
   bool _hasScrollableContent = false;
   final _formKey = GlobalKey<FormState>();
@@ -64,9 +63,6 @@ class _PersonEditDialogState extends State<PersonEditDialog>
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.person?.name ?? '');
-    _emojiController =
-        TextEditingController(text: widget.person?.emoji ?? '');
-    _emojiController.addListener(_handleEmojiChanged);
     _scrollController = ScrollController()
       ..addListener(_handleScrollMetricsChanged);
     _existingPhotoPath = widget.person?.photoPath;
@@ -77,32 +73,16 @@ class _PersonEditDialogState extends State<PersonEditDialog>
   @override
   void dispose() {
     _nameController.dispose();
-    _emojiController
-      ..removeListener(_handleEmojiChanged)
-      ..dispose();
     _scrollController
       ..removeListener(_handleScrollMetricsChanged)
       ..dispose();
     super.dispose();
   }
 
-  void _handleEmojiChanged() {
-    if (_emojiController.text.trim().isEmpty) {
-      return;
-    }
-    if (_selectedIconAsset == null) {
-      return;
-    }
-    setState(() {
-      _selectedIconAsset = null;
-    });
-  }
-
   void _selectIcon(String assetPath) {
     _setUsePhoto(false);
     setState(() {
       _selectedIconAsset = assetPath;
-      _emojiController.text = '';
     });
   }
 
@@ -265,7 +245,6 @@ class _PersonEditDialogState extends State<PersonEditDialog>
     });
 
     final name = _nameController.text.trim();
-    String? emoji;
     String? photoPath;
     String? iconAsset;
 
@@ -294,14 +273,7 @@ class _PersonEditDialogState extends State<PersonEditDialog>
         return;
       }
     } else {
-      final trimmedEmoji = _emojiController.text.trim();
-      if (trimmedEmoji.isNotEmpty) {
-        emoji = trimmedEmoji;
-        iconAsset = null;
-      } else {
-        emoji = null;
-        iconAsset = _selectedIconAsset;
-      }
+      iconAsset = _selectedIconAsset;
       photoPath = null;
     }
 
@@ -312,7 +284,6 @@ class _PersonEditDialogState extends State<PersonEditDialog>
     Navigator.of(context).pop(
       PersonFormResult(
         name: name,
-        emoji: emoji,
         photoPath: photoPath,
         iconAsset: iconAsset,
       ),
@@ -377,7 +348,7 @@ class _PersonEditDialogState extends State<PersonEditDialog>
                     spacing: 8,
                     children: [
                       ChoiceChip(
-                        label: const Text('絵文字'),
+                        label: const Text('アイコン'),
                         selected: !_usePhoto,
                         selectedColor: Colors.white,
                         labelStyle: const TextStyle(color: Colors.black),
@@ -472,18 +443,6 @@ class _PersonEditDialogState extends State<PersonEditDialog>
                       ],
                     ),
                   ] else ...[
-                    TextFormField(
-                      controller: _emojiController,
-                      decoration: const InputDecoration(
-                        labelText: 'カスタムアイコン（絵文字）',
-                        hintText: '例: 😀',
-                        border: OutlineInputBorder(),
-                        labelStyle: TextStyle(color: Colors.black),
-                      ),
-                      style: const TextStyle(color: Colors.black),
-                      inputFormatters: const [],
-                    ),
-                    const SizedBox(height: 12),
                     Text(
                       '候補のアイコンから選択する',
                       style: Theme.of(context)
