@@ -621,8 +621,19 @@ class _PersonEditDialogState extends State<PersonEditDialog>
     return Dialog(
       backgroundColor: const Color(0xFFFFFAF0),
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      child: SafeArea(
-        child: scrollableContent,
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () {
+          final currentFocus = FocusScope.of(context);
+          if (!currentFocus.hasPrimaryFocus && currentFocus.focusedChild != null) {
+            currentFocus.unfocus();
+          } else {
+            FocusManager.instance.primaryFocus?.unfocus();
+          }
+        },
+        child: SafeArea(
+          child: scrollableContent,
+        ),
       ),
     );
   }
