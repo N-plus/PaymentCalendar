@@ -87,6 +87,7 @@ class _PersonEditDialogState extends State<PersonEditDialog>
   }
 
   void _setUsePhoto(bool value) {
+    _unfocusTextField();
     setState(() {
       _usePhoto = value;
       if (!value) {
@@ -96,7 +97,12 @@ class _PersonEditDialogState extends State<PersonEditDialog>
     });
   }
 
+  void _unfocusTextField() {
+    FocusScope.of(context).unfocus();
+  }
+
   Future<void> _pickPhotoFromGallery() async {
+    _unfocusTextField();
     if (await shouldUseAndroidPhotoPicker()) {
       await _pickPhotoWithAndroidPhotoPicker();
       return;
@@ -134,6 +140,7 @@ class _PersonEditDialogState extends State<PersonEditDialog>
   }
 
   Future<void> _pickPhotoWithAndroidPhotoPicker() async {
+    _unfocusTextField();
     try {
       final picked = await _picker.pickImage(source: ImageSource.gallery);
       if (picked == null) {
@@ -159,6 +166,7 @@ class _PersonEditDialogState extends State<PersonEditDialog>
   }
 
   Future<void> _capturePhoto() async {
+    _unfocusTextField();
     try {
       final picked = await _picker.pickImage(source: ImageSource.camera);
       if (picked == null) {
@@ -181,6 +189,7 @@ class _PersonEditDialogState extends State<PersonEditDialog>
   }
 
   void _removePhoto() {
+    _unfocusTextField();
     setState(() {
       _selectedPhoto = null;
       _existingPhotoPath = null;
