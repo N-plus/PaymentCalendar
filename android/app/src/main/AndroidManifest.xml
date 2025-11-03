@@ -9,7 +9,7 @@
 
     <application
         android:label="pay_check"
-        android:name="${applicationName}"
+
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
