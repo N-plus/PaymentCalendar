@@ -155,52 +155,15 @@ class RootGate extends ConsumerStatefulWidget {
 }
 
 class _RootGateState extends ConsumerState<RootGate> {
-  bool _hasPresentedOnboarding = false;
-  late final ProviderSubscription<AsyncValue<bool>>
-      _rootInitializationSubscription;
+  bool _hasFinishedOnboardingFlow = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _rootInitializationSubscription = ref.listenManual<AsyncValue<bool>>(
-      _rootInitializationProvider,
-      (previous, next) {
-        next.whenData((shouldShowOnboarding) {
-          _handleOnboardingVisibility(shouldShowOnboarding);
-        });
-      },
-    );
-  }
-
-  @override
-  void dispose() {
-    _rootInitializationSubscription.close();
-    super.dispose();
-  }
-
-  void _handleOnboardingVisibility(bool shouldShowOnboarding) {
-    if (!shouldShowOnboarding) {
-      _hasPresentedOnboarding = false;
+  Future<void> _completeOnboarding() async {
+    await ref.read(peopleOnboardingProvider.notifier).complete();
+    if (!mounted) {
       return;
     }
-    if (_hasPresentedOnboarding || !mounted) {
-      return;
-    }
-    _hasPresentedOnboarding = true;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) {
-        return;
-      }
-      final onboardingNotifier = ref.read(peopleOnboardingProvider.notifier);
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => PeopleOnboardingScreen(
-            onCompleted: () => onboardingNotifier.complete(),
-            onLater: () => onboardingNotifier.complete(),
-          ),
-        ),
-      );
+    setState(() {
+      _hasFinishedOnboardingFlow = true;
     });
   }
 
@@ -208,7 +171,15 @@ class _RootGateState extends ConsumerState<RootGate> {
   Widget build(BuildContext context) {
     final initialization = ref.watch(_rootInitializationProvider);
     return initialization.when(
-      data: (_) => const RootPage(),
+      data: (shouldShowOnboarding) {
+        if (shouldShowOnboarding && !_hasFinishedOnboardingFlow) {
+          return PeopleOnboardingScreen(
+            onCompleted: _completeOnboarding,
+            onLater: _completeOnboarding,
+          );
+        }
+        return const RootPage();
+      },
       loading: () => const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       ),
