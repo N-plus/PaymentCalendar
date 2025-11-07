@@ -504,13 +504,24 @@ class _PersonSummaryTile extends ConsumerWidget {
         final isNaturalWoodTheme =
             Theme.of(context).colorScheme.primary.value ==
                 _naturalWoodThemeColorValue;
+        final naturalWoodTextColor =
+            const MaterialStatePropertyAll<Color>(Colors.black);
         final textButtonStyle = isNaturalWoodTheme
-            ? TextButton.styleFrom(foregroundColor: Colors.black)
+            ? (Theme.of(context).textButtonTheme.style ?? const ButtonStyle())
+                .copyWith(
+                foregroundColor: naturalWoodTextColor,
+                textStyle: const MaterialStatePropertyAll<TextStyle>(
+                  TextStyle(color: Colors.black),
+                ),
+              )
             : null;
         final elevatedButtonStyle = isNaturalWoodTheme
-            ? ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                foregroundColor: Colors.white,
+            ? (Theme.of(context).elevatedButtonTheme.style ?? const ButtonStyle())
+                .copyWith(
+                foregroundColor: naturalWoodTextColor,
+                textStyle: const MaterialStatePropertyAll<TextStyle>(
+                  TextStyle(color: Colors.black),
+                ),
               )
             : null;
         return AlertDialog(
