@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pay_check/providers/shared_preferences_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/person.dart';
-import 'shared_preferences_provider.dart';
 
 final peopleProvider = StateNotifierProvider<PeopleNotifier, List<Person>>((ref) {
   final preferences = ref.watch(sharedPreferencesProvider);
