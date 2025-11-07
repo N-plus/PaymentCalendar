@@ -1,17 +1,25 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/expense.dart';
 import '../models/expense_category.dart';
+import 'shared_preferences_provider.dart';
 
 final expensesProvider =
     StateNotifierProvider<ExpensesNotifier, List<Expense>>((ref) {
-  return ExpensesNotifier();
+  final preferences = ref.watch(sharedPreferencesProvider);
+  return ExpensesNotifier(preferences);
 });
 
 class ExpensesNotifier extends StateNotifier<List<Expense>> {
-  ExpensesNotifier() : super(_seedExpenses());
+  ExpensesNotifier(this._preferences) : super(const []) {
+    _initialization = _restoreInitialExpenses();
+  }
 
   static const _placeholderExpenses = [
     _PlaceholderExpenseSignature(
@@ -96,6 +104,39 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
   }
 
   final _uuid = const Uuid();
+  static const _storageKey = 'expenses_data';
+  final SharedPreferences _preferences;
+  late final Future<void> _initialization;
+
+  Future<void> _restoreInitialExpenses() async {
+    final jsonString = _preferences.getString(_storageKey);
+    if (jsonString == null || jsonString.isEmpty) {
+      final seeded = _seedExpenses();
+      state = seeded;
+      await _saveExpenses();
+      return;
+    }
+    try {
+      final List<dynamic> decoded = jsonDecode(jsonString) as List<dynamic>;
+      state = [
+        for (final dynamic item in decoded)
+          Expense.fromJson(Map<String, dynamic>.from(item as Map)),
+      ];
+    } catch (_) {
+      final seeded = _seedExpenses();
+      state = seeded;
+      await _saveExpenses();
+    }
+  }
+
+  Future<void> ensureInitialized() => _initialization;
+
+  Future<void> _saveExpenses() async {
+    final encoded = jsonEncode([
+      for (final expense in state) expense.toJson(),
+    ]);
+    await _preferences.setString(_storageKey, encoded);
+  }
 
   void removePlaceholderUnpaidExpenses() {
     if (state.isEmpty) {
@@ -114,6 +155,7 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
     }).toList();
     if (filtered.length != state.length) {
       state = filtered;
+      unawaited(_saveExpenses());
     }
   }
 
@@ -137,6 +179,7 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
       photoPaths: photoPaths,
     );
     state = [...state, expense];
+    unawaited(_saveExpenses());
   }
 
   void saveExpense(Expense expense) {
@@ -145,6 +188,7 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
       updateExpense(expense);
     } else {
       state = [...state, expense];
+      unawaited(_saveExpenses());
     }
   }
 
@@ -153,10 +197,12 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
       for (final e in state)
         if (e.id == expense.id) expense.adjustStatus() else e,
     ];
+    unawaited(_saveExpenses());
   }
 
   void deleteExpense(String id) {
     state = state.where((e) => e.id != id).toList();
+    unawaited(_saveExpenses());
   }
 
   void markAsPaid(String id) {
@@ -167,6 +213,7 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
         else
           e,
     ];
+    unawaited(_saveExpenses());
   }
 
   void markAsUnpaid(String id) {
@@ -174,6 +221,7 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
       for (final e in state)
         if (e.id == id) e.adjustStatus(paid: false) else e,
     ];
+    unawaited(_saveExpenses());
   }
 
   void changeDate(String id, DateTime date) {
@@ -181,6 +229,7 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
       for (final e in state)
         if (e.id == id) e.adjustStatus(date: date) else e,
     ];
+    unawaited(_saveExpenses());
   }
 
   void replaceCategory(String from, String to) {
@@ -191,6 +240,7 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
       for (final e in state)
         if (e.category == from) e.copyWith(category: to) else e,
     ];
+    unawaited(_saveExpenses());
   }
 
   List<Expense> markPaidForPair(
@@ -213,6 +263,7 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
         else
           e,
     ];
+    unawaited(_saveExpenses());
     return updated;
   }
 
@@ -232,6 +283,7 @@ class ExpensesNotifier extends StateNotifier<List<Expense>> {
       }
     }
     state = updated;
+    unawaited(_saveExpenses());
   }
 }
 

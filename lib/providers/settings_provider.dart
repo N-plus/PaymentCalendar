@@ -8,13 +8,10 @@ import '../models/expense.dart';
 import '../models/settings.dart';
 import '../services/reminder_service.dart';
 import 'expenses_provider.dart';
+import 'shared_preferences_provider.dart';
 
 final reminderServiceProvider = Provider<ReminderService>((ref) {
   throw UnimplementedError('ReminderService must be provided in main.dart');
-});
-
-final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
-  throw UnimplementedError('SharedPreferences must be provided in main.dart');
 });
 
 final settingsProvider =

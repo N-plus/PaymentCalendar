@@ -151,4 +151,56 @@ class Expense {
         paidAt,
         createdAt,
       );
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'payerId': payerId,
+      'payeeId': payeeId,
+      'date': date.toIso8601String(),
+      'amount': amount,
+      'memo': memo,
+      'status': status.name,
+      'category': category,
+      'photoPaths': photoPaths,
+      'paidAt': paidAt?.toIso8601String(),
+      'createdAt': createdAt.toIso8601String(),
+    };
+  }
+
+  factory Expense.fromJson(Map<String, dynamic> json) {
+    final statusValue = json['status'];
+    final status = () {
+      if (statusValue is String) {
+        return ExpenseStatus.values.firstWhere(
+          (element) => element.name == statusValue,
+          orElse: () => ExpenseStatus.unpaid,
+        );
+      }
+      if (statusValue is int) {
+        return ExpenseStatus.values[statusValue];
+      }
+      return ExpenseStatus.unpaid;
+    }();
+    final categoryValue = json['category'] as String?;
+    return Expense(
+      id: json['id'] as String,
+      payerId: json['payerId'] as String,
+      payeeId: json['payeeId'] as String,
+      date: DateTime.parse(json['date'] as String),
+      amount: json['amount'] as int,
+      memo: json['memo'] as String? ?? '',
+      status: status,
+      category:
+          (categoryValue == null || categoryValue.isEmpty)
+              ? ExpenseCategory.fallback
+              : categoryValue,
+      photoPaths:
+          List<String>.from((json['photoPaths'] as List<dynamic>? ?? <dynamic>[])),
+      paidAt: (json['paidAt'] as String?) != null
+          ? DateTime.parse(json['paidAt'] as String)
+          : null,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+    );
+  }
 }

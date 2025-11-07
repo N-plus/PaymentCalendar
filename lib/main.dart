@@ -8,6 +8,7 @@ import 'providers/expenses_provider.dart';
 import 'providers/onboarding_provider.dart';
 import 'providers/people_provider.dart';
 import 'providers/settings_provider.dart';
+import 'providers/shared_preferences_provider.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/onboarding/people_onboarding_screen.dart';
 import 'screens/settings/settings_screen.dart';
@@ -143,7 +144,9 @@ final _rootInitializationProvider = FutureProvider<bool>((ref) async {
     await onboardingNotifier.complete();
   }
 
-  ref.read(expensesProvider.notifier).removePlaceholderUnpaidExpenses();
+  final expensesNotifier = ref.read(expensesProvider.notifier);
+  await expensesNotifier.ensureInitialized();
+  expensesNotifier.removePlaceholderUnpaidExpenses();
   return shouldShowOnboarding;
 });
 
