@@ -8,7 +8,7 @@ import 'providers/expenses_provider.dart';
 import 'providers/onboarding_provider.dart';
 import 'providers/people_provider.dart';
 import 'providers/settings_provider.dart';
-import 'providers/shared_preferences_provider.dart';
+import 'package:pay_check/providers/shared_preferences_provider.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/onboarding/people_onboarding_screen.dart';
 import 'screens/settings/settings_screen.dart';

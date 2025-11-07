@@ -3,12 +3,12 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pay_check/providers/shared_preferences_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/expense.dart';
 import '../models/expense_category.dart';
-import 'shared_preferences_provider.dart';
 
 final expensesProvider =
     StateNotifierProvider<ExpensesNotifier, List<Expense>>((ref) {

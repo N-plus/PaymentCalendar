@@ -2,13 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pay_check/providers/shared_preferences_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/expense.dart';
 import '../models/settings.dart';
 import '../services/reminder_service.dart';
 import 'expenses_provider.dart';
-import 'shared_preferences_provider.dart';
 
 final reminderServiceProvider = Provider<ReminderService>((ref) {
   throw UnimplementedError('ReminderService must be provided in main.dart');

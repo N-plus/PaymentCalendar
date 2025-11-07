@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pay_check/providers/shared_preferences_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'settings_provider.dart';
 
 final sampleExperienceProvider =
     StateNotifierProvider<SampleExperienceNotifier, bool>((ref) {
