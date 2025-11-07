@@ -34,6 +34,26 @@ class Person {
 
   static const Object _noValue = Object();
 
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      if (photoPath != null) 'photoPath': photoPath,
+      if (emoji != null) 'emoji': emoji,
+      if (iconAsset != null) 'iconAsset': iconAsset,
+    };
+  }
+
+  factory Person.fromJson(Map<String, dynamic> json) {
+    return Person(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      photoPath: json['photoPath'] as String?,
+      emoji: json['emoji'] as String?,
+      iconAsset: json['iconAsset'] as String?,
+    );
+  }
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) {
