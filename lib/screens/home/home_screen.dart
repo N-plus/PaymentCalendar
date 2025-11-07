@@ -16,6 +16,8 @@ import '../expense/expense_form_sheet.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/person_avatar.dart';
 
+const _naturalWoodThemeColorValue = 0xFFE8CFA9;
+
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -499,6 +501,18 @@ class _PersonSummaryTile extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) {
+        final isNaturalWoodTheme =
+            Theme.of(context).colorScheme.primary.value ==
+                _naturalWoodThemeColorValue;
+        final textButtonStyle = isNaturalWoodTheme
+            ? TextButton.styleFrom(foregroundColor: Colors.black)
+            : null;
+        final elevatedButtonStyle = isNaturalWoodTheme
+            ? ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                foregroundColor: Colors.white,
+              )
+            : null;
         return AlertDialog(
           title: const Text('全件支払い'),
           content: Text(
@@ -506,10 +520,12 @@ class _PersonSummaryTile extends ConsumerWidget {
           ),
           actions: [
             TextButton(
+              style: textButtonStyle,
               onPressed: () => Navigator.of(context).pop(false),
               child: const Text('キャンセル'),
             ),
             ElevatedButton(
+              style: elevatedButtonStyle,
               onPressed: () => Navigator.of(context).pop(true),
               child: const Text('支払い済みにする'),
             ),
