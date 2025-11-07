@@ -83,6 +83,7 @@ class PayCheckApp extends ConsumerWidget {
     return MaterialApp(
       title: 'Pay Check',
       debugShowCheckedModeBanner: false,
+      locale: const Locale('ja'),
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
@@ -90,7 +91,6 @@ class PayCheckApp extends ConsumerWidget {
       ],
       supportedLocales: const [
         Locale('ja'),
-        Locale('en'),
       ],
       theme: ThemeData(
         colorScheme: colorScheme,
