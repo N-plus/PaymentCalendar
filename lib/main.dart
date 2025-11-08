@@ -90,7 +90,8 @@ class PayCheckApp extends ConsumerWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [
-        Locale('ja'),
+        Locale('ja'), // 日本語
+        Locale('en'), // 英語（フォールバック用）
       ],
       theme: ThemeData(
         colorScheme: colorScheme,
