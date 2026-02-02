@@ -158,14 +158,15 @@ class _PeopleOnboardingScreenState
             ),
             const SizedBox(height: 16),
             Text(
-              'まだ人が登録されていません',
+              'アプリを使用する人を登録しましょう',
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              '「人を追加」ボタンから登録できます',
+              'このアプリを使う家族を登録してください\n'
+              '『人を追加』ボタンから登録できます',
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
