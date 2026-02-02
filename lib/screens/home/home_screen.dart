@@ -90,7 +90,7 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         backgroundColor: colorScheme.primary,
         onPressed: () async {
           await showModalBottomSheet<void>(
@@ -99,9 +99,13 @@ class HomeScreen extends ConsumerWidget {
             builder: (_) => const ExpenseFormSheet(),
           );
         },
-        child: const Icon(
+        icon: const Icon(
           Icons.add,
           color: Colors.white,
+        ),
+        label: const Text(
+          '記録を追加',
+          style: TextStyle(color: Colors.white),
         ),
       ),
     );
