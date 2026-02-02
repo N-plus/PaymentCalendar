@@ -120,7 +120,11 @@ class _HomeEmptyState extends StatelessWidget {
   }
 }
 
-const Person _sampleChildPerson = Person(id: 'child', name: '子ども');
+const Person _sampleChildPerson = Person(
+  id: 'child',
+  name: '子ども',
+  iconAsset: 'assets/icons/person_icon_02.png',
+);
 const Person _sampleMotherPerson = Person(id: 'mother', name: '母');
 
 class _SampleExperience extends StatelessWidget {
