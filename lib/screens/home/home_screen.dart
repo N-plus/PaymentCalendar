@@ -90,29 +90,18 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: () async {
-                await showModalBottomSheet<void>(
-                  context: context,
-                  isScrollControlled: true,
-                  builder: (_) => const ExpenseFormSheet(),
-                );
-              },
-              style: TextButton.styleFrom(
-                foregroundColor: colorScheme.primary,
-                textStyle: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(fontWeight: FontWeight.w600),
-              ),
-              child: const Text('記録を追加'),
-            ),
-          ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: colorScheme.primary,
+        onPressed: () async {
+          await showModalBottomSheet<void>(
+            context: context,
+            isScrollControlled: true,
+            builder: (_) => const ExpenseFormSheet(),
+          );
+        },
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
         ),
       ),
     );
@@ -156,7 +145,7 @@ class _SampleExperience extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          '下の「記録を追加」ボタンから記録を作成して、家族やパートナーとのお金のやり取りを管理しましょう。',
+          '右下の＋ボタンから記録を作成して、家族やパートナーとのお金のやり取りを管理しましょう。',
           style: textTheme.bodyMedium?.copyWith(
             color: colorScheme.onSurfaceVariant,
           ),
