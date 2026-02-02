@@ -128,7 +128,7 @@ class _ExpenseFormSheetState extends ConsumerState<ExpenseFormSheet> {
     return Row(
       children: [
         Text(
-          widget.expenseId == null ? '立て替えを記録' : '記録編集',
+          widget.expenseId == null ? '記録追加' : '記録編集',
           style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         const Spacer(),
