@@ -750,7 +750,7 @@ class _PersonManagementScreenState
                         size: 64, color: Colors.grey.shade400),
                     const SizedBox(height: 16),
                     Text(
-                      '登録されている人がいません',
+                      'アプリを使用する人を登録しましょう',
                       style: TextStyle(
                         fontSize: 16,
                         color: Colors.grey.shade600,
@@ -758,7 +758,8 @@ class _PersonManagementScreenState
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '右下のボタンから人を追加できます',
+                      'このアプリを使う家族や同居人を登録してください\n'
+                      '右下のボタンから追加できます',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 14,
@@ -851,4 +852,3 @@ class _PersonManagementScreenState
     );
   }
 }
-
