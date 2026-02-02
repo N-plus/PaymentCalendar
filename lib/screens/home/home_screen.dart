@@ -143,7 +143,7 @@ class _SampleExperience extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       children: [
         Text(
-          '未払いの記録を追加するとここに表示されます',
+          '立て替えの記録を追加するとここに表示されます',
           style:
               textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
