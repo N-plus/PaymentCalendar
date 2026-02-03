@@ -149,7 +149,7 @@ class _SampleExperience extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          '右下の＋ボタンから記録を作成して、家族やパートナーとのお金のやり取りを管理しましょう。',
+          '右下の＋ボタンから記録を作成して、家族や同居人とのお金のやり取りを管理しましょう。',
           style: textTheme.bodyMedium?.copyWith(
             color: colorScheme.onSurfaceVariant,
           ),
