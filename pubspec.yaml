@@ -1,6 +1,6 @@
 name: pay_check
 description: A Flutter app for shared payment tracking.
-version: 1.0.2+4
+version: 1.0.3+5
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
