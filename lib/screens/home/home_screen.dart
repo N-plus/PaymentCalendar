@@ -7,9 +7,11 @@ import '../../models/person.dart';
 import '../../models/person_summary.dart';
 import '../../providers/expenses_provider.dart';
 import '../../providers/home_summary_provider.dart';
+import '../../providers/people_provider.dart';
 import '../../providers/settings_provider.dart';
 import '../../providers/sample_experience_provider.dart';
 import '../../screens/person/person_detail_screen.dart';
+import '../../screens/settings/settings_screen.dart';
 import '../../screens/unpaid/unpaid_screen.dart';
 import '../../utils/date_util.dart';
 import '../expense/expense_form_sheet.dart';
@@ -29,12 +31,13 @@ class HomeScreen extends ConsumerWidget {
         .select((settings) => settings.quickPayIncludesPlanned));
     final hasAddedRealExpense = ref.watch(sampleExperienceProvider);
     final showSampleExperience = !hasAddedRealExpense && summaries.isEmpty;
+    final people = ref.watch(peopleProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFFAF0),
       appBar: AppBar(
-        title: const Text('ホーム'),
+        title: const Text('PayCheck'),
         backgroundColor: colorScheme.primary,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -48,7 +51,7 @@ class HomeScreen extends ConsumerWidget {
             child: Row(
               children: [
                 Text(
-                  '予定を含める',
+                  '支払い予定を含める',
                   style: Theme.of(context)
                       .textTheme
                       .titleMedium
@@ -93,6 +96,36 @@ class HomeScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: colorScheme.primary,
         onPressed: () async {
+          if (people.length < 2) {
+            await showDialog<void>(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text('使う人を登録しましょう'),
+                content: const Text(
+                  '立て替えを記録するには\n'
+                  'アプリを使用する人を2人以上登録してください。',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('閉じる'),
+                  ),
+                  FilledButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const PersonManagementScreen(),
+                        ),
+                      );
+                    },
+                    child: const Text('人を登録する'),
+                  ),
+                ],
+              ),
+            );
+            return;
+          }
           await showModalBottomSheet<void>(
             context: context,
             isScrollControlled: true,

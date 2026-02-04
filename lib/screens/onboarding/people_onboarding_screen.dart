@@ -165,7 +165,7 @@ class _PeopleOnboardingScreenState
             ),
             const SizedBox(height: 8),
             Text(
-              'このアプリを使う家族を登録してください\n'
+              'このアプリを使う家族や同居人を登録してください\n'
               '『人を追加』ボタンから登録できます',
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(

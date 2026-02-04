@@ -613,6 +613,15 @@ class _CategoryFormDialogState extends State<_CategoryFormDialog> {
   }
 }
 
+class PersonManagementScreen extends StatelessWidget {
+  const PersonManagementScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const _PersonManagementScreen();
+  }
+}
+
 class _PersonManagementScreen extends ConsumerStatefulWidget {
   const _PersonManagementScreen();
 

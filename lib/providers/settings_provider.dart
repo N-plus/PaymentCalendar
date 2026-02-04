@@ -79,7 +79,11 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   Future<void> _restoreSettings() async {
     final colorValue = _preferences.getInt(_themeColorKey);
     if (colorValue != null) {
-      state = state.copyWith(themeColor: Color(colorValue));
+      const legacyRoyalBlue = 0xFF3366FF;
+      const updatedBlue = 0xFF456AD8;
+      final effectiveColorValue =
+          colorValue == legacyRoyalBlue ? updatedBlue : colorValue;
+      state = state.copyWith(themeColor: Color(effectiveColorValue));
     }
   }
 

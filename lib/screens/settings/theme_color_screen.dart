@@ -14,12 +14,11 @@ class ThemeColorOption {
 }
 
 const themeColorOptions = <ThemeColorOption>[
-  ThemeColorOption(name: 'ロイヤルブルー', color: Color(0xFF3366FF)),
-  ThemeColorOption(name: 'ナチュラルウッド', color: Color(0xFFE8CFA9)),
+  ThemeColorOption(name: '青', color: Color(0xFF456AD8)),
   ThemeColorOption(name: 'ディープブルー', color: Color(0xFF1A2947)),
-  ThemeColorOption(name: 'オレンジ', color: Color(0xFFFF9800)),
-  ThemeColorOption(name: '水色', color: Color(0xFF00BCD4)),
-  ThemeColorOption(name: '赤', color: Color(0xFFFF0033)),
+  ThemeColorOption(name: 'オレンジ', color: Color(0xFFC08A3D)),
+  ThemeColorOption(name: '水色', color: Color(0xFF5B9BBD)),
+  ThemeColorOption(name: '赤', color: Color(0xFFD95658)),
   ThemeColorOption(name: 'ワインレッド', color: Color(0xFFB71C1C)),
   ThemeColorOption(name: 'ピンク', color: Color(0xFFFF80AB)),
   ThemeColorOption(name: '緑', color: Color(0xFF4CAF50)),

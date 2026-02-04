@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-const Color kDefaultThemeColor = Color(0xFF3366FF);
+const Color kDefaultThemeColor = Color(0xFF456AD8);
 
 class SettingsState {
   const SettingsState({
